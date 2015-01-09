@@ -32,7 +32,8 @@ DISTFILES += \
     lit.frag \
     lit.vert \
     unlit.frag \
-    unlit.vert
+    unlit.vert \
+    README.md
 
 RESOURCES += resources.qrc
 
