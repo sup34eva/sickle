@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/shaders">
+        <file>lit.frag</file>
+        <file>lit.vert</file>
+        <file>unlit.frag</file>
+        <file>unlit.vert</file>
+    </qresource>
+</RCC>
