@@ -1,5 +1,5 @@
-#include "geometry.h"
-#include "viewport.h"
+#include <geometry.h>
+#include <viewport.h>
 
 Geometry::Geometry(QObject* parent) : m_scale(1, 1, 1), m_indexBuffer(QOpenGLBuffer::IndexBuffer)
 {

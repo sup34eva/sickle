@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QMdiArea>
 #include <QMdiSubWindow>
-#include <QScriptEngine>
 #include "viewport.h"
 
 class MainWindow : public QMainWindow

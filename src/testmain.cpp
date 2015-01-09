@@ -1,4 +1,4 @@
-#include "testmain.h"
+#include <testmain.h>
 #include "ui_testmain.h"
 #include <QVariant>
 
@@ -26,7 +26,7 @@ void TestMain::on_centralwidget_childAdded(QObject* obj) {
     });
 }
 
-QTableWidgetItem* widgetForVariant(QVariant& prop) {
+QTableWidgetItem* widgetForVariant(QVariant prop) {
     switch(prop.type()) {
         case QMetaType::QVector3D: {
             auto vector = qvariant_cast<QVector3D>(prop);

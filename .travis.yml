@@ -1,0 +1,36 @@
+language: cpp
+cache:
+  apt: true
+  directories:
+    - Qt
+compiler:
+  - clang
+  - gcc
+matrix:
+  include:
+    - compiler: i686-w64-mingw32-gcc
+      install:
+      - chmod ugo+x scripts/install-mingw32.sh
+      - ./scripts/install-mingw32.sh
+      - export CC="i686-w64-mingw32-gcc" CXX="i686-w64-mingw32-g++" LIBDIR="Qt/5.4/mingw491_32/lib" PLATFORM="win32"
+      before_script: /opt/qt54/bin/qmake -spec win32-g++ GameEditor.pro
+before_install:
+   - sudo add-apt-repository --yes ppa:beineri/opt-qt54
+   - sudo apt-get update -qq
+install:
+   - sudo apt-get install qt54base qt54tools qt54declarative
+before_script:
+  - /opt/qt54/bin/qmake GameEditor.pro
+script:
+  - make lint
+  - make
+deploy:
+  provider: releases
+  api-key:
+    secure: "X2ADvQ6f3AaBUi6MYuOkkGmwzGJHqIBxTVcJ0eYDIwOsUA+zRERyVR7nG6mbRCNSdfiC4kt0XA0II8xbDSrKZ1tyeooQFwQWKcgz+KnF8fogOk2l55jUEsOabLiY67rZPbqhozc0Gj2nB8EARuooWA88oB3QmhHI3JzB7pe9f5I="
+  file: "release/GameEditor.exe"
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
+    condition: "$PLATFORM = win32"

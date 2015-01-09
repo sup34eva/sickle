@@ -5,7 +5,6 @@
 #include <QOpenGLFunctions>
 #include <QWheelEvent>
 #include <QKeyEvent>
-#include <QScriptEngine>
 #include "camera.h"
 #include "geometry.h"
 
