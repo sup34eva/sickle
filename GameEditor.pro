@@ -29,7 +29,6 @@ QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 QMAKE_LIBDIR += $$(LIBDIR)
 
 SOURCES += src/main.cpp\
-    src/mainwindow.cpp \
     src/camera.cpp \
     src/geometry.cpp \
     src/viewport.cpp \
@@ -37,7 +36,6 @@ SOURCES += src/main.cpp\
     src/testmain.cpp
 
 HEADERS  += \
-    include/mainwindow.h \
     include/camera.h \
     include/geometry.h \
     include/viewport.h \

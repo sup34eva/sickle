@@ -30,45 +30,8 @@ public slots:
         emit childAdded(child);
         return child;
     }
-    void save() {
-        QFile file("file.dat");
-        file.open(QIODevice::WriteOnly);
-        QDataStream out(&file);
-        out << static_cast<quint32>(0xB00B1E5); // Magic number
-
-        auto version = QDataStream::Qt_5_4; // Format version
-        out << static_cast<qint32>(version);
-        out.setVersion(version);
-
-        // Data
-        out << *camera();
-        auto childList = findChildren<Geometry*>();
-        out << static_cast<quint32>(childList.size());
-        for(auto obj : childList) {
-            out << *obj;
-        }
-    }
-    void load() {
-        QFile file("file.dat");
-        file.open(QIODevice::ReadOnly);
-        QDataStream in(&file);
-        quint32 magic;
-        in >> magic; // Magic number
-
-        qint32 version; // Format version
-        in >> version;
-        in.setVersion(version);
-
-        // Data
-        in >> *camera();
-        quint32 size;
-        in >> size;
-        qDebug() << size;
-        for(quint32 i = 0; i < size; i++) {
-            Geometry* obj = addChild();
-            in >> *obj;
-        }
-    }
+    void save(QString name);
+    void load(QString name);
 
 signals:
     void childAdded(QObject* child);

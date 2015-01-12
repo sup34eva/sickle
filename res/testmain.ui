@@ -46,6 +46,7 @@
     <addaction name="action_New"/>
     <addaction name="action_Save"/>
     <addaction name="actionSave_as"/>
+    <addaction name="actionOpen"/>
    </widget>
    <addaction name="menu_File"/>
   </widget>
@@ -164,6 +165,11 @@
   <action name="actionSave_as">
    <property name="text">
     <string>Save as ...</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>&amp;Open</string>
    </property>
   </action>
  </widget>

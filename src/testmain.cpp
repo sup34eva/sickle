@@ -1,6 +1,7 @@
 #include <testmain.h>
 #include "ui_testmain.h"
 #include <QVariant>
+#include <QFileDialog>
 
 TestMain::TestMain(QWidget *parent) :
     QMainWindow(parent),
@@ -61,4 +62,22 @@ void TestMain::on_listWidget_currentItemChanged(QListWidgetItem *current) {
             }
         }
     }
+}
+
+void TestMain::on_actionOpen_triggered()
+{
+    auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), tr("World File (*.wld)"));
+    ui->centralwidget->load(fileName);
+}
+
+void TestMain::on_actionSave_as_triggered()
+{
+    auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("World File (*.wld)"));
+    ui->centralwidget->save(fileName);
+}
+
+void TestMain::on_action_Save_triggered()
+{
+    auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("World File (*.wld)"));
+    ui->centralwidget->save(fileName);
 }
