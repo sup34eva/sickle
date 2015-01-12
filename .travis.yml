@@ -34,3 +34,5 @@ deploy:
     tags: true
     all_branches: true
     condition: "$PLATFORM = win32"
+notifications:
+  slack: sup3asc2:DzHmU0Cfxw0UoWVs5r0Ph7Uf
