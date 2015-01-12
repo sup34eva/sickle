@@ -71,7 +71,7 @@ QDataStream& operator<<(QDataStream& stream, const QObject& obj) {
     for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i) {
         auto prop = metaObject->property(i);
         qDebug() << "Saving " << prop.name();
-        if(prop.type() != QMetaType::QObjectStar)
+        if(static_cast<QMetaType::Type>(prop.type()) != QMetaType::QObjectStar)
             stream << obj.property(prop.name());
     }
     return stream;
@@ -82,7 +82,7 @@ QDataStream& operator>>(QDataStream& stream, QObject& obj) {
     for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i) {
         auto prop = metaObject->property(i);
         qDebug() << "Restoring " << prop.name();
-        if(prop.type() != QMetaType::QObjectStar) {
+        if(static_cast<QMetaType::Type>(prop.type()) != QMetaType::QObjectStar) {
             QVariant value;
             stream >> value;
             obj.setProperty(prop.name(), value);

@@ -3,6 +3,7 @@
 
 Geometry::Geometry(QObject* parent) : m_scale(1, 1, 1), m_indexBuffer(QOpenGLBuffer::IndexBuffer)
 {
+    Q_UNUSED(parent)
     m_program = new QOpenGLShaderProgram;
     m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/lit.vert");
     m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/lit.frag");
