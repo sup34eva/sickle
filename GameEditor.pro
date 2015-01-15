@@ -24,9 +24,12 @@ if(!isEmpty(ENV_CXX)) {
 
 INCLUDEPATH += include
 
-CONFIG += c++11 rtti
-QMAKE_LFLAGS += -static-libgcc -static-libstdc++
+CONFIG += c++14 rtti static
 QMAKE_LIBDIR += $$(LIBDIR)
+
+unix|win*-g++ {
+    QMAKE_LFLAGS += -static-libgcc -static-libstdc++
+}
 
 SOURCES += src/main.cpp\
     src/camera.cpp \
@@ -50,22 +53,17 @@ DISTFILES += \
     res/unlit.vert \
     README.md \
     .travis.yml \
-    scripts/install-mingw32.sh
+    scripts/install-mingw32.sh \
+    res/wireframe.vert \
+    res/wireframe.frag
 
 RESOURCES += res/resources.qrc
 
 FORMS += res/testmain.ui
 
-lintD.depends += compiler_rcc_make_all
-lintD.depends += compiler_moc_header_make_all
-lintD.depends += compiler_uic_make_all
-lintD.commands = $(CXX) $(CXXFLAGS) -fsyntax-only $(INCPATH) $(SOURCES)
-
-equals($$(PLATFORM), "win32")|win32|win64 {
-    lint.commands = $(MAKE) -f $(MAKEFILE).Debug lintD
-    QMAKE_EXTRA_TARGETS += lint
-    Debug:QMAKE_EXTRA_TARGETS += lintD
-} else {
-    lint = lintD
-    QMAKE_EXTRA_TARGETS += lint
-}
+linter.name = linter
+linter.input = SOURCES
+linter.CONFIG += combine no_link no_clean target_predeps
+linter.commands = $$PWD/cpplint.py --verbose=7 ${QMAKE_FILE_IN} >> ${QMAKE_FILE_OUT}
+linter.output = ${QMAKE_VAR_OBJECTS_DIR}lint.txt
+QMAKE_EXTRA_COMPILERS += linter

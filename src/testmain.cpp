@@ -2,6 +2,8 @@
 #include "ui_testmain.h"
 #include <QVariant>
 #include <QFileDialog>
+#include <QSpinBox>
+#include <QLabel>
 
 TestMain::TestMain(QWidget *parent) :
     QMainWindow(parent),
@@ -27,19 +29,35 @@ void TestMain::on_centralwidget_childAdded(QObject* obj) {
     });
 }
 
-QTableWidgetItem* widgetForVariant(QVariant prop) {
+QWidget* TestMain::widgetForVariant(QObject* obj, const char* name) {
+    auto prop = obj->property(name);
     switch(prop.type()) {
         case QMetaType::QVector3D: {
             auto vector = qvariant_cast<QVector3D>(prop);
-            return new QTableWidgetItem(QString("X: %1, Y: %2, Z: %3").arg(vector.x()).arg(vector.y()).arg(vector.z()));
+            auto container = new QWidget; // QString("X: %1, Y: %2, Z: %3").arg(vector.x()).arg(vector.y()).arg(vector.z())
+
+            auto spinboxX = new QDoubleSpinBox(container);
+            spinboxX->setValue(vector.x());
+            spinboxX->setRange(-2147483647, 2147483647);
+            void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
+            connect(spinboxX, changeSignal, [=] (double value) {
+                qDebug() << value;
+                obj->setProperty(name, QVector3D(value, vector.y(), vector.z()));
+            });
+
+            /*auto spinboxY = new QSpinBox(container);
+            spinboxY->setValue(vector.y());
+            auto spinboxZ = new QSpinBox(container);
+            spinboxZ->setValue(vector.z());*/
+            return container;
         }
         case QMetaType::QQuaternion: {
             auto quat = qvariant_cast<QQuaternion>(prop);
-            return new QTableWidgetItem(QString("Pitch: %1, Yaw: %2, Roll: %3").arg(quat.x()).arg(quat.y()).arg(quat.z()));
+            return new QLabel(QString("Pitch: %1, Yaw: %2, Roll: %3").arg(quat.x()).arg(quat.y()).arg(quat.z()));
         }
         default:
             qDebug() << prop.type();
-            return new QTableWidgetItem(prop.toString());
+            return new QLabel(prop.toString());
     }
 }
 
@@ -58,7 +76,8 @@ void TestMain::on_listWidget_currentItemChanged(QListWidgetItem *current) {
             for(int i = offset; i < count; ++i) {
                 auto prop = metaObject->property(i).name();
                 info->setItem(i - offset, 0, new QTableWidgetItem(prop));
-                info->setItem(i - offset, 1, widgetForVariant(obj->property(prop)));
+                //info->setItem(i - offset, 1, widgetForVariant(obj->property(prop)));
+                info->setCellWidget(i - offset, 1, widgetForVariant(obj, prop));
             }
         }
     }

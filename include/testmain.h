@@ -28,6 +28,7 @@ private slots:
     void on_action_Save_triggered();
 
 private:
+    QWidget* widgetForVariant(QObject* obj, const char* name);
     Ui::TestMain *ui;
 };
 

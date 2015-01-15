@@ -1,31 +1,15 @@
 #include <group.h>
 
-Group::Group()
-{
-
-}
-
-Group::~Group()
+Group::Group(QObject* parent) : Geometry(parent)
 {
 
 }
 
 void Group::draw(QMatrix4x4& View, QMatrix4x4& Projection) {
-    View *= transform();
-    for(auto child : children) {
-        child->draw(View, Projection);
-    }
-}
-
-int Group::addChild(Geometry* child) {
-    auto index = children.indexOf(child);
-    if(index == -1) {
-        child->orientation(child->orientation() - orientation());
-        child->scale(child->scale() - scale());
-        child->position(child->position() - position());
-        children.append(child);
-        return children.length() - 1;
-    } else {
-        return index;
+    auto localView = View * transform();
+    for(auto i : children()) {
+        auto child = dynamic_cast<Geometry*>(i);
+        if(child)
+            child->draw(localView, Projection);
     }
 }

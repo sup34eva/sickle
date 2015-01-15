@@ -1,12 +1,12 @@
 #include <geometry.h>
 #include <viewport.h>
 
-Geometry::Geometry(QObject* parent) : m_scale(1, 1, 1), m_indexBuffer(QOpenGLBuffer::IndexBuffer)
+Geometry::Geometry(QObject* parent) : QObject(parent), m_scale(1, 1, 1), m_indexBuffer(QOpenGLBuffer::IndexBuffer)
 {
-    Q_UNUSED(parent)
-    m_program = new QOpenGLShaderProgram;
-    m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/lit.vert");
-    m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/lit.frag");
+    m_program = new QOpenGLShaderProgram(this);
+    m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/unlit.vert");
+    //m_program->addShaderFromSourceFile(QOpenGLShader::Geometry, ":/shaders/lit.geom");
+    m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/unlit.frag");
     m_program->link();
     m_posAttr = m_program->attributeLocation("vertexPosition");
     m_colAttr = m_program->attributeLocation("vertexColor");
@@ -39,6 +39,21 @@ Geometry::Geometry(QObject* parent) : m_scale(1, 1, 1), m_indexBuffer(QOpenGLBuf
         -1.0f,  1.0f,  1.0f,
     };
 
+    quint32 indices[] = {
+        0, 1, 3,
+        3, 1, 2,
+        4, 5, 7,
+        7, 5, 6,
+        8, 9, 11,
+        11, 9, 10,
+        12, 13, 15,
+        15, 13, 14,
+        16, 17, 19,
+        19, 17, 18,
+        20, 21, 23,
+        23, 21, 22,
+    };
+
     GLfloat colors[] = {
         1.0f, 0.0f, 0.0f,
         1.0f, 0.0f, 0.0f,
@@ -66,8 +81,7 @@ Geometry::Geometry(QObject* parent) : m_scale(1, 1, 1), m_indexBuffer(QOpenGLBuf
         1.0f, 0.0f, 1.0f,
     };
 
-    GLfloat normals[6 * 4 * 3];
-
+    auto normals = new GLfloat[6 * 4 * 3];
     for(int i = 0; i < (6 * 4 * 3); i += 12) {
         QVector3D p1 = QVector3D(vertices[i + 0], vertices[i + 1], vertices[i + 2]),
                   p2 = QVector3D(vertices[i + 3], vertices[i + 4], vertices[i + 5]),
@@ -88,21 +102,6 @@ Geometry::Geometry(QObject* parent) : m_scale(1, 1, 1), m_indexBuffer(QOpenGLBuf
         normals[i + 1] = normals[i + 4] = normals[i + 7] = normals[i + 10] = Normal.y();
         normals[i + 2] = normals[i + 5] = normals[i + 8] = normals[i + 11] = Normal.z();
     }
-
-    static const unsigned int indices[] = {
-        0, 1, 3,
-        3, 1, 2,
-        4, 5, 7,
-        7, 5, 6,
-        8, 9, 11,
-        11, 9, 10,
-        12, 13, 15,
-        15, 13, 14,
-        16, 17, 19,
-        19, 17, 18,
-        20, 21, 23,
-        23, 21, 22,
-    };
 
     m_vertexBuffer.create();
     m_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -182,14 +181,9 @@ void Geometry::draw(QMatrix4x4& View, QMatrix4x4& Projection)
     m_program->setUniformValue("ambientColor", QVector3D(0.1f, 0.1f, 0.1f));
 
     auto func = QOpenGLContext::currentContext()->functions();
-    func->glDrawElements(GL_TRIANGLES, 12 * 3, GL_UNSIGNED_INT, (void*)0);
+    func->glDrawElements(GL_TRIANGLES, 12 * 3, GL_UNSIGNED_INT, 0);
 
     m_program->release();
-}
-
-Geometry::~Geometry()
-{
-    delete m_program;
 }
 
 /*QDataStream& operator<<(QDataStream& stream, const QObject* obj) {
