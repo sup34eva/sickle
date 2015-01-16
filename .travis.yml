@@ -6,14 +6,13 @@ cache:
 before_install:
   - sudo add-apt-repository --yes ppa:beineri/opt-qt54
   - sudo apt-get update -qq
+  - sudo pip install PyYAML cpp-coveralls
 matrix:
   include:
     - compiler: clang
       install:
         - sudo apt-get install qt54base qt54tools qt54declarative doxygen graphviz
-        - chmod ugo+x scripts/build-docs.sh
       before_script: /opt/qt54/bin/qmake GameEditor.pro
-      after_success: ./scripts/build-docs.sh
     - compiler: i686-w64-mingw32-gcc
       install:
         - chmod ugo+x scripts/install-mingw32.sh

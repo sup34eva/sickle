@@ -8,6 +8,11 @@ namespace Ui {
 class MainWindow;
 }
 
+/*! \class MainWindow
+ * \brief Fenetre principale
+ *
+ * Charge l'interface de la fenetre principale et en gère les evenements.
+ */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -27,8 +32,11 @@ private slots:
 
     void on_action_Save_triggered();
 
+    void on_actionWireframe_toggled(bool arg1);
+
 private:
     QWidget* widgetForVariant(QObject* obj, const char* name);
+    QString m_lastFile;
     Ui::MainWindow *ui;
 };
 

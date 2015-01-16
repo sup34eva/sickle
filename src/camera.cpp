@@ -65,28 +65,3 @@ QMatrix4x4 Camera::view()
     view.lookAt(position(), position() + direction(), up());
     return view;
 }
-
-QDataStream& operator<<(QDataStream& stream, const QObject& obj) {
-    auto metaObject = obj.metaObject();
-    for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i) {
-        auto prop = metaObject->property(i);
-        qDebug() << "Saving " << prop.name();
-        if(static_cast<QMetaType::Type>(prop.type()) != QMetaType::QObjectStar)
-            stream << obj.property(prop.name());
-    }
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, QObject& obj) {
-    auto metaObject = obj.metaObject();
-    for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i) {
-        auto prop = metaObject->property(i);
-        qDebug() << "Restoring " << prop.name();
-        if(static_cast<QMetaType::Type>(prop.type()) != QMetaType::QObjectStar) {
-            QVariant value;
-            stream >> value;
-            obj.setProperty(prop.name(), value);
-        }
-    }
-    return stream;
-}

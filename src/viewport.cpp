@@ -1,7 +1,7 @@
 #include <viewport.h>
 
 Viewport::Viewport(QWidget *parent)
-    : QOpenGLWidget(parent)
+    : QOpenGLWidget(parent), m_renderMode(GL_TRIANGLES) // GL_LINES
 {
     resizeGL(width(), height());
     m_camera = new Camera();
@@ -34,20 +34,22 @@ void Viewport::initializeGL()
 void Viewport::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, width(), height());
 
     QMatrix4x4 view = m_camera->view();
 
+    DrawInfo info{view, m_projection, m_renderMode};
     for(auto i : children()) {
         auto child = dynamic_cast<Geometry*>(i);
         if(child)
-            child->draw(view, m_projection);
+            child->draw(info);
     }
 }
 
 void Viewport::resizeGL(int w, int h) {
+    if(QOpenGLFunctions::isInitialized(QOpenGLFunctions::d_ptr))
+        glViewport(0, 0, w, h);
     m_projection.setToIdentity();
-    m_projection.perspective(45.0f, w / h, 0.1f, 100.0f);
+    m_projection.perspective(45.0f, (float)w / (float)h, 0.1f, 1000.0f);
 }
 
 void Viewport::wheelEvent(QWheelEvent* event) {
@@ -139,6 +141,14 @@ void Viewport::save(QString name) {
         out << *obj;
     }
 }
+
+void Viewport::clearLevel() {
+    auto childList = findChildren<Geometry*>();
+    for(auto obj : childList) {
+        delete obj;
+    }
+}
+
 void Viewport::load(QString name) {
     QFile file(name);
     file.open(QIODevice::ReadOnly);
@@ -150,6 +160,8 @@ void Viewport::load(QString name) {
     in >> version;
     in.setVersion(version);
 
+    clearLevel();
+
     // Data
     in >> *camera();
     quint32 size;
@@ -159,4 +171,29 @@ void Viewport::load(QString name) {
         Geometry* obj = addChild();
         in >> *obj;
     }
+}
+
+QDataStream& operator<<(QDataStream& stream, const QObject& obj) {
+    auto metaObject = obj.metaObject();
+    for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i) {
+        auto prop = metaObject->property(i);
+        qDebug() << "Saving " << prop.name();
+        if(static_cast<QMetaType::Type>(prop.type()) != QMetaType::QObjectStar)
+            stream << obj.property(prop.name());
+    }
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, QObject& obj) {
+    auto metaObject = obj.metaObject();
+    for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i) {
+        auto prop = metaObject->property(i);
+        qDebug() << "Restoring " << prop.name();
+        if(static_cast<QMetaType::Type>(prop.type()) != QMetaType::QObjectStar) {
+            QVariant value;
+            stream >> value;
+            obj.setProperty(prop.name(), value);
+        }
+    }
+    return stream;
 }

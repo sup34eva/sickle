@@ -8,6 +8,11 @@
 #include "camera.h"
 #include "geometry.h"
 
+/*! \class Viewport
+ * \brief Cadre de vue 3D
+ *
+ * Ce widget affiche une scène en 3D composée de géometries a partir d'une caméra.
+ */
 class Viewport : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
@@ -19,6 +24,7 @@ public:
     QSize minimumSizeHint() const Q_DECL_OVERRIDE;
     QSize sizeHint() const Q_DECL_OVERRIDE;
     propRO(Camera*, camera)
+    prop(GLenum, renderMode)
 
 public slots:
     Geometry* addChild() {
@@ -32,6 +38,7 @@ public slots:
     }
     void save(QString name);
     void load(QString name);
+    void clearLevel();
 
 signals:
     void childAdded(QObject* child);
@@ -47,10 +54,12 @@ protected:
     void mouseMoveEvent (QMouseEvent* event) Q_DECL_OVERRIDE;
     int heightForWidth(int w) {return w;}
     bool hasHeightForWidth() {return true;}
-
 private:
     QMatrix4x4 m_projection;
     QPoint m_cursor;
 };
+
+QDataStream &operator<<(QDataStream &, const QObject &);
+QDataStream &operator>>(QDataStream &, QObject &);
 
 #endif

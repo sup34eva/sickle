@@ -28,10 +28,12 @@ CONFIG += c++14 rtti static
 QMAKE_LIBDIR += $$(LIBDIR)
 
 unix|win*-g++ {
-    QMAKE_LFLAGS += -static-libgcc -static-libstdc++
+    QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
+    QMAKE_LFLAGS += -fprofile-arcs -ftest-coverage -static-libgcc -static-libstdc++
 }
 
-SOURCES += src/main.cpp\
+SOURCES += \
+    src/main.cpp\
     src/camera.cpp \
     src/geometry.cpp \
     src/viewport.cpp \
@@ -54,19 +56,37 @@ DISTFILES += \
     README.md \
     .travis.yml \
     scripts/install-mingw32.sh \
-    res/wireframe.vert \
-    res/wireframe.frag \
-    doxygen.cfg \
+    Doxyfile \
     scripts/build-docs.sh
 
 RESOURCES += res/resources.qrc
 
-FORMS += \
-    res/mainwindow.ui
+FORMS += res/mainwindow.ui
 
-linter.name = linter
-linter.input = SOURCES
-linter.CONFIG += combine no_link no_clean target_predeps
-linter.commands = $$PWD/cpplint.py --verbose=7 ${QMAKE_FILE_IN} >> ${QMAKE_FILE_OUT}
-linter.output = ${QMAKE_VAR_OBJECTS_DIR}lint.txt
-QMAKE_EXTRA_COMPILERS += linter
+TRANSLATIONS = res/editor_fr.ts
+
+DOXYFILE = Doxyfile
+COVERALLS = .coveralls.yml
+
+#linter.name = linter
+#linter.input = SOURCES
+#linter.CONFIG += combine no_link no_clean target_predeps
+#linter.commands = $$PWD/cpplint.py --verbose=7 ${QMAKE_FILE_IN} >> ${QMAKE_FILE_OUT}
+#linter.output = lint.log
+#QMAKE_EXTRA_COMPILERS += linter
+
+doxygen.name = doxygen
+doxygen.input = DOXYFILE
+doxygen.CONFIG += no_link no_clean
+doxygen.commands = ( cat ${QMAKE_FILE_IN} ; echo "INPUT = $$PWD/src \ $$PWD/include" ) | doxygen - >> ${QMAKE_FILE_OUT}
+doxygen.output = doxygen.log
+QMAKE_EXTRA_COMPILERS += doxygen
+
+coverage.name = coverage
+coverage.input = COVERALLS
+coverage.CONFIG += no_link no_clean
+coverage.commands = coveralls -n -y ${QMAKE_FILE_IN} -r ${OBJECTS_DIR} -b $$PWD --dump ${QMAKE_FILE_OUT}
+coverage.output = coverage.json
+QMAKE_EXTRA_COMPILERS += coverage
+
+POST_TARGETDEPS += doxygen.log coverage.json

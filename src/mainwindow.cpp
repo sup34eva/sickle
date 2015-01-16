@@ -71,6 +71,7 @@ QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
             auto spinners = new QDoubleSpinBox*[3];
             for(int i = 0; i < 3; i++) {
                 spinners[i] = new QDoubleSpinBox(container);
+                spinners[i]->setRange(-2147483647, 2147483647);
                 switch(i) {
                     case 0:
                         spinners[i]->setValue(vector->x());
@@ -82,7 +83,6 @@ QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
                         spinners[i]->setValue(vector->z());
                         break;
                 }
-                spinners[i]->setRange(-2147483647, 2147483647);
                 hbox->addWidget(spinners[i]);
                 connect(spinners[i], changeSignal, [=] (double value) {
                     switch(i) {
@@ -114,6 +114,7 @@ QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
             auto spinners = new QDoubleSpinBox*[3];
             for(int i = 0; i < 3; i++) {
                 spinners[i] = new QDoubleSpinBox(container);
+                spinners[i]->setRange(-2147483647, 2147483647);
                 switch(i) {
                     case 0:
                         spinners[i]->setValue(quat->x());
@@ -125,7 +126,6 @@ QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
                         spinners[i]->setValue(quat->z());
                         break;
                 }
-                spinners[i]->setRange(-2147483647, 2147483647);
                 hbox->addWidget(spinners[i]);
                 connect(spinners[i], changeSignal, [=] (double value) {
                     switch(i) {
@@ -176,16 +176,29 @@ void MainWindow::on_actionOpen_triggered()
 {
     auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), tr("World File (*.wld)"));
     ui->centralwidget->load(fileName);
+    m_lastFile = fileName;
 }
 
 void MainWindow::on_actionSave_as_triggered()
 {
     auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("World File (*.wld)"));
     ui->centralwidget->save(fileName);
+    m_lastFile = fileName;
 }
 
 void MainWindow::on_action_Save_triggered()
 {
-    auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("World File (*.wld)"));
-    ui->centralwidget->save(fileName);
+    if(m_lastFile.isEmpty())
+        on_actionSave_as_triggered();
+    else
+        ui->centralwidget->save(m_lastFile);
+}
+
+void MainWindow::on_actionWireframe_toggled(bool checked)
+{
+    if(checked) {
+        ui->centralwidget->renderMode(GL_LINES);
+    } else {
+        ui->centralwidget->renderMode(GL_TRIANGLES);
+    }
 }

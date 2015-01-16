@@ -7,6 +7,14 @@
 #include "globals.h"
 #include <QMetaProperty>
 
+/*!
+ * \class Camera
+ * \brief Gestion de la camera
+ *
+ * Permet de calculer la matrice view d'une camera a partir de 2 angles (vertical et horizontal) et une position.
+ * Les propriétés bias permettent de déclaer les angles pour eviter que la caméra ne retourne a son point de départ lorsque l'utilisateur la tourne.
+ * La propriété speed correspond a la vitesse de déplacement de la caméra.
+ */
 class Camera : public QObject
 {
     Q_OBJECT
@@ -27,8 +35,5 @@ public:
     prop(float, hBias)
     prop(float, speed)
 };
-
-QDataStream &operator<<(QDataStream &, const QObject &);
-QDataStream &operator>>(QDataStream &, QObject &);
 
 #endif // CAMERA_H

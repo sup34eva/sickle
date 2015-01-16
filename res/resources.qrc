@@ -4,7 +4,11 @@
         <file>lit.vert</file>
         <file>unlit.frag</file>
         <file>unlit.vert</file>
-        <file>wireframe.frag</file>
-        <file>wireframe.vert</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file>add-geo.png</file>
+    </qresource>
+    <qresource prefix="/lang">
+        <file>editor_fr.qm</file>
     </qresource>
 </RCC>

@@ -14,7 +14,7 @@ git add -A
 rm -f ~/docs_need_commit
 git status
 git status | perl -ne '/modified:\s+(.*)/ and print "$1\n"' | while read x; do
-        echo" Checking for useful changes: $x"
+        echo "Checking for useful changes: $x"
         git diff --cached $x |
                 perl -ne '/^[-+]/ and !/^([-+])\1\1 / and !/^[-+]Generated.*ZNC.*doxygen/ and exit 1' &&
                 git reset -q $x ||

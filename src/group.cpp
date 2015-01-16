@@ -5,11 +5,12 @@ Group::Group(QObject* parent) : Geometry(parent)
 
 }
 
-void Group::draw(QMatrix4x4& View, QMatrix4x4& Projection) {
-    auto localView = View * transform();
+void Group::draw(const DrawInfo& info) {
+    auto localView = info.View * transform();
+    DrawInfo localInfo{localView, info.Projection, info.mode};
     for(auto i : children()) {
         auto child = dynamic_cast<Geometry*>(i);
         if(child)
-            child->draw(localView, Projection);
+            child->draw(localInfo);
     }
 }

@@ -5,7 +5,7 @@ Geometry::Geometry(QObject* parent) : QObject(parent), m_scale(1, 1, 1), m_index
 {
     m_program = new QOpenGLShaderProgram(this);
     m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/unlit.vert");
-    //m_program->addShaderFromSourceFile(QOpenGLShader::Geometry, ":/shaders/lit.geom");
+    //m_program->addShaderFromSourceFile(QOpenGLShader::Geometry, ":/shaders/unlit.geom");
     m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/unlit.frag");
     m_program->link();
     m_posAttr = m_program->attributeLocation("vertexPosition");
@@ -166,41 +166,20 @@ QMatrix4x4 Geometry::transform() {
     return transform;
 }
 
-void Geometry::draw(QMatrix4x4& View, QMatrix4x4& Projection)
+void Geometry::draw(const DrawInfo &info)
 {
     m_program->bind();
 
-    auto Model = transform();
-
-    m_program->setUniformValue("model", Model);
-    m_program->setUniformValue("view", View);
-    m_program->setUniformValue("projection", Projection);
+    m_program->setUniformValue("model", transform());
+    m_program->setUniformValue("view", info.View);
+    m_program->setUniformValue("projection", info.Projection);
     m_program->setUniformValue("lightPosition", QVector3D(4.5f, 4.5f, 4.0f));
     m_program->setUniformValue("lightColor", QVector3D(1.0f, 1.0f, 1.0f));
     m_program->setUniformValue("lightPower", 25.0f);
     m_program->setUniformValue("ambientColor", QVector3D(0.1f, 0.1f, 0.1f));
 
     auto func = QOpenGLContext::currentContext()->functions();
-    func->glDrawElements(GL_TRIANGLES, 12 * 3, GL_UNSIGNED_INT, 0);
+    func->glDrawElements(info.mode, 12 * 3, GL_UNSIGNED_INT, 0);
 
     m_program->release();
 }
-
-/*QDataStream& operator<<(QDataStream& stream, const QObject* obj) {
-    auto metaObject = obj->metaObject();
-    for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i) {
-        stream << obj->property(metaObject->property(i).name());
-    }
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, QObject* obj) {
-    auto metaObject = obj->metaObject();
-    for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i) {
-        auto prop = metaObject->property(i);
-        QVariant value;
-        stream >> value;
-        obj->setProperty(prop.name(), value);
-    }
-    return stream;
-}*/

@@ -4,11 +4,16 @@
 #include <QVector>
 #include <geometry.h>
 
+/*! \class Group
+ * \brief Groupe de geometries
+ *
+ * Toute les géometries enfant de cet objet seront affichés avec une transformation relative a celle du groupe.
+ */
 class Group : public Geometry
 {
 public:
     Group(QObject* parent = nullptr);
-    void draw(QMatrix4x4& View, QMatrix4x4& Projection) Q_DECL_OVERRIDE;
+    void draw(const DrawInfo& info) Q_DECL_OVERRIDE;
 };
 
 #endif // GROUP_H
