@@ -29,31 +29,111 @@ void TestMain::on_centralwidget_childAdded(QObject* obj) {
     });
 }
 
+QQuaternion fromEuler(const QVector3D& euler) {
+    double c1 = cos(euler.x()/2);
+    double s1 = sin(euler.x()/2);
+    double c2 = cos(euler.y()/2);
+    double s2 = sin(euler.y()/2);
+    double c3 = cos(euler.z()/2);
+    double s3 = sin(euler.z()/2);
+    double c1c2 = c1 * c2;
+    double s1s2 = s1 * s2;
+    auto w = c1c2 * c3 - s1s2 * s3;
+    auto x = c1c2 * s3 + s1s2 * c3;
+    auto y = s1 * c2 * c3 + c1 * s2 * s3;
+    auto z = c1 * s2 * c3 - s1 * c2 * s3;
+    auto angle = 2 * acos(w);
+    double norm = x * x + y * y + z * z;
+    if (norm < 0.001) {
+        x = 1;
+        y = z = 0;
+    } else {
+        norm = sqrt(norm);
+        x /= norm;
+        y /= norm;
+        z /= norm;
+    }
+    return QQuaternion(angle, x, y, z);
+}
+
 QWidget* TestMain::widgetForVariant(QObject* obj, const char* name) {
     auto prop = obj->property(name);
     switch(prop.type()) {
         case QMetaType::QVector3D: {
-            auto vector = qvariant_cast<QVector3D>(prop);
-            auto container = new QWidget; // QString("X: %1, Y: %2, Z: %3").arg(vector.x()).arg(vector.y()).arg(vector.z())
+            void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
+            auto value = qvariant_cast<QVector3D>(prop);
+            auto vector = new QVector3D(value);
+            auto container = new QWidget;
+            auto hbox = new QHBoxLayout;
+            container->setLayout(hbox);
 
             auto spinboxX = new QDoubleSpinBox(container);
-            spinboxX->setValue(vector.x());
+            spinboxX->setValue(vector->x());
             spinboxX->setRange(-2147483647, 2147483647);
-            void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
+            hbox->addWidget(spinboxX);
             connect(spinboxX, changeSignal, [=] (double value) {
-                qDebug() << value;
-                obj->setProperty(name, QVector3D(value, vector.y(), vector.z()));
+                vector->setX(value);
+                obj->setProperty(name, *vector);
             });
 
-            /*auto spinboxY = new QSpinBox(container);
-            spinboxY->setValue(vector.y());
-            auto spinboxZ = new QSpinBox(container);
-            spinboxZ->setValue(vector.z());*/
+            auto spinboxY = new QDoubleSpinBox(container);
+            spinboxY->setValue(vector->y());
+            spinboxY->setRange(-2147483647, 2147483647);
+            hbox->addWidget(spinboxY);
+            connect(spinboxY, changeSignal, [=] (double value) {
+                vector->setY(value);
+                obj->setProperty(name, *vector);
+            });
+
+            auto spinboxZ = new QDoubleSpinBox(container);
+            spinboxZ->setValue(vector->z());
+            spinboxZ->setRange(-2147483647, 2147483647);
+            hbox->addWidget(spinboxZ);
+            connect(spinboxZ, changeSignal, [=] (double value) {
+                vector->setZ(value);
+                obj->setProperty(name, *vector);
+            });
+
             return container;
         }
         case QMetaType::QQuaternion: {
-            auto quat = qvariant_cast<QQuaternion>(prop);
-            return new QLabel(QString("Pitch: %1, Yaw: %2, Roll: %3").arg(quat.x()).arg(quat.y()).arg(quat.z()));
+            void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
+            auto value = qvariant_cast<QQuaternion>(prop);
+            auto quat = new QQuaternion(value);
+            QQuaternion pitch, yaw, roll;
+
+            auto container = new QWidget;
+            auto hbox = new QHBoxLayout;
+            container->setLayout(hbox);
+
+            auto spinboxX = new QDoubleSpinBox(container);
+            spinboxX->setValue(quat->vector().x());
+            spinboxX->setRange(-2147483647, 2147483647);
+            hbox->addWidget(spinboxX);
+            connect(spinboxX, changeSignal, [=] (double value) {
+                pitch = QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), value);
+                obj->setProperty(name, pitch * yaw * roll);
+            });
+
+            auto spinboxY = new QDoubleSpinBox(container);
+            spinboxY->setValue(quat->vector().y());
+            spinboxY->setRange(-2147483647, 2147483647);
+            hbox->addWidget(spinboxY);
+            connect(spinboxY, changeSignal, [=] (double value) {
+                yaw = QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), value);
+                obj->setProperty(name, pitch * yaw * roll);
+            });
+
+            auto spinboxZ = new QDoubleSpinBox(container);
+            spinboxZ->setValue(quat->vector().z());
+            spinboxZ->setRange(-2147483647, 2147483647);
+            hbox->addWidget(spinboxZ);
+            connect(spinboxZ, changeSignal, [=] (double value) {
+                roll = QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), value);
+                obj->setProperty(name, pitch * yaw * roll);
+            });
+
+            return container;
         }
         default:
             qDebug() << prop.type();
@@ -76,7 +156,6 @@ void TestMain::on_listWidget_currentItemChanged(QListWidgetItem *current) {
             for(int i = offset; i < count; ++i) {
                 auto prop = metaObject->property(i).name();
                 info->setItem(i - offset, 0, new QTableWidgetItem(prop));
-                //info->setItem(i - offset, 1, widgetForVariant(obj->property(prop)));
                 info->setCellWidget(i - offset, 1, widgetForVariant(obj, prop));
             }
         }

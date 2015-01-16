@@ -160,9 +160,9 @@ Geometry::Geometry(QObject* parent) : QObject(parent), m_scale(1, 1, 1), m_index
 
 QMatrix4x4 Geometry::transform() {
     QMatrix4x4 transform;
-    transform.scale(scale());
     transform.translate(position());
     transform.rotate(orientation());
+    transform.scale(scale());
     return transform;
 }
 

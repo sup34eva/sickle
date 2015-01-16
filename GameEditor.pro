@@ -55,7 +55,8 @@ DISTFILES += \
     .travis.yml \
     scripts/install-mingw32.sh \
     res/wireframe.vert \
-    res/wireframe.frag
+    res/wireframe.frag \
+    doxygen.cfg
 
 RESOURCES += res/resources.qrc
 
