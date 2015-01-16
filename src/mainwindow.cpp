@@ -1,22 +1,22 @@
-#include <testmain.h>
-#include "ui_testmain.h"
+#include <mainwindow.h>
+#include "ui_mainwindow.h"
 #include <QVariant>
 #include <QFileDialog>
 #include <QSpinBox>
 #include <QLabel>
 
-TestMain::TestMain(QWidget *parent) :
+MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::TestMain)
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 }
 
-TestMain::~TestMain() {
+MainWindow::~MainWindow() {
     delete ui;
 }
 
-void TestMain::on_centralwidget_childAdded(QObject* obj) {
+void MainWindow::on_centralwidget_childAdded(QObject* obj) {
     auto item = new QListWidgetItem(obj->objectName(), ui->listWidget);
     auto ptr = QVariant::fromValue(obj);
     item->setData(Qt::UserRole, ptr);
@@ -56,43 +56,49 @@ QQuaternion fromEuler(const QVector3D& euler) {
     return QQuaternion(angle, x, y, z);
 }
 
-QWidget* TestMain::widgetForVariant(QObject* obj, const char* name) {
+QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
     auto prop = obj->property(name);
     switch(prop.type()) {
         case QMetaType::QVector3D: {
             void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
             auto value = qvariant_cast<QVector3D>(prop);
             auto vector = new QVector3D(value);
+
             auto container = new QWidget;
             auto hbox = new QHBoxLayout;
             container->setLayout(hbox);
 
-            auto spinboxX = new QDoubleSpinBox(container);
-            spinboxX->setValue(vector->x());
-            spinboxX->setRange(-2147483647, 2147483647);
-            hbox->addWidget(spinboxX);
-            connect(spinboxX, changeSignal, [=] (double value) {
-                vector->setX(value);
-                obj->setProperty(name, *vector);
-            });
-
-            auto spinboxY = new QDoubleSpinBox(container);
-            spinboxY->setValue(vector->y());
-            spinboxY->setRange(-2147483647, 2147483647);
-            hbox->addWidget(spinboxY);
-            connect(spinboxY, changeSignal, [=] (double value) {
-                vector->setY(value);
-                obj->setProperty(name, *vector);
-            });
-
-            auto spinboxZ = new QDoubleSpinBox(container);
-            spinboxZ->setValue(vector->z());
-            spinboxZ->setRange(-2147483647, 2147483647);
-            hbox->addWidget(spinboxZ);
-            connect(spinboxZ, changeSignal, [=] (double value) {
-                vector->setZ(value);
-                obj->setProperty(name, *vector);
-            });
+            auto spinners = new QDoubleSpinBox*[3];
+            for(int i = 0; i < 3; i++) {
+                spinners[i] = new QDoubleSpinBox(container);
+                switch(i) {
+                    case 0:
+                        spinners[i]->setValue(vector->x());
+                        break;
+                    case 1:
+                        spinners[i]->setValue(vector->y());
+                        break;
+                    case 2:
+                        spinners[i]->setValue(vector->z());
+                        break;
+                }
+                spinners[i]->setRange(-2147483647, 2147483647);
+                hbox->addWidget(spinners[i]);
+                connect(spinners[i], changeSignal, [=] (double value) {
+                    switch(i) {
+                        case 0:
+                            vector->setX(value);
+                            break;
+                        case 1:
+                            vector->setY(value);
+                            break;
+                        case 2:
+                            vector->setZ(value);
+                            break;
+                    }
+                    obj->setProperty(name, *vector);
+                });
+            }
 
             return container;
         }
@@ -100,38 +106,42 @@ QWidget* TestMain::widgetForVariant(QObject* obj, const char* name) {
             void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
             auto value = qvariant_cast<QQuaternion>(prop);
             auto quat = new QQuaternion(value);
-            QQuaternion pitch, yaw, roll;
 
             auto container = new QWidget;
             auto hbox = new QHBoxLayout;
             container->setLayout(hbox);
 
-            auto spinboxX = new QDoubleSpinBox(container);
-            spinboxX->setValue(quat->vector().x());
-            spinboxX->setRange(-2147483647, 2147483647);
-            hbox->addWidget(spinboxX);
-            connect(spinboxX, changeSignal, [=] (double value) {
-                pitch = QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), value);
-                obj->setProperty(name, pitch * yaw * roll);
-            });
-
-            auto spinboxY = new QDoubleSpinBox(container);
-            spinboxY->setValue(quat->vector().y());
-            spinboxY->setRange(-2147483647, 2147483647);
-            hbox->addWidget(spinboxY);
-            connect(spinboxY, changeSignal, [=] (double value) {
-                yaw = QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), value);
-                obj->setProperty(name, pitch * yaw * roll);
-            });
-
-            auto spinboxZ = new QDoubleSpinBox(container);
-            spinboxZ->setValue(quat->vector().z());
-            spinboxZ->setRange(-2147483647, 2147483647);
-            hbox->addWidget(spinboxZ);
-            connect(spinboxZ, changeSignal, [=] (double value) {
-                roll = QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), value);
-                obj->setProperty(name, pitch * yaw * roll);
-            });
+            auto spinners = new QDoubleSpinBox*[3];
+            for(int i = 0; i < 3; i++) {
+                spinners[i] = new QDoubleSpinBox(container);
+                switch(i) {
+                    case 0:
+                        spinners[i]->setValue(quat->x());
+                        break;
+                    case 1:
+                        spinners[i]->setValue(quat->y());
+                        break;
+                    case 2:
+                        spinners[i]->setValue(quat->z());
+                        break;
+                }
+                spinners[i]->setRange(-2147483647, 2147483647);
+                hbox->addWidget(spinners[i]);
+                connect(spinners[i], changeSignal, [=] (double value) {
+                    switch(i) {
+                        case 0:
+                            quat->setX(value);
+                            break;
+                        case 1:
+                            quat->setY(value);
+                            break;
+                        case 2:
+                            quat->setZ(value);
+                            break;
+                    }
+                    obj->setProperty(name, *quat);
+                });
+            }
 
             return container;
         }
@@ -141,9 +151,9 @@ QWidget* TestMain::widgetForVariant(QObject* obj, const char* name) {
     }
 }
 
-void TestMain::on_listWidget_currentItemChanged(QListWidgetItem *current) {
+void MainWindow::on_listWidget_currentItemChanged(QListWidgetItem *current) {
     auto ptr = current->data(Qt::UserRole);
-    if(ptr.isValid() && ptr.type() == QMetaType::QObjectStar) {
+    if(ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
         QObject* obj = qvariant_cast<QObject*>(ptr);
         if(obj) {
             auto info = ui->infoWidget;
@@ -162,19 +172,19 @@ void TestMain::on_listWidget_currentItemChanged(QListWidgetItem *current) {
     }
 }
 
-void TestMain::on_actionOpen_triggered()
+void MainWindow::on_actionOpen_triggered()
 {
     auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), tr("World File (*.wld)"));
     ui->centralwidget->load(fileName);
 }
 
-void TestMain::on_actionSave_as_triggered()
+void MainWindow::on_actionSave_as_triggered()
 {
     auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("World File (*.wld)"));
     ui->centralwidget->save(fileName);
 }
 
-void TestMain::on_action_Save_triggered()
+void MainWindow::on_action_Save_triggered()
 {
     auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("World File (*.wld)"));
     ui->centralwidget->save(fileName);

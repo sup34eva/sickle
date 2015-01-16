@@ -36,7 +36,7 @@ SOURCES += src/main.cpp\
     src/geometry.cpp \
     src/viewport.cpp \
     src/group.cpp \
-    src/testmain.cpp
+    src/mainwindow.cpp
 
 HEADERS  += \
     include/camera.h \
@@ -44,7 +44,7 @@ HEADERS  += \
     include/viewport.h \
     include/group.h \
     include/globals.h \
-    include/testmain.h
+    include/mainwindow.h
 
 DISTFILES += \
     res/lit.frag \
@@ -56,11 +56,13 @@ DISTFILES += \
     scripts/install-mingw32.sh \
     res/wireframe.vert \
     res/wireframe.frag \
-    doxygen.cfg
+    doxygen.cfg \
+    scripts/build-docs.sh
 
 RESOURCES += res/resources.qrc
 
-FORMS += res/testmain.ui
+FORMS += \
+    res/mainwindow.ui
 
 linter.name = linter
 linter.input = SOURCES

@@ -1,4 +1,4 @@
-#include <testmain.h>
+#include <mainwindow.h>
 #include <QApplication>
 #include <QSurfaceFormat>
 
@@ -13,10 +13,9 @@ int main(int argc, char *argv[])
     format.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(format);
 
-    TestMain window;
+    MainWindow window;
     window.resize(640, 480);
     window.show();
-
 
     return app.exec();
 }

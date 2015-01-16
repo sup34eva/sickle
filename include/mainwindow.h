@@ -5,16 +5,16 @@
 #include <QListWidgetItem>
 
 namespace Ui {
-class TestMain;
+class MainWindow;
 }
 
-class TestMain : public QMainWindow
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit TestMain(QWidget *parent = 0);
-    ~TestMain();
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
 
 private slots:
     void on_centralwidget_childAdded(QObject *obj);
@@ -29,7 +29,7 @@ private slots:
 
 private:
     QWidget* widgetForVariant(QObject* obj, const char* name);
-    Ui::TestMain *ui;
+    Ui::MainWindow *ui;
 };
 
 #endif // TESTMAIN_H
