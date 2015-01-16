@@ -1,12 +1,12 @@
 #!/bin/bash
 echo "Generating docs with doxygen..."
 
-doxygen
+doxygen doxygen.cfg
 
 cd "$HOME"
-git clone --depth=1 --branch=gh-pages git@github.com:sup3asc2/sickle.git gh-pages || exit 1
+git clone --depth=1 --branch=gh-pages git://github.com/sup3asc2/sickle.git gh-pages || exit 1
 
-cd "$TRAVIS_BUILD_DIR/doc/html/"
+cd "$TRAVIS_BUILD_DIR/docs/html/"
 mv ~/gh-pages/.git ./
 echo docs.znc.in > CNAME
 git add -A
