@@ -32,21 +32,15 @@ public:
     propSig(QVector3D, scale, scaled)
 protected:
     QMatrix4x4 transform();
-    static const std::shared_ptr<GLfloat*> getVertices();
-    static const std::shared_ptr<GLfloat*> getColors();
-    static const std::shared_ptr<quint32*> getIndices();
 private:
-    //Program
-    QOpenGLShaderProgram* m_program;
-    QOpenGLBuffer m_vertexBuffer;
-    QOpenGLBuffer m_colorBuffer;
-    QOpenGLBuffer m_normalBuffer;
-    QOpenGLBuffer m_indexBuffer;
-    // Shader attributes
-    GLuint m_posAttr;
-    GLuint m_colAttr;
-    GLuint m_normAttr;
-    GLuint m_matrixUniform;
+    // Instances
+    static int s_instances;
+    static QOpenGLShaderProgram* s_program;
+    static QOpenGLBuffer* s_vertexBuffer;
+    static QOpenGLBuffer* s_colorBuffer;
+    static QOpenGLBuffer* s_normalBuffer;
+    static QOpenGLBuffer* s_indexBuffer;
+    static void initProgram(QObject *parent);
 };
 
 #endif // GEOMETRY_H
