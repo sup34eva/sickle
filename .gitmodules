@@ -1,0 +1,4 @@
+[submodule "docs/html"]
+	path = docs/html
+	url = git@github.com:sup3asc2/sickle.git
+	branch = gh-pages
