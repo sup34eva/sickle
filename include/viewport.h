@@ -5,8 +5,9 @@
 #include <QOpenGLFunctions>
 #include <QWheelEvent>
 #include <QKeyEvent>
-#include "camera.h"
-#include "geometry.h"
+#include <camera.h>
+#include <geometry.h>
+#include <cube.h>
 
 /*! \class Viewport
  * \brief Cadre de vue 3D
@@ -29,7 +30,7 @@ public:
 public slots:
     Geometry* addChild() {
         makeCurrent();
-        auto child = new Geometry(this);
+        auto child = new Cube(this);
         doneCurrent();
         child->setObjectName("testObj");
         child->setParent(this);

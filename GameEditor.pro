@@ -37,7 +37,8 @@ SOURCES += \
     src/geometry.cpp \
     src/viewport.cpp \
     src/group.cpp \
-    src/mainwindow.cpp
+    src/mainwindow.cpp \
+    src/cube.cpp
 
 HEADERS  += \
     include/camera.h \
@@ -45,7 +46,8 @@ HEADERS  += \
     include/viewport.h \
     include/group.h \
     include/globals.h \
-    include/mainwindow.h
+    include/mainwindow.h \
+    include/cube.h
 
 DISTFILES += \
     res/lit.frag \

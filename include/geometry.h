@@ -26,26 +26,24 @@ class Geometry : public QObject
     Q_OBJECT
 public:
     Geometry(QObject* parent = nullptr);
-    virtual void draw(const DrawInfo &info);
+    void draw(const DrawInfo &info);
     propSig(QVector3D, position, moved)
     propSig(QQuaternion, orientation, rotated)
     propSig(QVector3D, scale, scaled)
 protected:
     QMatrix4x4 transform();
-    // Vertices
-    static std::vector<GLfloat> s_vertices;
-    static std::vector<GLfloat> s_colors;
-    static std::vector<GLfloat> s_normals;
-    static std::vector<quint32> s_indices;
+    virtual std::vector<GLfloat>& getVertices() = 0;
+    virtual std::vector<GLfloat>& getColors() = 0;
+    virtual std::vector<quint32>& getIndices() = 0;
+    static void initProgram(Geometry *self, QObject *parent);
 private:
     // Instances
     static int s_instances;
     static QOpenGLShaderProgram* s_program;
     static QOpenGLBuffer* s_vertexBuffer;
     static QOpenGLBuffer* s_colorBuffer;
-    static QOpenGLBuffer* s_normalBuffer;
+    //static QOpenGLBuffer* s_normalBuffer;
     static QOpenGLBuffer* s_indexBuffer;
-    static void initProgram(QObject *parent);
 };
 
 #endif // GEOMETRY_H

@@ -13,7 +13,7 @@ class Group : public Geometry
 {
 public:
     Group(QObject* parent = nullptr);
-    void draw(const DrawInfo& info) Q_DECL_OVERRIDE;
+    void draw(const DrawInfo& info);
 };
 
 #endif // GROUP_H
