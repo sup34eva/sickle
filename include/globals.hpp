@@ -20,16 +20,23 @@
  */
 
 //! Déclare une variable membre privée
-#define declare(TYPE, NAME) private: TYPE m_ ## NAME;
+#define declare(TYPE, NAME) \
+private:                    \
+	TYPE m_##NAME;
 
-#define setterBase(TYPE, NAME, COMMAND) Q_SLOT TYPE NAME(TYPE val) {m_ ## NAME = val;COMMAND return NAME();}
+#define setterBase(TYPE, NAME, COMMAND) \
+	Q_SLOT TYPE NAME(TYPE val) {        \
+		m_##NAME = val;                 \
+		COMMAND return NAME();          \
+	}
 //! Déclare un setter pour une variable membre
-#define setter(TYPE, NAME) setterBase(TYPE, NAME,)
+#define setter(TYPE, NAME) setterBase(TYPE, NAME, )
 //! Déclare un setter emettant un evenement
 #define setterSig(TYPE, NAME, SIG) setterBase(TYPE, NAME, emit SIG(NAME());)
 
 //! Déclare un getter pour une variable membre
-#define getter(TYPE, NAME) TYPE NAME() const {return m_ ## NAME;}
+#define getter(TYPE, NAME) \
+	TYPE NAME() const { return m_##NAME; }
 
 /*! \def prop
  * \brief Declare une propriété
@@ -45,11 +52,23 @@
  * Le signal prend la nouvelle valeur en paramètre.
  */
 
-#define propBase(TYPE, NAME) declare(TYPE, NAME) public: getter(TYPE, NAME)
-#define prop(TYPE, NAME) Q_PROPERTY( TYPE NAME WRITE NAME READ NAME ); propBase(TYPE, NAME); setter(TYPE, NAME)
-#define propSig(TYPE, NAME, SIG) Q_PROPERTY( TYPE NAME WRITE NAME READ NAME NOTIFY SIG) propBase(TYPE, NAME); setterSig(TYPE, NAME, SIG); Q_SIGNALS: void SIG(TYPE); public:
+#define propBase(TYPE, NAME) declare(TYPE, NAME) public : getter(TYPE, NAME)
+#define prop(TYPE, NAME)                        \
+	Q_PROPERTY(TYPE NAME WRITE NAME READ NAME); \
+	propBase(TYPE, NAME);                       \
+	setter(TYPE, NAME)
+#define propSig(TYPE, NAME, SIG)                                                \
+	Q_PROPERTY(TYPE NAME WRITE NAME READ NAME NOTIFY SIG) propBase(TYPE, NAME); \
+	setterSig(TYPE, NAME, SIG);                                                 \
+	Q_SIGNALS:                                                                  \
+	void SIG(TYPE);                                                             \
+																				\
+public:
 //! Déclare une variable membre et un getter, mais pas de setter (RO: Read-only)
-#define propRO(TYPE, NAME) private: Q_PROPERTY(TYPE NAME READ NAME); propBase(TYPE, NAME)
+#define propRO(TYPE, NAME)           \
+private:                             \
+	Q_PROPERTY(TYPE NAME READ NAME); \
+	propBase(TYPE, NAME)
 
 /*! \def DEFINE_GEOMETRY_CLASS
  * \brief Définit une nouvelle classe de Geometry
@@ -59,17 +78,14 @@
  * Elle contient aussi 3 vectors contenant les vertices, les couleurs et les indices de l'objet.
  */
 
-#define DEFINE_GEOMETRY_CLASS(NAME) class NAME : public Geometry \
-{ \
-    Q_OBJECT \
-public: \
-    NAME(QObject* parent = nullptr) : Geometry(parent) { \
-        initProgram<NAME>(parent); \
-    } \
-    static std::vector<GLfloat> s_vertices; \
-    static std::vector<GLfloat> s_colors; \
-    static std::vector<quint32> s_indices; \
-};
+#define DEFINE_GEOMETRY_CLASS(NAME)                                                                         \
+	class NAME : public Geometry {                                                                          \
+		Q_OBJECT                                                                                            \
+	public:                                                                                                 \
+		NAME(QObject* parent = nullptr) : Geometry(parent) { initProgram<NAME>(parent); }                   \
+		static std::vector<GLfloat> s_vertices;                                                             \
+		static std::vector<GLfloat> s_colors;                                                               \
+		static std::vector<quint32> s_indices;                                                              \
+	};
 
-#endif // GLOBALS
-
+#endif  // GLOBALS

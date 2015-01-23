@@ -1,0 +1,14 @@
+BasedOnStyle: Google
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always
+BreakBeforeBraces: Attach
+IndentCaseLabels: true
+PointerAlignment: Left
+AllowShortFunctionsOnASingleLine: Inline
+AlwaysBreakTemplateDeclarations: true
+AccessModifierOffset: -4
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: All
+KeepEmptyLinesAtTheStartOfBlocks: false
+ColumnLimit: 120

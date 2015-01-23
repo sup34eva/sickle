@@ -9,11 +9,10 @@
  *
  * Toute les géometries enfant de cet objet seront affichés avec une transformation relative a celle du groupe.
  */
-class Group : public Geometry
-{
+class Group : public Geometry {
 public:
-    Group(QObject* parent = nullptr);
-    void draw(const DrawInfo& info);
+	Group(QObject* parent = nullptr);
+	void draw(const DrawInfo& info);
 };
 
-#endif // GROUP_H
+#endif  // GROUP_H

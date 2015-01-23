@@ -58,7 +58,8 @@ DISTFILES += \
     .travis.yml \
     scripts/install-mingw32.sh \
     Doxyfile \
-    scripts/build-docs.sh
+    scripts/build-docs.sh \
+    .clang-format
 
 RESOURCES += res/resources.qrc
 
@@ -81,11 +82,17 @@ TRANSLATIONS = res/editor_fr.ts
 #doxygen.commands = ( cat ${QMAKE_FILE_IN} ; echo "INPUT = $$PWD/src \ $$PWD/include" ) | doxygen - >> ${QMAKE_FILE_OUT}
 #doxygen.output = doxygen.log
 
+#format.name = format
+#format.input = SOURCES HEADERS
+#format.CONFIG += combine no_link no_clean
+#format.commands = clang-format -style=file ${QMAKE_FILE_IN} >> ${QMAKE_FILE_OUT}
+#format.output = format.log
+
 #coverage.name = coverage
 #coverage.input = COVERALLS
 #coverage.CONFIG += no_link no_clean
 #coverage.commands = coveralls -n -y ${QMAKE_FILE_IN} -r ${OBJECTS_DIR} -b $$PWD --dump ${QMAKE_FILE_OUT}
 #coverage.output = coverage.json
 
-#QMAKE_EXTRA_COMPILERS += linter doxygen coverage
-#POST_TARGETDEPS += doxygen.log lint.log coverage.json
+#QMAKE_EXTRA_COMPILERS += linter doxygen coverage format
+#POST_TARGETDEPS += doxygen.log lint.log coverage.json format.log
