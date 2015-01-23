@@ -175,7 +175,7 @@ void Viewport::load(QString name) {
 
 QDataStream& operator<<(QDataStream& stream, const QObject& obj) {
     auto metaObject = obj.metaObject();
-    for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i) {
+    for(int i = 0; i < metaObject->propertyCount(); ++i) {
         auto prop = metaObject->property(i);
         qDebug() << "Saving " << prop.name();
         if(static_cast<QMetaType::Type>(prop.type()) != QMetaType::QObjectStar)
@@ -186,7 +186,7 @@ QDataStream& operator<<(QDataStream& stream, const QObject& obj) {
 
 QDataStream& operator>>(QDataStream& stream, QObject& obj) {
     auto metaObject = obj.metaObject();
-    for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i) {
+    for(int i = 0; i < metaObject->propertyCount(); ++i) {
         auto prop = metaObject->property(i);
         qDebug() << "Restoring " << prop.name();
         if(static_cast<QMetaType::Type>(prop.type()) != QMetaType::QObjectStar) {

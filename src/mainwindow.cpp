@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QSpinBox>
 #include <QLabel>
+#include <QLineEdit>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -102,49 +103,17 @@ QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
 
             return container;
         }
-        case QMetaType::QQuaternion: {
-            void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
-            auto value = qvariant_cast<QQuaternion>(prop);
-            auto quat = new QQuaternion(value);
-
-            auto container = new QWidget;
-            auto hbox = new QHBoxLayout;
-            container->setLayout(hbox);
-
-            auto spinners = new QDoubleSpinBox*[3];
-            for(int i = 0; i < 3; i++) {
-                spinners[i] = new QDoubleSpinBox(container);
-                spinners[i]->setRange(-2147483647, 2147483647);
-                switch(i) {
-                    case 0:
-                        spinners[i]->setValue(quat->x());
-                        break;
-                    case 1:
-                        spinners[i]->setValue(quat->y());
-                        break;
-                    case 2:
-                        spinners[i]->setValue(quat->z());
-                        break;
-                }
-                hbox->addWidget(spinners[i]);
-                connect(spinners[i], changeSignal, [=] (double value) {
-                    switch(i) {
-                        case 0:
-                            quat->setX(value);
-                            break;
-                        case 1:
-                            quat->setY(value);
-                            break;
-                        case 2:
-                            quat->setZ(value);
-                            break;
-                    }
-                    obj->setProperty(name, *quat);
-                });
-            }
-
-            return container;
+        case QMetaType::QString: {
+            auto textBox = new QLineEdit;
+            textBox->setText(prop.toString());
+            connect(textBox, &QLineEdit::textEdited, [=] (const QString& text) {
+                obj->setProperty(name, text);
+            });
+            return textBox;
         }
+        /*case QMetaType::QQuaternion: {
+            //TODO
+        }*/
         default:
             qDebug() << prop.type();
             return new QLabel(prop.toString());
@@ -159,14 +128,13 @@ void MainWindow::on_listWidget_currentItemChanged(QListWidgetItem *current) {
             auto info = ui->infoWidget;
             auto metaObject = obj->metaObject();
             auto count = metaObject->propertyCount();
-            auto offset = metaObject->propertyOffset();
             info->clear();
             info->setColumnCount(2);
-            info->setRowCount(count - offset);
-            for(int i = offset; i < count; ++i) {
+            info->setRowCount(count);
+            for(int i = 0; i < count; ++i) {
                 auto prop = metaObject->property(i).name();
-                info->setItem(i - offset, 0, new QTableWidgetItem(prop));
-                info->setCellWidget(i - offset, 1, widgetForVariant(obj, prop));
+                info->setItem(i, 0, new QTableWidgetItem(prop));
+                info->setCellWidget(i, 1, widgetForVariant(obj, prop));
             }
         }
     }
