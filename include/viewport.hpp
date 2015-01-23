@@ -5,8 +5,8 @@
 #include <QOpenGLFunctions>
 #include <QWheelEvent>
 #include <QKeyEvent>
-#include <camera.h>
-#include <cube.h>
+#include <camera.hpp>
+#include <cube.hpp>
 
 /*! \class Viewport
  * \brief Cadre de vue 3D

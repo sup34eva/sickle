@@ -41,13 +41,13 @@ SOURCES += \
     src/cube.cpp
 
 HEADERS  += \
-    include/camera.h \
-    include/geometry.h \
-    include/viewport.h \
-    include/group.h \
-    include/globals.h \
-    include/mainwindow.h \
-    include/cube.h
+    include/camera.hpp \
+    include/cube.hpp \
+    include/geometry.hpp \
+    include/globals.hpp \
+    include/group.hpp \
+    include/mainwindow.hpp \
+    include/viewport.hpp
 
 DISTFILES += \
     res/lit.frag \

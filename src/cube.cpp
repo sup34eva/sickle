@@ -1,4 +1,4 @@
-#include <cube.h>
+#include <cube.hpp>
 
 Cube::Cube(QObject* parent) : Geometry(parent) {
     initProgram<Cube>(parent);

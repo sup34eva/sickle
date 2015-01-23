@@ -1,4 +1,4 @@
-#include <group.h>
+#include <group.hpp>
 
 Group::Group(QObject* parent) : Geometry(parent)
 {

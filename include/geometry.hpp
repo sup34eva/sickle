@@ -6,7 +6,7 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
-#include <globals.h>
+#include <globals.hpp>
 #include <memory>
 
 typedef struct DrawInfo {

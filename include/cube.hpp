@@ -1,7 +1,7 @@
 #ifndef CUBE_H
 #define CUBE_H
 
-#include <geometry.h>
+#include <geometry.hpp>
 
 class Cube : public Geometry
 {

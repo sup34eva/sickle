@@ -2,7 +2,7 @@
 #define GROUP_H
 
 #include <QVector>
-#include <geometry.h>
+#include <geometry.hpp>
 
 /*! \class Group
  * \brief Groupe de geometries

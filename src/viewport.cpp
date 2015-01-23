@@ -1,4 +1,4 @@
-#include <viewport.h>
+#include <viewport.hpp>
 
 Viewport::Viewport(QWidget *parent)
     : QOpenGLWidget(parent), m_renderMode(GL_TRIANGLES) // GL_LINES

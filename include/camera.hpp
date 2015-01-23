@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QVector3D>
 #include <QMatrix4x4>
-#include "globals.h"
+#include "globals.hpp"
 #include <QMetaProperty>
 
 /*!

@@ -1,5 +1,5 @@
-#include <geometry.h>
-#include <viewport.h>
+#include <geometry.hpp>
+#include <viewport.hpp>
 
 int Geometry::s_instances = 0;
 QOpenGLShaderProgram* Geometry::s_program = nullptr;
