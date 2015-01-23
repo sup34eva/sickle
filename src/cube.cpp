@@ -1,6 +1,10 @@
 #include <cube.h>
 
-std::vector<GLfloat> Cube::c_vertices = {
+Cube::Cube(QObject* parent) : Geometry(parent) {
+    initProgram<Cube>(parent);
+}
+
+std::vector<GLfloat> Cube::s_vertices = {
     -1.0f, -1.0f, -1.0f, // Face 1
     -1.0f, -1.0f,  1.0f,
     -1.0f,  1.0f,  1.0f,
@@ -26,7 +30,7 @@ std::vector<GLfloat> Cube::c_vertices = {
      1.0f,  1.0f,  1.0f,
     -1.0f,  1.0f,  1.0f,
 };
-std::vector<quint32> Cube::c_indices = {
+std::vector<quint32> Cube::s_indices = {
     0, 1, 3,
     3, 1, 2,
     4, 5, 7,
@@ -40,7 +44,7 @@ std::vector<quint32> Cube::c_indices = {
     20, 21, 23,
     23, 21, 22,
 };
-std::vector<GLfloat> Cube::c_colors = {
+std::vector<GLfloat> Cube::s_colors = {
     1.0f, 0.0f, 0.0f,
     1.0f, 0.0f, 0.0f,
     1.0f, 0.0f, 0.0f,

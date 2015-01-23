@@ -8,24 +8,11 @@ class Cube : public Geometry
     Q_OBJECT
 
 public:
-    Cube(QObject* parent = nullptr) : Geometry(parent) {
-        initProgram(this, parent);
-    }
+    Cube(QObject* parent = nullptr);
 
-protected:
-    std::vector<GLfloat>& getVertices() {
-        return c_vertices;
-    }
-    std::vector<GLfloat>& getColors() {
-        return c_colors;
-    }
-    std::vector<quint32>& getIndices() {
-        return c_indices;
-    }
-
-    static std::vector<GLfloat> c_vertices;
-    static std::vector<GLfloat> c_colors;
-    static std::vector<quint32> c_indices;
+    static std::vector<GLfloat> s_vertices;
+    static std::vector<GLfloat> s_colors;
+    static std::vector<quint32> s_indices;
 };
 
 #endif // CUBE_H

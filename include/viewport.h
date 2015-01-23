@@ -6,7 +6,6 @@
 #include <QWheelEvent>
 #include <QKeyEvent>
 #include <camera.h>
-#include <geometry.h>
 #include <cube.h>
 
 /*! \class Viewport
