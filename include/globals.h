@@ -7,6 +7,18 @@
     Contient les macros utilitaires globales au projet.
 */
 
+/*! \class QWidget
+ * \extends QObject
+ */
+
+/*! \class QMainWindow
+ * \extends QWidget
+ */
+
+/*! \class QOpenGLWidget
+ * \extends QWidget
+ */
+
 #define declare(TYPE, NAME) private: TYPE m_ ## NAME; //! Déclare une variable membre privée
 
 #define setterBase(TYPE, NAME, COMMAND) Q_SLOT TYPE NAME(TYPE val) {m_ ## NAME = val;COMMAND return NAME();}
