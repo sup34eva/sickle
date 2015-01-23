@@ -7,110 +7,97 @@ QOpenGLBuffer* Geometry::s_vertexBuffer = nullptr;
 QOpenGLBuffer* Geometry::s_colorBuffer = nullptr;
 QOpenGLBuffer* Geometry::s_normalBuffer = nullptr;
 QOpenGLBuffer* Geometry::s_indexBuffer = nullptr;
+std::vector<GLfloat> Geometry::s_vertices = {
+    -1.0f, -1.0f, -1.0f, // Face 1
+    -1.0f, -1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f, // Face 2
+     1.0f,  1.0f, -1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f, -1.0f, // Face 3
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+    -1.0f,  1.0f, -1.0f, // Face 4
+    -1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f, // Face 5
+    -1.0f,  1.0f, -1.0f,
+     1.0f,  1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f, // Face 6
+     1.0f, -1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+};
+std::vector<quint32> Geometry::s_indices = {
+    0, 1, 3,
+    3, 1, 2,
+    4, 5, 7,
+    7, 5, 6,
+    8, 9, 11,
+    11, 9, 10,
+    12, 13, 15,
+    15, 13, 14,
+    16, 17, 19,
+    19, 17, 18,
+    20, 21, 23,
+    23, 21, 22,
+};
+std::vector<GLfloat> Geometry::s_colors = {
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 1.0f, 0.0f,
+    1.0f, 1.0f, 0.0f,
+    1.0f, 1.0f, 0.0f,
+    1.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 1.0f,
+    0.0f, 1.0f, 1.0f,
+    0.0f, 1.0f, 1.0f,
+    0.0f, 1.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    1.0f, 0.0f, 1.0f,
+    1.0f, 0.0f, 1.0f,
+    1.0f, 0.0f, 1.0f,
+    1.0f, 0.0f, 1.0f,
+};
+std::vector<GLfloat> Geometry::s_normals;
 
 void Geometry::initProgram(QObject* parent) {
-    auto index = s_instances++;
-
-    if(index == 0) {
+    if(s_instances++ == 0) {
         s_program = new QOpenGLShaderProgram(parent);
         s_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/unlit.vert");
-        //m_s_program->addShaderFromSourceFile(QOpenGLShader::Geometry, ":/shaders/unlit.geom");
         s_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/unlit.frag");
         s_program->link();
 
-        GLuint posAttr = s_program->attributeLocation("vertexPosition");
-        GLuint colAttr = s_program->attributeLocation("vertexColor");
-        GLuint normAttr = s_program->attributeLocation("vertexNormal");
+        auto posAttr = s_program->attributeLocation("vertexPosition");
+        auto colAttr = s_program->attributeLocation("vertexColor");
+        auto normAttr = s_program->attributeLocation("vertexNormal");
 
-        GLfloat vertices[] = {
-            -1.0f, -1.0f, -1.0f, // Face 1
-            -1.0f, -1.0f,  1.0f,
-            -1.0f,  1.0f,  1.0f,
-            -1.0f,  1.0f, -1.0f,
-             1.0f, -1.0f, -1.0f, // Face 2
-             1.0f,  1.0f, -1.0f,
-             1.0f,  1.0f,  1.0f,
-             1.0f, -1.0f,  1.0f,
-            -1.0f, -1.0f, -1.0f, // Face 3
-             1.0f, -1.0f, -1.0f,
-             1.0f, -1.0f,  1.0f,
-            -1.0f, -1.0f,  1.0f,
-            -1.0f,  1.0f, -1.0f, // Face 4
-            -1.0f,  1.0f,  1.0f,
-             1.0f,  1.0f,  1.0f,
-             1.0f,  1.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f, // Face 5
-            -1.0f,  1.0f, -1.0f,
-             1.0f,  1.0f, -1.0f,
-             1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f,  1.0f, // Face 6
-             1.0f, -1.0f,  1.0f,
-             1.0f,  1.0f,  1.0f,
-            -1.0f,  1.0f,  1.0f,
-        };
-
-        quint32 indices[] = {
-            0, 1, 3,
-            3, 1, 2,
-            4, 5, 7,
-            7, 5, 6,
-            8, 9, 11,
-            11, 9, 10,
-            12, 13, 15,
-            15, 13, 14,
-            16, 17, 19,
-            19, 17, 18,
-            20, 21, 23,
-            23, 21, 22,
-        };
-
-        GLfloat colors[] = {
-            1.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 1.0f,
-            0.0f, 0.0f, 1.0f,
-            0.0f, 0.0f, 1.0f,
-            0.0f, 0.0f, 1.0f,
-            0.0f, 0.0f, 1.0f,
-            1.0f, 0.0f, 1.0f,
-            1.0f, 0.0f, 1.0f,
-            1.0f, 0.0f, 1.0f,
-            1.0f, 0.0f, 1.0f,
-        };
-
-        auto normals = new GLfloat[6 * 4 * 3];
-        for(int i = 0; i < (6 * 4 * 3); i += 12) {
-            QVector3D p1 = QVector3D(vertices[i + 0], vertices[i + 1], vertices[i + 2]),
-                      p2 = QVector3D(vertices[i + 3], vertices[i + 4], vertices[i + 5]),
-                      p3 = QVector3D(vertices[i + 6], vertices[i + 7], vertices[i + 8]),
-                      p4 = QVector3D(vertices[i + 9], vertices[i + 10], vertices[i + 11]),
+        s_normals.resize(s_vertices.size());
+        for(auto i = 0; i < s_indices.size(); i += 3) {
+            QVector3D p1 = QVector3D(s_vertices[s_indices[i]], s_vertices[s_indices[i] + 1], s_vertices[s_indices[i] + 2]),
+                      p2 = QVector3D(s_vertices[s_indices[i + 1]], s_vertices[s_indices[i + 1] + 1], s_vertices[s_indices[i + 1] + 2]),
+                      p3 = QVector3D(s_vertices[s_indices[i + 2]], s_vertices[s_indices[i + 2] + 1], s_vertices[s_indices[i + 2] + 2]),
                       U1 = p2 - p1,
                       V1 = p3 - p1,
-                      U2 = p2 - p4,
-                      V2 = p3 - p4,
-                      Normal1 = QVector3D::crossProduct(U1, V1),
-                      Normal2 = QVector3D::crossProduct(U2, V2),
-                      Normal;
-            Normal1.normalize();
-            Normal2.normalize();
-            Normal = Normal1 + Normal2;
+                      Normal = QVector3D::crossProduct(U1, V1);
             Normal.normalize();
-            normals[i + 0] = normals[i + 3] = normals[i + 6] = normals[i + 9] = Normal.x();
-            normals[i + 1] = normals[i + 4] = normals[i + 7] = normals[i + 10] = Normal.y();
-            normals[i + 2] = normals[i + 5] = normals[i + 8] = normals[i + 11] = Normal.z();
+            s_normals[s_indices[i] + 0] = s_normals[s_indices[i + 1] + 0] = s_normals[s_indices[i + 2] + 0] = Normal.x();
+            s_normals[s_indices[i] + 1] = s_normals[s_indices[i + 1] + 1] = s_normals[s_indices[i + 2] + 1] = Normal.y();
+            s_normals[s_indices[i] + 2] = s_normals[s_indices[i + 1] + 2] = s_normals[s_indices[i + 2] + 2] = Normal.z();
         }
 
         s_vertexBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
@@ -121,7 +108,7 @@ void Geometry::initProgram(QObject* parent) {
             qWarning() << "Could not bind vertex buffer to the context";
             return;
         }
-        s_vertexBuffer->allocate(vertices, sizeof(vertices));
+        s_vertexBuffer->allocate(&s_vertices[0], s_vertices.size() * sizeof(GLfloat));
 
         s_colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
         s_colorBuffer->create();
@@ -131,7 +118,7 @@ void Geometry::initProgram(QObject* parent) {
             qWarning() << "Could not bind color buffer to the context";
             return;
         }
-        s_colorBuffer->allocate(colors, sizeof(colors));
+        s_colorBuffer->allocate(&s_colors[0], s_colors.size() * sizeof(GLfloat));
 
         s_normalBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
         s_normalBuffer->create();
@@ -141,7 +128,7 @@ void Geometry::initProgram(QObject* parent) {
             qWarning() << "Could not bind normal buffer to the context";
             return;
         }
-        s_normalBuffer->allocate(normals, sizeof(normals));
+        s_normalBuffer->allocate(&s_normals[0], s_normals.size() * sizeof(GLfloat));
 
         s_indexBuffer = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
         s_indexBuffer->create();
@@ -151,7 +138,7 @@ void Geometry::initProgram(QObject* parent) {
             qWarning() << "Could not bind index buffer to the context";
             return;
         }
-        s_indexBuffer->allocate(indices, sizeof(indices));
+        s_indexBuffer->allocate(&s_indices[0], s_indices.size() * sizeof(GLfloat));
 
         if (!s_program->bind())
         {
@@ -190,13 +177,8 @@ void Geometry::draw(const DrawInfo &info)
 {
     s_program->bind();
 
-    s_program->setUniformValue("model", transform());
-    s_program->setUniformValue("view", info.View);
-    s_program->setUniformValue("projection", info.Projection);
-    s_program->setUniformValue("lightPosition", QVector3D(4.5f, 4.5f, 4.0f));
-    s_program->setUniformValue("lightColor", QVector3D(1.0f, 1.0f, 1.0f));
-    s_program->setUniformValue("lightPower", 25.0f);
-    s_program->setUniformValue("ambientColor", QVector3D(0.1f, 0.1f, 0.1f));
+    auto MVP = info.Projection * info.View * transform();
+    s_program->setUniformValue("MVP", MVP);
 
     auto func = QOpenGLContext::currentContext()->functions();
     func->glDrawElements(info.mode, 12 * 3, GL_UNSIGNED_INT, 0);

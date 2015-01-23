@@ -32,6 +32,11 @@ public:
     propSig(QVector3D, scale, scaled)
 protected:
     QMatrix4x4 transform();
+    // Vertices
+    static std::vector<GLfloat> s_vertices;
+    static std::vector<GLfloat> s_colors;
+    static std::vector<GLfloat> s_normals;
+    static std::vector<quint32> s_indices;
 private:
     // Instances
     static int s_instances;
