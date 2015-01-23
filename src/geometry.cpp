@@ -5,12 +5,10 @@ int Geometry::s_instances = 0;
 QOpenGLShaderProgram* Geometry::s_program = nullptr;
 QOpenGLBuffer* Geometry::s_vertexBuffer = nullptr;
 QOpenGLBuffer* Geometry::s_colorBuffer = nullptr;
-//QOpenGLBuffer* Geometry::s_normalBuffer = nullptr;
 QOpenGLBuffer* Geometry::s_indexBuffer = nullptr;
 
 Geometry::Geometry(QObject* parent) : QObject(parent), m_scale(1, 1, 1)
 {
-    //initProgram(this, parent);
 }
 
 QMatrix4x4 Geometry::transform() {

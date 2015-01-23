@@ -1,9 +1,5 @@
 #include <cube.hpp>
 
-Cube::Cube(QObject* parent) : Geometry(parent) {
-    initProgram<Cube>(parent);
-}
-
 std::vector<GLfloat> Cube::s_vertices = {
     -1.0f, -1.0f, -1.0f, // Face 1
     -1.0f, -1.0f,  1.0f,

@@ -2,9 +2,9 @@
 #define GLOBALS
 
 /*! \file globals.h
-    \brief Definitions globales
-
-    Contient les macros utilitaires globales au projet.
+ * \brief Definitions globales
+ *
+ * Contient les macros utilitaires globales au projet.
 */
 
 /*! \class QWidget
@@ -19,22 +19,28 @@
  * \extends QWidget
  */
 
-#define declare(TYPE, NAME) private: TYPE m_ ## NAME; //! Déclare une variable membre privée
+//! Déclare une variable membre privée
+#define declare(TYPE, NAME) private: TYPE m_ ## NAME;
 
 #define setterBase(TYPE, NAME, COMMAND) Q_SLOT TYPE NAME(TYPE val) {m_ ## NAME = val;COMMAND return NAME();}
-#define setter(TYPE, NAME) setterBase(TYPE, NAME,) //! Déclare un setter pour une variable membre
-#define setterSig(TYPE, NAME, SIG) setterBase(TYPE, NAME, emit SIG(NAME());) //! Déclare un setter emettant un evenement
+//! Déclare un setter pour une variable membre
+#define setter(TYPE, NAME) setterBase(TYPE, NAME,)
+//! Déclare un setter emettant un evenement
+#define setterSig(TYPE, NAME, SIG) setterBase(TYPE, NAME, emit SIG(NAME());)
 
-#define getter(TYPE, NAME) TYPE NAME() const {return m_ ## NAME;} //! Déclare un getter pour une variable membre
+//! Déclare un getter pour une variable membre
+#define getter(TYPE, NAME) TYPE NAME() const {return m_ ## NAME;}
 
 /*! \def prop
  * \brief Declare une propriété
+ *
  * Déclare une variable membre avec le type TYPE et le nom NAME, ainsi qu'un getter et un setter du même nom.
  * Cette propriété est déclarée dans le système de meta-objet de Qt.
  */
 
 /*! \def propSig
  * \brief Declare une propriété emettant un signal quand modifiée
+ *
  * Fonctionne de manière similaire a prop, mais la classe emettra le signal SIG lorsque le getter est appelé.
  * Le signal prend la nouvelle valeur en paramètre.
  */
@@ -42,7 +48,28 @@
 #define propBase(TYPE, NAME) declare(TYPE, NAME) public: getter(TYPE, NAME)
 #define prop(TYPE, NAME) Q_PROPERTY( TYPE NAME WRITE NAME READ NAME ); propBase(TYPE, NAME); setter(TYPE, NAME)
 #define propSig(TYPE, NAME, SIG) Q_PROPERTY( TYPE NAME WRITE NAME READ NAME NOTIFY SIG) propBase(TYPE, NAME); setterSig(TYPE, NAME, SIG); Q_SIGNALS: void SIG(TYPE); public:
-#define propRO(TYPE, NAME) private: Q_PROPERTY(TYPE NAME READ NAME); propBase(TYPE, NAME) //! Déclare une variable membre et un getter, mais pas de setter (RO: Read-only)
+//! Déclare une variable membre et un getter, mais pas de setter (RO: Read-only)
+#define propRO(TYPE, NAME) private: Q_PROPERTY(TYPE NAME READ NAME); propBase(TYPE, NAME)
+
+/*! \def DEFINE_GEOMETRY_CLASS
+ * \brief Définit une nouvelle classe de Geometry
+ *
+ * Cette macro crée une classe héritant de Geometry.
+ * La nouvelle classe est créée avec un constructeur appelant automatiquement initProgram pour la classe.
+ * Elle contient aussi 3 vectors contenant les vertices, les couleurs et les indices de l'objet.
+ */
+
+#define DEFINE_GEOMETRY_CLASS(NAME) class NAME : public Geometry \
+{ \
+    Q_OBJECT \
+public: \
+    NAME(QObject* parent = nullptr) : Geometry(parent) { \
+        initProgram<NAME>(parent); \
+    } \
+    static std::vector<GLfloat> s_vertices; \
+    static std::vector<GLfloat> s_colors; \
+    static std::vector<quint32> s_indices; \
+};
 
 #endif // GLOBALS
 
