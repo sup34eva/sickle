@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>596</width>
-    <height>564</height>
+    <width>767</width>
+    <height>648</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,26 +16,49 @@
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>true</bool>
   </property>
-  <widget class="Viewport" name="centralwidget">
+  <widget class="QWidget" name="centralwidget">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="focusPolicy">
     <enum>Qt::StrongFocus</enum>
    </property>
+   <property name="acceptDrops">
+    <bool>true</bool>
+   </property>
    <property name="autoFillBackground">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">background: rgb(0, 0, 0);</string>
+    <string notr="true"/>
    </property>
+   <layout class="QGridLayout" name="centralLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <item row="0" column="0">
+     <widget class="Viewport" name="viewport"/>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>596</width>
+     <width>767</width>
      <height>21</height>
     </rect>
    </property>
@@ -50,7 +73,6 @@
    </widget>
    <addaction name="menu_File"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>Toolbar</string>
@@ -89,7 +111,19 @@
       <number>0</number>
      </property>
      <item row="0" column="0">
-      <widget class="QListWidget" name="listWidget"/>
+      <widget class="QTreeWidget" name="actorList">
+       <property name="uniformRowHeights">
+        <bool>true</bool>
+       </property>
+       <attribute name="headerVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string notr="true">1</string>
+        </property>
+       </column>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -148,6 +182,45 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QStatusBar" name="statusBar">
+   <widget class="QWidget" name="sbContainer" native="true">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>750</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="sbLayout">
+     <property name="leftMargin">
+      <number>9</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>9</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="camPos">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>1</horstretch>
+         <verstretch>1</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>X: 0, Y:0, Z: 0</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="newGeo">
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -192,9 +265,8 @@
  <customwidgets>
   <customwidget>
    <class>Viewport</class>
-   <extends>QWidget</extends>
+   <extends>QOpenGLWidget</extends>
    <header location="global">viewport.hpp</header>
-   <container>1</container>
    <slots>
     <signal>childAdded(QObject*)</signal>
     <slot>addChild()</slot>
@@ -209,7 +281,7 @@
   <connection>
    <sender>newGeo</sender>
    <signal>triggered()</signal>
-   <receiver>centralwidget</receiver>
+   <receiver>viewport</receiver>
    <slot>addChild()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -217,15 +289,15 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>223</x>
-     <y>292</y>
+     <x>254</x>
+     <y>341</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>action_New</sender>
    <signal>triggered()</signal>
-   <receiver>centralwidget</receiver>
+   <receiver>viewport</receiver>
    <slot>clearLevel()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -233,8 +305,8 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>169</x>
-     <y>299</y>
+     <x>254</x>
+     <y>341</y>
     </hint>
    </hints>
   </connection>

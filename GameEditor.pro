@@ -59,7 +59,10 @@ DISTFILES += \
     scripts/install-mingw32.sh \
     Doxyfile \
     scripts/build-docs.sh \
-    .clang-format
+    .clang-format \
+    .gitattributes \
+    .gitignore \
+    .gitmodules
 
 RESOURCES += res/resources.qrc
 

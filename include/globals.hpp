@@ -61,7 +61,7 @@ private:                    \
 	Q_PROPERTY(TYPE NAME WRITE NAME READ NAME NOTIFY SIG) propBase(TYPE, NAME); \
 	setterSig(TYPE, NAME, SIG);                                                 \
 	Q_SIGNALS:                                                                  \
-	void SIG(TYPE);                                                             \
+	void SIG(const TYPE&);                                                             \
 																				\
 public:
 //! Déclare une variable membre et un getter, mais pas de setter (RO: Read-only)

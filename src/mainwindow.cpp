@@ -8,21 +8,32 @@
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
+	connect(ui->viewport->camera(), &Camera::moved, [=] (const QVector3D& position) {
+		ui->camPos->setText(QString("X: %1, Y: %2, Z: %3").arg(position.x()).arg(position.y()).arg(position.z()));
+	});
 }
 
 MainWindow::~MainWindow() {
 	delete ui;
 }
 
-void MainWindow::on_centralwidget_childAdded(QObject* obj) {
-	auto item = new QListWidgetItem(obj->objectName(), ui->listWidget);
+void MainWindow::on_viewport_childAdded(QObject* obj) {
+	auto item = new QTreeWidgetItem(ui->actorList);
+	item->setText(0, obj->objectName());
+
 	auto ptr = QVariant::fromValue(obj);
-	item->setData(Qt::UserRole, ptr);
-	connect(obj, &QObject::objectNameChanged, [=](QString newName) { item->setText(newName); });
+	item->setData(0, Qt::UserRole, ptr);
+
+	connect(obj, &QObject::objectNameChanged, [=](QString newName) {
+		item->setText(0, newName);
+	});
+
 	connect(obj, &QObject::destroyed, [=]() {
-		ui->listWidget->removeItemWidget(item);
+		ui->actorList->removeItemWidget(item, 0);
 		delete item;
 	});
+
+	ui->actorList->addTopLevelItem(item);
 }
 
 QQuaternion fromEuler(const QVector3D& euler) {
@@ -62,6 +73,7 @@ QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
 
 			auto container = new QWidget;
 			auto hbox = new QHBoxLayout;
+			hbox->setMargin(0);
 			container->setLayout(hbox);
 
 			auto spinners = new QDoubleSpinBox* [3];
@@ -113,8 +125,9 @@ QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
 	}
 }
 
-void MainWindow::on_listWidget_currentItemChanged(QListWidgetItem* current) {
-	auto ptr = current->data(Qt::UserRole);
+void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem *current)
+{
+	auto ptr = current->data(0, Qt::UserRole);
 	if (ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
 		QObject* obj = qvariant_cast<QObject*>(ptr);
 		if (obj) {
@@ -135,13 +148,13 @@ void MainWindow::on_listWidget_currentItemChanged(QListWidgetItem* current) {
 
 void MainWindow::on_actionOpen_triggered() {
 	auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), tr("World File (*.wld)"));
-	ui->centralwidget->load(fileName);
+	ui->viewport->load(fileName);
 	m_lastFile = fileName;
 }
 
 void MainWindow::on_actionSave_as_triggered() {
 	auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("World File (*.wld)"));
-	ui->centralwidget->save(fileName);
+	ui->viewport->save(fileName);
 	m_lastFile = fileName;
 }
 
@@ -149,13 +162,13 @@ void MainWindow::on_action_Save_triggered() {
 	if (m_lastFile.isEmpty())
 		on_actionSave_as_triggered();
 	else
-		ui->centralwidget->save(m_lastFile);
+		ui->viewport->save(m_lastFile);
 }
 
 void MainWindow::on_actionWireframe_toggled(bool checked) {
 	if (checked) {
-		ui->centralwidget->renderMode(GL_LINES);
+		ui->viewport->renderMode(GL_LINES);
 	} else {
-		ui->centralwidget->renderMode(GL_TRIANGLES);
+		ui->viewport->renderMode(GL_TRIANGLES);
 	}
 }
