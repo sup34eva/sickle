@@ -49,7 +49,14 @@
      <number>0</number>
     </property>
     <item row="0" column="0">
-     <widget class="Viewport" name="viewport"/>
+     <widget class="Viewport" name="viewport">
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
+      </property>
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

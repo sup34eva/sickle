@@ -51,8 +51,8 @@ protected:
 	void mousePressEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
 	void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
 	void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
-	int heightForWidth(int w) { return w; }
-	bool hasHeightForWidth() { return true; }
+	int heightForWidth(int w) const { return w; }
+	bool hasHeightForWidth() const { return true; }
 
 private:
 	QMatrix4x4 m_projection;

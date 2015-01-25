@@ -27,10 +27,6 @@ INCLUDEPATH += include
 CONFIG += c++14 rtti static
 QMAKE_LIBDIR += $$(LIBDIR)
 
-unix|win*-g++ {
-    QMAKE_LFLAGS += -static-libgcc -static-libstdc++
-}
-
 SOURCES += \
     src/main.cpp\
     src/camera.cpp \
@@ -62,7 +58,9 @@ DISTFILES += \
     .clang-format \
     .gitattributes \
     .gitignore \
-    .gitmodules
+    .gitmodules \
+    .coveralls.yml \
+    CodeStyle.xml
 
 RESOURCES += res/resources.qrc
 
@@ -70,32 +68,16 @@ FORMS += res/mainwindow.ui
 
 TRANSLATIONS = res/editor_fr.ts
 
-#DOXYFILE = Doxyfile
-#COVERALLS = .coveralls.yml
+unix {
+	QMAKE_LFLAGS += -static-libgcc -static-libstdc++
+	#QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
 
-#linter.name = linter
-#linter.input = SOURCES
-#linter.CONFIG += combine no_link no_clean
-#linter.commands = $$PWD/cpplint.py --verbose=7 ${QMAKE_FILE_IN} >> ${QMAKE_FILE_OUT}
-#linter.output = lint.log
+	gcov.name = gcov
+	gcov.input = SOURCES
+	gcov.CONFIG += no_link no_clean
+	gcov.commands = gcov ${QMAKE_FILE_IN}.gcno
+	gcov.output = coverage
 
-#doxygen.name = doxygen
-#doxygen.input = DOXYFILE
-#doxygen.CONFIG += no_link no_clean
-#doxygen.commands = ( cat ${QMAKE_FILE_IN} ; echo "INPUT = $$PWD/src \ $$PWD/include" ) | doxygen - >> ${QMAKE_FILE_OUT}
-#doxygen.output = doxygen.log
-
-#format.name = format
-#format.input = SOURCES HEADERS
-#format.CONFIG += combine no_link no_clean
-#format.commands = clang-format -style=file ${QMAKE_FILE_IN} >> ${QMAKE_FILE_OUT}
-#format.output = format.log
-
-#coverage.name = coverage
-#coverage.input = COVERALLS
-#coverage.CONFIG += no_link no_clean
-#coverage.commands = coveralls -n -y ${QMAKE_FILE_IN} -r ${OBJECTS_DIR} -b $$PWD --dump ${QMAKE_FILE_OUT}
-#coverage.output = coverage.json
-
-#QMAKE_EXTRA_COMPILERS += linter doxygen coverage format
-#POST_TARGETDEPS += doxygen.log lint.log coverage.json format.log
+	QMAKE_EXTRA_COMPILERS += gcov
+	#POST_TARGETDEPS += coverage
+}

@@ -1,4 +1,7 @@
 language: cpp
+env:
+  global:
+    - secure: "sI8EY9vmX7JcimIBpfe1H7yQanNr0Zp8Y2Tv7Io7otVor48emWUhTkFB0hv/U8K+izCgviJX9w9D1FKiQVr2wGOdQRXV/YALjF+Sxc8ECi04THgopkxffTM4Nzvq1xVQJyqbfLjVJN1i4wzS+tKZaTODt/wtfN8a4wlfH7iVl5c="
 cache:
   apt: true
   directories:
@@ -6,13 +9,17 @@ cache:
 before_install:
   - sudo add-apt-repository --yes ppa:beineri/opt-qt54
   - sudo apt-get update -qq
-  - sudo pip install PyYAML cpp-coveralls
+  - sudo pip install PyYAML cpp-coveralls cpplint
 matrix:
   include:
     - compiler: clang
       install:
         - sudo apt-get install qt54base qt54tools qt54declarative doxygen graphviz
-      before_script: /opt/qt54/bin/qmake GameEditor.pro
+        - chmod ugo+x scripts/build-docs.sh
+      before_script: /opt/qt54/bin/qmake -unix GameEditor.pro
+      after_success:
+        - ./scripts/build-docs.sh
+        - coveralls
     - compiler: i686-w64-mingw32-gcc
       install:
         - chmod ugo+x scripts/install-mingw32.sh
@@ -24,7 +31,7 @@ script:
 deploy:
   provider: releases
   api-key:
-    secure: "X2ADvQ6f3AaBUi6MYuOkkGmwzGJHqIBxTVcJ0eYDIwOsUA+zRERyVR7nG6mbRCNSdfiC4kt0XA0II8xbDSrKZ1tyeooQFwQWKcgz+KnF8fogOk2l55jUEsOabLiY67rZPbqhozc0Gj2nB8EARuooWA88oB3QmhHI3JzB7pe9f5I="
+    secure: "Tq7NV2xn6bYSc/y9seTNlNuC/ceuA6SbWZ+EWLSF1jFB23nH+FnouZvZdWWZTKtH1kjtIOpVj+5TwLDxzFOL2jYGGhFifuztxD8c4n7K2br3NBF4zSXRWFvGXKvEoi0cJLwuWO22WCs+ESrLKWNzQVxRTUABbfRYd1089muqaf0="
   file: "release/GameEditor.exe"
   skip_cleanup: true
   on:

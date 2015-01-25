@@ -11,4 +11,5 @@
     <qresource prefix="/lang">
         <file>editor_fr.qm</file>
     </qresource>
+    <qresource prefix="/styles"/>
 </RCC>

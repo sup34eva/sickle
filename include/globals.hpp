@@ -70,22 +70,4 @@ private:                             \
 	Q_PROPERTY(TYPE NAME READ NAME); \
 	propBase(TYPE, NAME)
 
-/*! \def DEFINE_GEOMETRY_CLASS
- * \brief Définit une nouvelle classe de Geometry
- *
- * Cette macro crée une classe héritant de Geometry.
- * La nouvelle classe est créée avec un constructeur appelant automatiquement initProgram pour la classe.
- * Elle contient aussi 3 vectors contenant les vertices, les couleurs et les indices de l'objet.
- */
-
-#define DEFINE_GEOMETRY_CLASS(NAME)                                                                         \
-	class NAME : public Geometry {                                                                          \
-		Q_OBJECT                                                                                            \
-	public:                                                                                                 \
-		NAME(QObject* parent = nullptr) : Geometry(parent) { initProgram<NAME>(parent); }                   \
-		static std::vector<GLfloat> s_vertices;                                                             \
-		static std::vector<GLfloat> s_colors;                                                               \
-		static std::vector<quint32> s_indices;                                                              \
-	};
-
 #endif  // GLOBALS
