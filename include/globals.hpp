@@ -70,4 +70,22 @@ private:                             \
 	Q_PROPERTY(TYPE NAME READ NAME); \
 	propBase(TYPE, NAME)
 
+/*! \def noinline
+ * \brief Empeche une fonction d'être inlinée
+ *
+ * Cette macro force une fonction a ne pas être compilée en mode inline lorsque le compileur le permet.
+ * Inliner des fonctions de petites taille peut constituer une optimisation, mais il est parfois préférable d'éviter
+ * d'inliner des fonctions de grande taille comme Geometry::initProgram pour diminuer la taille du programme.
+ */
+
+#ifdef _MSC_VER
+	#define noinline __declspec(noinline)
+#else
+	#ifdef __GNUG__
+		#define noinline __attribute__((noinline))
+	#else
+		#define noinline
+	#endif
+#endif
+
 #endif  // GLOBALS

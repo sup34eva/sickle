@@ -25,7 +25,7 @@ void Geometry::draw(const DrawInfo& info) {
 	s_program->setUniformValue("MVP", MVP);
 
 	auto func = QOpenGLContext::currentContext()->functions();
-	func->glDrawElements(info.mode, 12 * 3, GL_UNSIGNED_INT, 0);
+	func->glDrawElements(info.mode, s_indexBuffer->size() / sizeof(GLfloat), GL_UNSIGNED_INT, 0);
 
 	s_program->release();
 }

@@ -35,7 +35,7 @@ protected:
 	QMatrix4x4 transform();
 
 	template <typename T>
-	static QOpenGLBuffer* initBuffer(QOpenGLBuffer::Type type, std::vector<T>& data) {
+	noinline static QOpenGLBuffer* initBuffer(QOpenGLBuffer::Type type, std::vector<T>& data) {
 		auto buffer = new QOpenGLBuffer(type);
 		buffer->create();
 		buffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -55,7 +55,7 @@ protected:
 	 * Elle DOIT se trouver dans le header pour permettre au template d'être parsé corectement.
 	 */
 	template <typename Child>
-	static void initProgram(QObject* parent) {
+	noinline static void initProgram(QObject* parent) {
 		if (Child::s_instances++ == 0) {
 			Child::s_program = new QOpenGLShaderProgram(parent);
 

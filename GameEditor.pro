@@ -60,7 +60,8 @@ DISTFILES += \
     .gitignore \
     .gitmodules \
     .coveralls.yml \
-    CodeStyle.xml
+    CodeStyle.xml \
+    res/style.qss
 
 RESOURCES += res/resources.qrc
 
