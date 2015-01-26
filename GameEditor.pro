@@ -70,8 +70,8 @@ FORMS += res/mainwindow.ui
 TRANSLATIONS = res/editor_fr.ts
 
 unix {
-	QMAKE_LFLAGS += -static-libgcc -static-libstdc++
-	#QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
+	QMAKE_LFLAGS += -static-libgcc -static-libstdc++ --coverage
+	QMAKE_CXXFLAGS += --coverage
 
 	gcov.name = gcov
 	gcov.input = SOURCES
@@ -80,5 +80,5 @@ unix {
 	gcov.output = coverage
 
 	QMAKE_EXTRA_COMPILERS += gcov
-	#POST_TARGETDEPS += coverage
+	POST_TARGETDEPS += coverage
 }
