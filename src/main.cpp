@@ -2,9 +2,14 @@
 #include <QApplication>
 #include <QSurfaceFormat>
 #include <QTranslator>
+#include <QFile>
 
 int main(int argc, char *argv[]) {
 	QApplication app(argc, argv);
+
+	QFile style(":/styles/style.qss");
+	style.open(QFile::ReadOnly);
+	app.setStyleSheet(style.readAll());
 
 	QTranslator translator;
 	QString locale = QLocale::system().name();

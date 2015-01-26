@@ -11,5 +11,7 @@
     <qresource prefix="/lang">
         <file>editor_fr.qm</file>
     </qresource>
-    <qresource prefix="/styles"/>
+    <qresource prefix="/styles">
+        <file>style.qss</file>
+    </qresource>
 </RCC>

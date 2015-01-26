@@ -806,7 +806,7 @@ QDockWidget::close-button:pressed, QDockWidget::float-button:pressed {
     background: rgba(255, 255, 255, 10);
 }
 
-QTreeView, QListView
+QTreeView, QListView, Viewport
 {
     border: 1px solid #78879b;
     background-color: #201F1F;

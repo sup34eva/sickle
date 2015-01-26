@@ -1,4 +1,5 @@
 #include <viewport.hpp>
+#include <QStyle>
 
 Viewport::Viewport(QWidget* parent)
 	: QOpenGLWidget(parent),
@@ -23,9 +24,13 @@ QSize Viewport::sizeHint() const {
 
 void Viewport::initializeGL() {
 	initializeOpenGLFunctions();
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
+
+	auto bg = palette().color(QPalette::Background);
+	glClearColor(bg.red() / 255.0f, bg.green() / 255.0f, bg.blue() / 255.0f, bg.alpha() / 255.0f);
 }
 
 void Viewport::paintGL() {
