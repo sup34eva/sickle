@@ -3,6 +3,10 @@
 
 #include <QMainWindow>
 #include <QTreeWidgetItem>
+#include <functional>
+
+typedef std::function<QVariant(void)> VarGetter;
+typedef std::function<void(const QVariant&)> VarSetter;
 
 namespace Ui {
 	class MainWindow;
@@ -29,7 +33,7 @@ private slots:
 	void on_viewport_childAdded(QObject *obj);
 
 private:
-	QWidget *widgetForVariant(QObject *obj, const char *name);
+	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);
 	QString m_lastFile;
 	Ui::MainWindow *ui;
 };

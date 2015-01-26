@@ -2,6 +2,10 @@
 
 Cube::Cube(QObject* parent) : Geometry(parent) {
 	initProgram<Cube>(parent);
+	colors({
+		QColor(1, 0, 0),
+		QColor(1, 1, 0)
+	});
 }
 
 std::vector<GLfloat> Cube::s_vertices = {

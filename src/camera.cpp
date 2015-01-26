@@ -1,7 +1,6 @@
 #include <camera.hpp>
 
-Camera::Camera(QObject* parent) {
-	Q_UNUSED(parent)
+Camera::Camera(QObject* parent) : QObject(parent) {
 	m_hAngle = 3.14f;
 	m_hBias = 0.0f;
 	m_vAngle = 0.0f;

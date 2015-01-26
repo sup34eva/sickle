@@ -5,6 +5,9 @@
 #include <QSpinBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QColorDialog>
+#include <QPushButton>
+#include <QList>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
@@ -63,8 +66,8 @@ QQuaternion fromEuler(const QVector3D& euler) {
 	return QQuaternion(angle, x, y, z);
 }
 
-QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
-	auto prop = obj->property(name);
+QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set) {
+	auto prop = get();
 	switch (prop.type()) {
 		case QMetaType::QVector3D: {
 			void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
@@ -73,7 +76,7 @@ QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
 
 			auto container = new QWidget;
 			auto hbox = new QHBoxLayout;
-			hbox->setMargin(0);
+			hbox->setMargin(1);
 			container->setLayout(hbox);
 
 			auto spinners = new QDoubleSpinBox* [3];
@@ -104,7 +107,7 @@ QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
 							vector->setZ(value);
 							break;
 					}
-					obj->setProperty(name, *vector);
+					set(*vector);
 				});
 			}
 
@@ -113,16 +116,57 @@ QWidget* MainWindow::widgetForVariant(QObject* obj, const char* name) {
 		case QMetaType::QString: {
 			auto textBox = new QLineEdit;
 			textBox->setText(prop.toString());
-			connect(textBox, &QLineEdit::textEdited, [=](const QString& text) { obj->setProperty(name, text); });
+			connect(textBox, &QLineEdit::textEdited, set);
 			return textBox;
 		}
-		/*case QMetaType::QQuaternion: {
+		case QMetaType::QColor: {
+			auto colBtn = new QPushButton;
+
+			/*auto value = qvariant_cast<QColor>(prop);
+			auto col = const_cast<QColor*>(&value);
+			colBtn->setText(QString(col->value()));*/
+
+			connect(colBtn, &QPushButton::clicked, [=] () {
+				auto value = qvariant_cast<QColor>(get());
+				auto col = QColorDialog::getColor(value, nullptr, tr("Face color"));
+				set(col);
+				//colBtn->setText(QString("rgb(%1, %2, %3)").arg(col.red()).arg(col.green()).arg(col.blue()));
+				//colBtn->palette().setColor(QPalette::Background, col);
+				colBtn->setStyleSheet(QString("background-color: %1").arg(col.name()));
+			});
+
+			return colBtn;
+		}
+		case QMetaType::QVariantList: {
+			auto value = prop.toList();
+			auto list = new QVariantList(value);
+
+			for (int i = 0; i < list->size(); i++) {
+				auto item = new QTreeWidgetItem;
+				item->setText(0, QString("Item %1").arg(i));
+				line->addChild(item);
+
+				auto widget = widgetForVariant(item, [=] () {
+					return list->at(i);
+				}, [=] (const QVariant& val) {
+					list->operator[](i) = val;
+				});
+
+				line->treeWidget()->setItemWidget(item, 1, widget);
+			}
+
+			break;
+		}
+		case QMetaType::QQuaternion: {
 			//TODO
-		}*/
+			break;
+		}
 		default:
 			qDebug() << prop.type();
 			return new QLabel(prop.toString());
 	}
+
+	return nullptr;
 }
 
 void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem *current)
@@ -135,12 +179,16 @@ void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem *current)
 			auto metaObject = obj->metaObject();
 			auto count = metaObject->propertyCount();
 			info->clear();
-			info->setColumnCount(2);
-			info->setRowCount(count);
-			for (int i = 0; i < count; ++i) {
+			for (int i = 0; i < count; i++) {
 				auto prop = metaObject->property(i).name();
-				info->setItem(i, 0, new QTableWidgetItem(prop));
-				info->setCellWidget(i, 1, widgetForVariant(obj, prop));
+				auto line = new QTreeWidgetItem;
+				line->setText(0, prop);
+				info->addTopLevelItem(line);
+				info->setItemWidget(line, 1, widgetForVariant(line, [=] () {
+					return obj->property(prop);
+				}, [=] (const QVariant& val) {
+					obj->setProperty(prop, val);
+				}));
 			}
 		}
 	}

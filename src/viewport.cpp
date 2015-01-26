@@ -6,7 +6,7 @@ Viewport::Viewport(QWidget* parent)
 	  m_renderMode(GL_TRIANGLES)  // GL_LINES
 {
 	resizeGL(width(), height());
-	m_camera = new Camera();
+	m_camera = new Camera(this);
 	setFocusPolicy(Qt::StrongFocus);
 }
 
@@ -30,7 +30,7 @@ void Viewport::initializeGL() {
 	glEnable(GL_CULL_FACE);
 
 	auto bg = palette().color(QPalette::Background);
-	glClearColor(bg.red() / 255.0f, bg.green() / 255.0f, bg.blue() / 255.0f, bg.alpha() / 255.0f);
+	glClearColor(bg.redF(), bg.greenF(), bg.blueF(), bg.alphaF());
 }
 
 void Viewport::paintGL() {
