@@ -11,10 +11,8 @@ void TestCase::initTestCase() {
 void TestCase::addCube() {
 	auto before = ui->viewport->findChildren<Geometry>().length();
 	ui->newGeo->trigger();
-	//auto cube = view->addChild<Cube>();
 	auto after = ui->viewport->findChildren<Geometry>().length();
 	QCOMPARE(after, before + 1);
-	//Q_CHECK_PTR(cube);
 }
 
 void TestCase::renderBenchmark() {
@@ -61,7 +59,6 @@ void TestCase::scaleObject() {
 
 void TestCase::cleanup() {
 	ui->viewport->clearLevel();
-	//win.hide();
 }
 
 QTEST_MAIN(TestCase)
