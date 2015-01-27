@@ -150,6 +150,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 					return list->at(i);
 				}, [=] (const QVariant& val) {
 					list->operator[](i) = val;
+					set(*list);
 				});
 
 				line->treeWidget()->setItemWidget(item, 1, widget);

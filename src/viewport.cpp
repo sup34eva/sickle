@@ -5,9 +5,16 @@ Viewport::Viewport(QWidget* parent)
 	: QOpenGLWidget(parent),
 	  m_renderMode(GL_TRIANGLES)  // GL_LINES
 {
-	resizeGL(width(), height());
 	m_camera = new Camera(this);
 	setFocusPolicy(Qt::StrongFocus);
+
+	QSurfaceFormat format;
+	format.setProfile(QSurfaceFormat::CoreProfile);
+	format.setDepthBufferSize(16);
+	format.setStencilBufferSize(8);
+	format.setSamples(16);
+	format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+	setFormat(format);
 }
 
 Viewport::~Viewport() {
@@ -28,6 +35,7 @@ void Viewport::initializeGL() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_MULTISAMPLE);
 
 	auto bg = palette().color(QPalette::Background);
 	glClearColor(bg.redF(), bg.greenF(), bg.blueF(), bg.alphaF());

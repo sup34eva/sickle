@@ -24,14 +24,19 @@ public:
 	QSize sizeHint() const Q_DECL_OVERRIDE;
 	propRO(Camera*, camera);
 	prop(GLenum, renderMode);
+	void updateNow() {
+		makeCurrent();
+		paintGL();
+		doneCurrent();
+	}
 
 public slots:
 	Geometry* addChild() {
 		makeCurrent();
 		auto child = new Cube(this);
 		doneCurrent();
-		child->setObjectName("testObj");
-		child->setParent(this);
+		//auto name = QString(tr("New Object %1")).arg(findChildren<Geometry>().length());
+		child->setObjectName(tr("New Object"));
 		emit childAdded(child);
 		return child;
 	}
