@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>767</width>
-    <height>648</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -65,7 +65,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>767</width>
+     <width>800</width>
      <height>20</height>
     </rect>
    </property>
@@ -119,6 +119,12 @@
      </property>
      <item row="0" column="0">
       <widget class="QTreeWidget" name="actorList">
+       <property name="minimumSize">
+        <size>
+         <width>250</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="uniformRowHeights">
         <bool>true</bool>
        </property>
@@ -161,6 +167,12 @@
      </property>
      <item row="0" column="0">
       <widget class="QTreeWidget" name="infoWidget">
+       <property name="minimumSize">
+        <size>
+         <width>400</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="columnCount">
         <number>2</number>
        </property>
