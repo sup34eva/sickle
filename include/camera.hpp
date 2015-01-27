@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #ifndef CAMERA_H
 #define CAMERA_H
 
@@ -19,8 +21,8 @@
 class Camera : public QObject {
 	Q_OBJECT
 public:
-	Camera(QObject* parent = nullptr);
-	Camera(Camera* copy);
+	explicit Camera(QObject* parent = nullptr);
+	explicit Camera(Camera* copy);
 	~Camera();
 	void resetBias();
 	QVector3D move(QVector3D val);

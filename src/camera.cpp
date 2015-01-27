@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #include <camera.hpp>
 
 Camera::Camera(QObject* parent) : QObject(parent) {

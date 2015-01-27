@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #ifndef TESTMAIN_H
 #define TESTMAIN_H
 

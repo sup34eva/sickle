@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #ifndef GLOBALS
 #define GLOBALS
 

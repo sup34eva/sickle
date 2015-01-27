@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #include <group.hpp>
 
 Group::Group(QObject* parent) : Geometry(parent) {

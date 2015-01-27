@@ -1,10 +1,9 @@
+// Copyright 2015 PsychoLama
+
 #include <viewport.hpp>
 #include <QStyle>
 
-Viewport::Viewport(QWidget* parent)
-	: QOpenGLWidget(parent),
-	  m_renderMode(GL_TRIANGLES)  // GL_LINES
-{
+Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_renderMode(GL_TRIANGLES) {
 	m_camera = new Camera(this);
 	setFocusPolicy(Qt::StrongFocus);
 
@@ -19,14 +18,6 @@ Viewport::Viewport(QWidget* parent)
 
 Viewport::~Viewport() {
 	delete m_camera;
-}
-
-QSize Viewport::minimumSizeHint() const {
-	return QSize(500, 500);
-}
-
-QSize Viewport::sizeHint() const {
-	return QSize(500, 500);
 }
 
 void Viewport::initializeGL() {
@@ -56,7 +47,7 @@ void Viewport::paintGL() {
 void Viewport::resizeGL(int w, int h) {
 	if (QOpenGLFunctions::isInitialized(QOpenGLFunctions::d_ptr)) glViewport(0, 0, w, h);
 	m_projection.setToIdentity();
-	m_projection.perspective(45.0f, (float)w / (float)h, 0.1f, 1000.0f);
+	m_projection.perspective(45.0f, static_cast<float>(w) / static_cast<float>(h), 0.1f, 1000.0f);
 }
 
 void Viewport::wheelEvent(QWheelEvent* event) {
@@ -121,8 +112,8 @@ void Viewport::mouseReleaseEvent(QMouseEvent* event) {
 
 void Viewport::mouseMoveEvent(QMouseEvent* event) {
 	event->accept();
-	auto deltaX = ((size().width() / 2) - (float)(event->x())) / size().width();
-	auto deltaY = ((size().height() / 2) - (float)(event->y())) / size().height();
+	auto deltaX = ((size().width() / 2) - static_cast<float>(event->x())) / size().width();
+	auto deltaY = ((size().height() / 2) - static_cast<float>(event->y())) / size().height();
 	QCursor::setPos(mapToGlobal(QPoint(size().width() / 2, size().height() / 2)));
 	m_camera->hAngle(m_camera->hAngle() + (deltaX * 3.14f));
 	m_camera->vAngle(m_camera->vAngle() + (deltaY * 3.14f));

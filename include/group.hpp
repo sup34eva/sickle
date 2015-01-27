@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #ifndef GROUP_H
 #define GROUP_H
 
@@ -11,7 +13,7 @@
  */
 class Group : public Geometry {
 public:
-	Group(QObject* parent = nullptr);
+	explicit Group(QObject* parent = nullptr);
 	void draw(const DrawInfo& info);
 };
 

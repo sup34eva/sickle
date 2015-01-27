@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
@@ -8,6 +10,7 @@
 #include <QOpenGLBuffer>
 #include <globals.hpp>
 #include <memory>
+#include <vector>
 
 typedef struct DrawInfo {
 	QMatrix4x4 View;
@@ -23,8 +26,9 @@ typedef struct DrawInfo {
  */
 class Geometry : public QObject {
 	Q_OBJECT
+
 public:
-	Geometry(QObject* parent = nullptr);
+	explicit Geometry(QObject* parent = nullptr);
 	void draw(const DrawInfo& info);
 
 	propSig(QVector3D, position, moved);
@@ -35,7 +39,7 @@ protected:
 	QMatrix4x4 transform();
 
 	template <typename T>
-	noinline static QOpenGLBuffer* initBuffer(QOpenGLBuffer::Type type, std::vector<T>& data) {
+	noinline static QOpenGLBuffer* initBuffer(QOpenGLBuffer::Type type, const std::vector<T>& data) {
 		auto buffer = new QOpenGLBuffer(type);
 		buffer->create();
 		buffer->setUsagePattern(QOpenGLBuffer::StaticDraw);

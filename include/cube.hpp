@@ -1,14 +1,17 @@
+// Copyright 2015 PsychoLama
+
 #ifndef CUBE_H
 #define CUBE_H
 
 #include <geometry.hpp>
 #include <globals.hpp>
 #include <QColor>
+#include <vector>
 
 class Cube : public Geometry {
 	Q_OBJECT
 public:
-	Cube(QObject* parent = nullptr);
+	explicit Cube(QObject* parent = nullptr);
 	prop(QVariantList, colors);
 	static std::vector<GLfloat> s_vertices;
 	static std::vector<GLfloat> s_colors;

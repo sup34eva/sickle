@@ -15,6 +15,18 @@ HEADERS += \
 SOURCES += \
     test/testcase.cpp
 
+linter.name = linter
+linter.input = SOURCES
+linter.CONFIG += no_link no_clean combine
+linter.commands = cpplint --root=$$PWD $$PWD/include/*.hpp $$PWD/src/*.cpp
+linter.output = lint.log
+QMAKE_EXTRA_COMPILERS += linter
+
+lint.target = lint
+lint.CONFIG = recursive
+lint.recurse_target = lint.log
+QMAKE_EXTRA_TARGETS += lint
+
 unix {
 	QMAKE_LFLAGS += -static-libgcc -static-libstdc++ --coverage
 	QMAKE_CXXFLAGS += --coverage

@@ -1,5 +1,6 @@
+// Copyright 2015 PsychoLama
+
 #include <mainwindow.hpp>
-#include "ui_mainwindow.h"
 #include <QVariant>
 #include <QFileDialog>
 #include <QSpinBox>
@@ -8,6 +9,7 @@
 #include <QColorDialog>
 #include <QPushButton>
 #include <QList>
+#include "./ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
@@ -130,8 +132,8 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 				auto value = qvariant_cast<QColor>(get());
 				auto col = QColorDialog::getColor(value, nullptr, tr("Face color"));
 				set(col);
-				//colBtn->setText(QString("rgb(%1, %2, %3)").arg(col.red()).arg(col.green()).arg(col.blue()));
-				//colBtn->palette().setColor(QPalette::Background, col);
+				// colBtn->setText(QString("rgb(%1, %2, %3)").arg(col.red()).arg(col.green()).arg(col.blue()));
+				// colBtn->palette().setColor(QPalette::Background, col);
 				colBtn->setStyleSheet(QString("background-color: %1").arg(col.name()));
 			});
 
@@ -159,7 +161,6 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			break;
 		}
 		case QMetaType::QQuaternion: {
-			//TODO
 			break;
 		}
 		default:
@@ -170,8 +171,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 	return nullptr;
 }
 
-void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem *current)
-{
+void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem *current) {
 	auto ptr = current->data(0, Qt::UserRole);
 	if (ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
 		QObject* obj = qvariant_cast<QObject*>(ptr);
