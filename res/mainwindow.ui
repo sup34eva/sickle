@@ -278,7 +278,6 @@
    <header location="global">viewport.hpp</header>
    <slots>
     <signal>childAdded(QObject*)</signal>
-    <slot>addChild()</slot>
     <slot>clearLevel()</slot>
    </slots>
   </customwidget>
@@ -287,22 +286,6 @@
   <include location="resources.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>newGeo</sender>
-   <signal>triggered()</signal>
-   <receiver>viewport</receiver>
-   <slot>addChild()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>254</x>
-     <y>341</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>action_New</sender>
    <signal>triggered()</signal>

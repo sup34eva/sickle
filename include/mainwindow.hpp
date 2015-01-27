@@ -25,6 +25,7 @@ class MainWindow : public QMainWindow {
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
+	Ui::MainWindow* getUI() { return ui; }
 
 private slots:
 	void on_actorList_currentItemChanged(QTreeWidgetItem *current);
@@ -34,10 +35,12 @@ private slots:
 	void on_actionWireframe_toggled(bool arg1);
 	void on_viewport_childAdded(QObject *obj);
 
+	void on_newGeo_triggered();
+
 private:
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);
 	QString m_lastFile;
-	Ui::MainWindow *ui;
+	Ui::MainWindow* ui;
 };
 
 #endif  // TESTMAIN_H

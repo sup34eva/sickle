@@ -165,7 +165,7 @@ void Viewport::load(QString name) {
 	in >> size;
 	qDebug() << size;
 	for (quint32 i = 0; i < size; i++) {
-		Geometry* obj = addChild();
+		auto obj = addChild<Geometry>();
 		in >> *obj;
 	}
 }

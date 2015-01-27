@@ -23,7 +23,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::on_viewport_childAdded(QObject* obj) {
-	auto item = new QTreeWidgetItem(ui->actorList);
+	auto item = new QTreeWidgetItem;
 	item->setText(0, obj->objectName());
 
 	auto ptr = QVariant::fromValue(obj);
@@ -34,8 +34,8 @@ void MainWindow::on_viewport_childAdded(QObject* obj) {
 	});
 
 	connect(obj, &QObject::destroyed, [=]() {
-		ui->actorList->removeItemWidget(item, 0);
-		delete item;
+		auto index = ui->actorList->indexOfTopLevelItem(item);
+		delete ui->actorList->takeTopLevelItem(index);
 	});
 
 	ui->actorList->addTopLevelItem(item);
@@ -171,25 +171,27 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 	return nullptr;
 }
 
-void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem *current) {
-	auto ptr = current->data(0, Qt::UserRole);
-	if (ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
-		QObject* obj = qvariant_cast<QObject*>(ptr);
-		if (obj) {
-			auto info = ui->infoWidget;
-			auto metaObject = obj->metaObject();
-			auto count = metaObject->propertyCount();
-			info->clear();
-			for (int i = 0; i < count; i++) {
-				auto prop = metaObject->property(i).name();
-				auto line = new QTreeWidgetItem;
-				line->setText(0, prop);
-				info->addTopLevelItem(line);
-				info->setItemWidget(line, 1, widgetForVariant(line, [=] () {
-					return obj->property(prop);
-				}, [=] (const QVariant& val) {
-					obj->setProperty(prop, val);
-				}));
+void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
+	qDebug() << "Selected" << current;
+	ui->infoWidget->clear();
+	if(current != nullptr) {
+		auto ptr = current->data(0, Qt::UserRole);
+		if ((!ptr.isNull()) && ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
+			QObject* obj = qvariant_cast<QObject*>(ptr);
+			if (obj != nullptr) {
+				auto metaObject = obj->metaObject();
+				auto count = metaObject->propertyCount();
+				for (int i = 0; i < count; i++) {
+					auto prop = metaObject->property(i).name();
+					auto line = new QTreeWidgetItem;
+					line->setText(0, prop);
+					ui->infoWidget->addTopLevelItem(line);
+					ui->infoWidget->setItemWidget(line, 1, widgetForVariant(line, [=] () {
+						return obj->property(prop);
+					}, [=] (const QVariant& val) {
+						obj->setProperty(prop, val);
+					}));
+				}
 			}
 		}
 	}
@@ -220,4 +222,8 @@ void MainWindow::on_actionWireframe_toggled(bool checked) {
 	} else {
 		ui->viewport->renderMode(GL_TRIANGLES);
 	}
+}
+
+void MainWindow::on_newGeo_triggered() {
+	ui->viewport->addChild<Cube>();
 }
