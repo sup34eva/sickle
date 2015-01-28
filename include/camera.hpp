@@ -8,6 +8,7 @@
 #include <QMatrix4x4>
 #include <globals.hpp>
 #include <QMetaProperty>
+#include <QPropertyAnimation>
 
 /*!
  * \class Camera
@@ -20,6 +21,7 @@
  */
 class Camera : public QObject {
 	Q_OBJECT
+
 public:
 	explicit Camera(QObject* parent = nullptr);
 	explicit Camera(Camera* copy);
@@ -30,6 +32,13 @@ public:
 	QVector3D direction();
 	QVector3D up();
 	QMatrix4x4 view();
+	void velocity(QVector3D v) {
+		QPropertyAnimation *animation = new QPropertyAnimation(this, "position");
+		animation->setDuration(100);
+		animation->setStartValue(position());
+		animation->setEndValue(position() + (v * speed()));
+		animation->start();
+	}
 	propSig(QVector3D, position, moved);
 	prop(float, vAngle);
 	prop(float, vBias);

@@ -2,12 +2,8 @@
 
 #include <camera.hpp>
 
-Camera::Camera(QObject* parent) : QObject(parent) {
-	m_hAngle = 3.14f;
-	m_hBias = 0.0f;
-	m_vAngle = 0.0f;
-	m_vBias = 0.0f;
-	m_speed = 10.0f;
+Camera::Camera(QObject* parent) : QObject(parent), m_vAngle(0.0f), m_vBias(0.0f), m_hAngle(3.14f), m_hBias(0.0f),
+	m_speed(5.0f) {
 	position(QVector3D(0, 0, 0));
 }
 

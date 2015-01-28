@@ -59,22 +59,22 @@ void Viewport::wheelEvent(QWheelEvent* event) {
 void Viewport::keyPressEvent(QKeyEvent* event) {
 	switch (event->key()) {
 		case Qt::Key_Up:
-			m_camera->move(m_camera->direction());
+			m_camera->velocity(m_camera->direction());
 			break;
 		case Qt::Key_Down:
-			m_camera->move(-m_camera->direction());
+			m_camera->velocity(-m_camera->direction());
 			break;
 		case Qt::Key_Right:
-			m_camera->move(m_camera->right());
+			m_camera->velocity(m_camera->right());
 			break;
 		case Qt::Key_Left:
-			m_camera->move(-m_camera->right());
+			m_camera->velocity(-m_camera->right());
 			break;
 		case Qt::Key_PageUp:
-			m_camera->move(m_camera->up());
+			m_camera->velocity(m_camera->up());
 			break;
 		case Qt::Key_PageDown:
-			m_camera->move(-m_camera->up());
+			m_camera->velocity(-m_camera->up());
 			break;
 		case Qt::Key_Z:
 			m_camera->vAngle(m_camera->vAngle() + 0.14f);

@@ -9,7 +9,3 @@ include(Files.pri)
 
 SOURCES += \
     src/main.cpp
-
-unix|win*-g* {
-    QMAKE_LFLAGS += -static-libgcc -static-libstdc++
-}

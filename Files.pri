@@ -50,3 +50,19 @@ RESOURCES += res/resources.qrc
 FORMS += res/mainwindow.ui
 
 TRANSLATIONS = res/editor_fr.ts
+
+linter.name = linter
+linter.input = SOURCES
+linter.CONFIG += no_link no_clean combine
+linter.commands = cpplint --root=$$PWD $$PWD/include/*.hpp $$PWD/src/*.cpp
+linter.output = lint
+QMAKE_EXTRA_COMPILERS += linter
+
+lint.target = lint
+lint.CONFIG = recursive
+lint.recurse_target = lint
+QMAKE_EXTRA_TARGETS += lint
+
+unix|win*-g* {
+    QMAKE_LFLAGS += -static-libgcc -static-libstdc++
+}
