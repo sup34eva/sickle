@@ -43,7 +43,7 @@ DISTFILES += \
     .coveralls.yml \
     CodeStyle.xml \
     Files.pri \
-    $$PWD/cpplint.cfg
+    CPPLINT.cfg
 
 RESOURCES += res/resources.qrc
 
