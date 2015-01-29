@@ -26,7 +26,10 @@ void Viewport::initializeGL() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
+
+#ifdef GL_MULTISAMPLE
 	glEnable(GL_MULTISAMPLE);
+#endif
 
 	auto bg = palette().color(QPalette::Background);
 	glClearColor(bg.redF(), bg.greenF(), bg.blueF(), bg.alphaF());
@@ -135,6 +138,9 @@ void Viewport::save(QString name) {
 	auto childList = findChildren<Geometry*>();
 	out << static_cast<quint32>(childList.size());
 	for (auto obj : childList) {
+		auto info = obj->metaObject()->classInfo(0);
+		qDebug() << "Object of class" << info.name() << info.value();
+		out << QString(info.value());
 		out << *obj;
 	}
 }
@@ -165,7 +171,14 @@ void Viewport::load(QString name) {
 	in >> size;
 	qDebug() << size;
 	for (quint32 i = 0; i < size; i++) {
-		auto obj = addChild<Geometry>();
+		QString id;
+		in >> id;
+		Geometry* obj = nullptr;
+		if(id == "Cube") {
+			obj = addChild<Cube>();
+		} else {
+			qWarning() << "Unknown type" << id;
+		}
 		in >> *obj;
 	}
 }

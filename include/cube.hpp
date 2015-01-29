@@ -10,6 +10,8 @@
 
 class Cube : public Geometry {
 	Q_OBJECT
+	Q_CLASSINFO("Type", "Cube")
+
 public:
 	explicit Cube(QObject* parent = nullptr);
 	prop(QVariantList, colors);

@@ -11,6 +11,8 @@
 #include <QList>
 #include "./ui_mainwindow.h"
 
+#define M_PI 3.14159265358979323846
+
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
 	connect(ui->viewport->camera(), &Camera::moved, [=] (const QVector3D& position) {
@@ -42,30 +44,38 @@ void MainWindow::on_viewport_childAdded(QObject* obj) {
 }
 
 QQuaternion fromEuler(const QVector3D& euler) {
-	double c1 = cos(euler.x() / 2);
-	double s1 = sin(euler.x() / 2);
-	double c2 = cos(euler.y() / 2);
-	double s2 = sin(euler.y() / 2);
-	double c3 = cos(euler.z() / 2);
-	double s3 = sin(euler.z() / 2);
-	double c1c2 = c1 * c2;
-	double s1s2 = s1 * s2;
-	auto w = c1c2 * c3 - s1s2 * s3;
-	auto x = c1c2 * s3 + s1s2 * c3;
-	auto y = s1 * c2 * c3 + c1 * s2 * s3;
-	auto z = c1 * s2 * c3 - s1 * c2 * s3;
-	auto angle = 2 * acos(w);
-	double norm = x * x + y * y + z * z;
-	if (norm < 0.001) {
-		x = 1;
-		y = z = 0;
+	auto value = QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), euler.x());
+	value *= QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), euler.y());
+	value *= QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), euler.z());
+	value.normalize();
+	return value;
+}
+
+QVector3D* toEuler(const QQuaternion& quat) {
+	float heading, attitude, bank;
+	auto q1 = quat.toVector4D();
+	Q_ASSERT(q1.x() == quat.vector().x());
+	Q_ASSERT(q1.y() == quat.vector().y());
+	Q_ASSERT(q1.z() == quat.vector().z());
+	Q_ASSERT(q1.w() == quat.scalar());
+	double test = q1.x() * q1.y() + q1.z() * q1.w();
+	if (test > 0.499) {
+		heading = 2 * atan2(q1.x(), q1.w());
+		attitude = M_PI / 2;
+		bank = 0;
+	} else if (test < -0.499) {
+		heading = -2 * atan2(q1.x(), q1.w());
+		attitude = - M_PI / 2;
+		bank = 0;
 	} else {
-		norm = sqrt(norm);
-		x /= norm;
-		y /= norm;
-		z /= norm;
+		double sqx = q1.x() * q1.x();
+		double sqy = q1.y() * q1.y();
+		double sqz = q1.z() * q1.z();
+		heading = atan2(2 * q1.y() * q1.w() - 2 * q1.x() * q1.z(), 1 - 2 * sqy - 2 * sqz);
+		attitude = asin(2 * test);
+		bank = atan2(2 * q1.x() * q1.w() - 2 * q1.y() * q1.z(), 1 - 2 * sqx - 2 * sqz);
 	}
-	return QQuaternion(angle, x, y, z);
+	return new QVector3D(heading, attitude, bank);
 }
 
 QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set) {
@@ -124,17 +134,12 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 		case QMetaType::QColor: {
 			auto colBtn = new QPushButton;
 
-			/*auto value = qvariant_cast<QColor>(prop);
-			auto col = const_cast<QColor*>(&value);
-			colBtn->setText(QString(col->value()));*/
-
 			connect(colBtn, &QPushButton::clicked, [=] () {
 				auto value = qvariant_cast<QColor>(get());
 				auto col = QColorDialog::getColor(value, nullptr, tr("Face color"));
 				set(col);
-				// colBtn->setText(QString("rgb(%1, %2, %3)").arg(col.red()).arg(col.green()).arg(col.blue()));
-				// colBtn->palette().setColor(QPalette::Background, col);
-				colBtn->setStyleSheet(QString("background-color: %1").arg(col.name()));
+				colBtn->setText(QString("rgb(%1, %2, %3)").arg(col.red()).arg(col.green()).arg(col.blue()));
+				// colBtn->setStyleSheet(QString("background: %1").arg(col.name()));
 			});
 
 			return colBtn;
@@ -161,7 +166,49 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			break;
 		}
 		case QMetaType::QQuaternion: {
-			break;
+			void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
+			auto value = qvariant_cast<QQuaternion>(prop);
+			auto quat = new QQuaternion(value);
+			auto vector = toEuler(*quat);
+
+			auto container = new QWidget;
+			auto hbox = new QHBoxLayout;
+			hbox->setMargin(1);
+			container->setLayout(hbox);
+
+			auto spinners = new QDoubleSpinBox* [3];
+			for (int i = 0; i < 3; i++) {
+				spinners[i] = new QDoubleSpinBox(container);
+				spinners[i]->setRange(-2147483647, 2147483647);
+				switch (i) {
+					case 0:
+						spinners[i]->setValue(vector->x());
+						break;
+					case 1:
+						spinners[i]->setValue(vector->y());
+						break;
+					case 2:
+						spinners[i]->setValue(vector->z());
+						break;
+				}
+				hbox->addWidget(spinners[i]);
+				connect(spinners[i], changeSignal, [=](double value) {
+					switch (i) {
+						case 0:
+							vector->setX(value);
+							break;
+						case 1:
+							vector->setY(value);
+							break;
+						case 2:
+							vector->setZ(value);
+							break;
+					}
+					set(fromEuler(*vector));
+				});
+			}
+
+			return container;
 		}
 		default:
 			qDebug() << prop.type();
@@ -172,7 +219,6 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 }
 
 void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
-	qDebug() << "Selected" << current;
 	ui->infoWidget->clear();
 	if(current != nullptr) {
 		auto ptr = current->data(0, Qt::UserRole);
