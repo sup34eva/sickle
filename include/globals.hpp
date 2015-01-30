@@ -21,6 +21,8 @@
  * \extends QWidget
  */
 
+#define FILE_MAGIC 0xB00B1E5
+
 //! Déclare une variable membre privée
 #define declare(TYPE, NAME) \
 private:                    \

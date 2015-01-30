@@ -7,6 +7,8 @@ Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_renderMode(GL_TRI
 	m_camera = new Camera(this);
 	setFocusPolicy(Qt::StrongFocus);
 
+	qRegisterMetaType<Cube>("Cube");
+
 	QSurfaceFormat format;
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	format.setDepthBufferSize(16);
@@ -129,20 +131,20 @@ void Viewport::save(QString name) {
 	QFile file(name);
 	file.open(QIODevice::WriteOnly);
 	QDataStream out(&file);
-	out << static_cast<quint32>(0xB00B1E5);  // Magic number
+	out << static_cast<quint32>(FILE_MAGIC);  // Magic number
+	out << static_cast<quint32>(FILE_VERSION);  // Sickle version
 
-	auto version = QDataStream::Qt_5_4;  // Format version
-	out << static_cast<qint32>(version);
-	out.setVersion(version);
+	auto format = QDataStream::Qt_5_4;  // File format
+	out << static_cast<qint32>(format);
+	out.setVersion(format);
 
 	// Data
 	out << *camera();
 	auto childList = findChildren<Geometry*>();
 	out << static_cast<quint32>(childList.size());
 	for (auto obj : childList) {
-		auto info = obj->metaObject()->classInfo(0);
-		qDebug() << "Object of class" << info.name() << info.value();
-		out << QString(info.value());
+		int type = QMetaType::type(obj->metaObject()->className());
+		out << type;
 		out << *obj;
 	}
 }
@@ -158,12 +160,24 @@ void Viewport::load(QString name) {
 	QFile file(name);
 	file.open(QIODevice::ReadOnly);
 	QDataStream in(&file);
+
 	quint32 magic;
 	in >> magic;  // Magic number
+	if(magic != FILE_MAGIC) {
+		qWarning() << "Bad file format";
+		return;
+	}
 
-	qint32 version;  // Format version
+	quint32 version;  // Sickle version
 	in >> version;
-	in.setVersion(version);
+	if(version != FILE_VERSION) {
+		qWarning() << "Old file format";
+		return;
+	}
+
+	qint32 format;  // File format
+	in >> format;
+	in.setVersion(format);
 
 	clearLevel();
 
@@ -171,18 +185,17 @@ void Viewport::load(QString name) {
 	in >> *camera();
 	quint32 size;
 	in >> size;
-	qDebug() << size;
+	makeCurrent();
 	for (quint32 i = 0; i < size; i++) {
-		QString id;
+		int id;
 		in >> id;
-		Geometry* obj = nullptr;
-		if(id == "Cube") {
-			obj = addChild<Cube>();
-		} else {
-			qWarning() << "Unknown type" << id;
-		}
+		auto obj = static_cast<Geometry*>(QMetaType::create(id));
+		qDebug() << "Restoring object of type" << QMetaType::typeName(id);
 		in >> *obj;
+		obj->setParent(this);
+		emit childAdded(obj);
 	}
+	doneCurrent();
 }
 
 QDataStream& operator<<(QDataStream& stream, const QObject& obj) {
