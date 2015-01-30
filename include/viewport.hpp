@@ -59,6 +59,7 @@ public slots:
 
 signals:
 	void childAdded(QObject* child);
+	void initialized();
 
 protected:
 	void initializeGL() Q_DECL_OVERRIDE;

@@ -9,14 +9,20 @@
 #include <QColorDialog>
 #include <QPushButton>
 #include <QList>
+#include <QtMath>
 #include "./ui_mainwindow.h"
-
-#define M_PI 3.14159265358979323846
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
 	connect(ui->viewport->camera(), &Camera::moved, [=] (const QVector3D& position) {
 		ui->camPos->setText(QString("X: %1, Y: %2, Z: %3").arg(position.x()).arg(position.y()).arg(position.z()));
+	});
+
+	connect(ui->viewport, &Viewport::initialized, [=] () {
+		auto args = QCoreApplication::arguments();
+		if(args.length() > 1) {
+			ui->viewport->load(args.at(1));
+		}
 	});
 }
 
@@ -52,30 +58,31 @@ QQuaternion fromEuler(const QVector3D& euler) {
 }
 
 QVector3D* toEuler(const QQuaternion& quat) {
-	float heading, attitude, bank;
-	auto q1 = quat.toVector4D();
-	Q_ASSERT(q1.x() == quat.vector().x());
-	Q_ASSERT(q1.y() == quat.vector().y());
-	Q_ASSERT(q1.z() == quat.vector().z());
-	Q_ASSERT(q1.w() == quat.scalar());
-	double test = q1.x() * q1.y() + q1.z() * q1.w();
-	if (test > 0.499) {
-		heading = 2 * atan2(q1.x(), q1.w());
-		attitude = M_PI / 2;
-		bank = 0;
-	} else if (test < -0.499) {
-		heading = -2 * atan2(q1.x(), q1.w());
-		attitude = - M_PI / 2;
-		bank = 0;
+	qreal pitch, yaw, roll;
+	const auto q = quat.toVector4D();
+	const auto w2 = q.w() * q.w();
+	const auto x2 = q.x() * q.x();
+	const auto y2 = q.y() * q.y();
+	const auto z2 = q.z() * q.z();
+	const auto unitLength = w2 + x2 + y2 + z2;
+	const auto abcd = q.w() * q.x() + q.y() * q.z();
+	const auto eps = 1e-7;
+	if (abcd > (0.5 - eps) * unitLength) {
+		yaw = 2 * qAtan2(q.y(), q.w());
+		pitch = M_PI;
+		roll = 0;
+	} else if (abcd < (-0.5 + eps) * unitLength) {
+		yaw = -2 * qAtan2(q.y(), q.w());
+		pitch = -M_PI;
+		roll = 0;
 	} else {
-		double sqx = q1.x() * q1.x();
-		double sqy = q1.y() * q1.y();
-		double sqz = q1.z() * q1.z();
-		heading = atan2(2 * q1.y() * q1.w() - 2 * q1.x() * q1.z(), 1 - 2 * sqy - 2 * sqz);
-		attitude = asin(2 * test);
-		bank = atan2(2 * q1.x() * q1.w() - 2 * q1.y() * q1.z(), 1 - 2 * sqx - 2 * sqz);
+		const auto adbc = q.w() * q.z() - q.x() * q.y();
+		const auto acbd = q.w() * q.y() - q.x() * q.z();
+		yaw = qAtan2(2 * adbc, 1 - 2 * (z2 + x2));
+		pitch = qAsin(2 * abcd / unitLength);
+		roll = qAtan2(2 * acbd, 1 - 2 * (y2 + x2));
 	}
-	return new QVector3D(heading, attitude, bank);
+	return new QVector3D(qRadiansToDegrees(pitch), qRadiansToDegrees(yaw), qRadiansToDegrees(roll));
 }
 
 QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set) {
@@ -244,13 +251,13 @@ void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
 }
 
 void MainWindow::on_actionOpen_triggered() {
-	auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), tr("World File (*.wld)"));
+	auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), tr("Sickle World (*.wld)"));
 	ui->viewport->load(fileName);
 	m_lastFile = fileName;
 }
 
 void MainWindow::on_actionSave_as_triggered() {
-	auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("World File (*.wld)"));
+	auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("Sickle World (*.wld)"));
 	ui->viewport->save(fileName);
 	m_lastFile = fileName;
 }

@@ -33,6 +33,8 @@ void Viewport::initializeGL() {
 
 	auto bg = palette().color(QPalette::Background);
 	glClearColor(bg.redF(), bg.greenF(), bg.blueF(), bg.alphaF());
+
+	emit initialized();
 }
 
 void Viewport::paintGL() {

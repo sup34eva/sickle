@@ -43,7 +43,9 @@ DISTFILES += \
     .coveralls.yml \
     CodeStyle.xml \
     Files.pri \
-    CPPLINT.cfg
+    CPPLINT.cfg \
+    res/sickle.ico \
+    res/sickle.rc
 
 RESOURCES += res/resources.qrc
 

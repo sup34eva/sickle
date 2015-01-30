@@ -7,6 +7,8 @@
     </qresource>
     <qresource prefix="/icons">
         <file>add-geo.png</file>
+        <file>sickle.ico</file>
+        <file>file.ico</file>
     </qresource>
     <qresource prefix="/lang">
         <file>editor_fr.qm</file>
