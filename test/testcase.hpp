@@ -13,10 +13,10 @@ private slots:
 	void cleanup();
 	// Editor core
 	void renderBenchmark();
-	/*void viewMove();
+	void viewMove();
 	void infobox();
-	void newZone();
-	void saveLoad();*/
+	/*void newZone();*/
+	void saveLoad();
 	// Object creator
 	void addCube();
 	// Object editor

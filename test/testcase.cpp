@@ -57,6 +57,43 @@ void TestCase::scaleObject() {
 	QCOMPARE(cube->scale(), QVector3D(2, 2, 2));
 }
 
+void TestCase::saveLoad() {
+	ui->viewport->addChild<Cube>();
+	ui->viewport->save("test.wld");
+	ui->viewport->clearLevel();
+	ui->viewport->load("test.wld");
+	QCOMPARE(ui->viewport->findChildren<Cube>().length(), 1);
+}
+
+void TestCase::viewMove() {
+	auto cam = ui->viewport->camera();
+	auto oldView = cam->view();
+
+	auto list = {
+		Qt::Key_Up,
+		Qt::Key_Down,
+		Qt::Key_Right,
+		Qt::Key_Left,
+		Qt::Key_PageUp,
+		Qt::Key_PageDown,
+		Qt::Key_Z,
+		Qt::Key_S,
+		Qt::Key_Q,
+		Qt::Key_D
+	};
+
+	for(auto key : list)
+		QTest::keyPress(ui->viewport, key);
+
+	QCOMPARE(cam->view(), oldView);
+}
+
+void TestCase::infobox() {
+	auto position = QVector3D(1, 1, 1);
+	ui->viewport->camera()->position(position);
+	QCOMPARE(ui->camPos->text(), QString("X: %1, Y: %2, Z: %3").arg(position.x()).arg(position.y()).arg(position.z()));
+}
+
 void TestCase::cleanup() {
 	ui->viewport->clearLevel();
 }
