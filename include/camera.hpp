@@ -32,9 +32,9 @@ public:
 	QVector3D direction();
 	QVector3D up();
 	QMatrix4x4 view();
-	void velocity(QVector3D v) {
+	void velocity(QVector3D v, int dur = 0) {
 		QPropertyAnimation *animation = new QPropertyAnimation(this, "position");
-		animation->setDuration(100);
+		animation->setDuration(dur);
 		animation->setStartValue(position());
 		animation->setEndValue(position() + (v * speed()));
 		animation->start();

@@ -27,10 +27,9 @@ void TestCase::renderBenchmark() {
 }
 
 void TestCase::moveVector(int row) {
-	auto item = ui->infoWidget->topLevelItem(row);
-	auto cont = ui->infoWidget->itemWidget(item, 1)->layout();
 	for(int i = 0; i < 3; i++) {
-		auto spin = static_cast<QDoubleSpinBox*>(cont->itemAt(i)->widget());
+		auto item = ui->infoWidget->topLevelItem(row)->child(i);
+		auto spin = static_cast<QDoubleSpinBox*>(ui->infoWidget->itemWidget(item, 1));
 		spin->setValue(2.0);
 	}
 }
@@ -65,27 +64,29 @@ void TestCase::saveLoad() {
 	QCOMPARE(ui->viewport->findChildren<Cube>().length(), 1);
 }
 
+Q_DECLARE_METATYPE(Qt::Key)
+
+void TestCase::viewMove_data() {
+	QTest::addColumn<Qt::Key>("key");
+
+	QTest::newRow("Up") << Qt::Key_Up;
+	QTest::newRow("Down") << Qt::Key_Down;
+	QTest::newRow("Right") << Qt::Key_Right;
+	QTest::newRow("Left") << Qt::Key_Left;
+	QTest::newRow("PageUp") << Qt::Key_PageUp;
+	QTest::newRow("PageDown") << Qt::Key_PageDown;
+	QTest::newRow("Z") << Qt::Key_Z;
+	QTest::newRow("S") << Qt::Key_S;
+	QTest::newRow("Q") << Qt::Key_Q;
+	QTest::newRow("D") << Qt::Key_D;
+}
+
 void TestCase::viewMove() {
 	auto cam = ui->viewport->camera();
-	auto oldView = cam->view();
-
-	auto list = {
-		Qt::Key_Up,
-		Qt::Key_Down,
-		Qt::Key_Right,
-		Qt::Key_Left,
-		Qt::Key_PageUp,
-		Qt::Key_PageDown,
-		Qt::Key_Z,
-		Qt::Key_S,
-		Qt::Key_Q,
-		Qt::Key_D
-	};
-
-	for(auto key : list)
-		QTest::keyPress(ui->viewport, key);
-
-	QCOMPARE(cam->view(), oldView);
+	auto view = cam->view();
+	QFETCH(Qt::Key, key);
+	QTest::keyPress(ui->viewport, key);
+	QVERIFY(cam->view() != view);
 }
 
 void TestCase::infobox() {
@@ -93,6 +94,22 @@ void TestCase::infobox() {
 	ui->viewport->camera()->position(position);
 	QCOMPARE(ui->camPos->text(), QString("X: %1, Y: %2, Z: %3").arg(position.x()).arg(position.y()).arg(position.z()));
 }
+
+void TestCase::newZone() {
+}
+
+void TestCase::createGroup() {
+}
+
+void TestCase::moveGroup() {
+}
+
+void TestCase::paintFace() {
+}
+
+void TestCase::linkZones() {
+}
+
 
 void TestCase::cleanup() {
 	ui->viewport->clearLevel();

@@ -12,10 +12,14 @@
 #include <QtMath>
 #include "./ui_mainwindow.h"
 
+QString toString(const QVector3D& vector) {
+	return QString("X: %1, Y: %2, Z: %3").arg(vector.x()).arg(vector.y()).arg(vector.z());
+}
+
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
 	connect(ui->viewport->camera(), &Camera::moved, [=] (const QVector3D& position) {
-		ui->camPos->setText(QString("X: %1, Y: %2, Z: %3").arg(position.x()).arg(position.y()).arg(position.z()));
+		ui->camPos->setText(toString(position));
 	});
 
 	connect(ui->viewport, &Viewport::initialized, [=] () {
@@ -89,48 +93,54 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 	auto prop = get();
 	switch (prop.type()) {
 		case QMetaType::QVector3D: {
-			void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
 			auto value = qvariant_cast<QVector3D>(prop);
 			auto vector = new QVector3D(value);
+			auto label = new QLabel(toString(*vector));
 
-			auto container = new QWidget;
-			auto hbox = new QHBoxLayout;
-			hbox->setMargin(1);
-			container->setLayout(hbox);
-
-			auto spinners = new QDoubleSpinBox* [3];
 			for (int i = 0; i < 3; i++) {
-				spinners[i] = new QDoubleSpinBox(container);
-				spinners[i]->setRange(-2147483647, 2147483647);
+				auto item = new QTreeWidgetItem;
 				switch (i) {
 					case 0:
-						spinners[i]->setValue(vector->x());
+						item->setText(0, QString("X"));
 						break;
 					case 1:
-						spinners[i]->setValue(vector->y());
+						item->setText(0, QString("Y"));
 						break;
 					case 2:
-						spinners[i]->setValue(vector->z());
+						item->setText(0, QString("Z"));
 						break;
 				}
-				hbox->addWidget(spinners[i]);
-				connect(spinners[i], changeSignal, [=](double value) {
+				line->addChild(item);
+
+				auto widget = widgetForVariant(item, [=] () {
 					switch (i) {
 						case 0:
-							vector->setX(value);
+							return vector->x();
+						case 1:
+							return vector->y();
+						case 2:
+							return vector->z();
+					}
+				}, [=] (const QVariant& val) {
+					switch (i) {
+						case 0:
+							vector->setX(val.toFloat());
 							break;
 						case 1:
-							vector->setY(value);
+							vector->setY(val.toFloat());
 							break;
 						case 2:
-							vector->setZ(value);
+							vector->setZ(val.toFloat());
 							break;
 					}
+					label->setText(toString(*vector));
 					set(*vector);
 				});
+
+				line->treeWidget()->setItemWidget(item, 1, widget);
 			}
 
-			return container;
+			return label;
 		}
 		case QMetaType::QString: {
 			auto textBox = new QLineEdit;
@@ -146,7 +156,6 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 				auto col = QColorDialog::getColor(value, nullptr, tr("Face color"));
 				set(col);
 				colBtn->setText(QString("rgb(%1, %2, %3)").arg(col.red()).arg(col.green()).arg(col.blue()));
-				// colBtn->setStyleSheet(QString("background: %1").arg(col.name()));
 			});
 
 			return colBtn;
@@ -173,49 +182,65 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			break;
 		}
 		case QMetaType::QQuaternion: {
-			void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
 			auto value = qvariant_cast<QQuaternion>(prop);
 			auto quat = new QQuaternion(value);
 			auto vector = toEuler(*quat);
+			auto label = new QLabel(toString(*vector));
 
-			auto container = new QWidget;
-			auto hbox = new QHBoxLayout;
-			hbox->setMargin(1);
-			container->setLayout(hbox);
-
-			auto spinners = new QDoubleSpinBox* [3];
 			for (int i = 0; i < 3; i++) {
-				spinners[i] = new QDoubleSpinBox(container);
-				spinners[i]->setRange(-2147483647, 2147483647);
+				auto item = new QTreeWidgetItem;
 				switch (i) {
 					case 0:
-						spinners[i]->setValue(vector->x());
+						item->setText(0, QString("Pitch"));
 						break;
 					case 1:
-						spinners[i]->setValue(vector->y());
+						item->setText(0, QString("Yaw"));
 						break;
 					case 2:
-						spinners[i]->setValue(vector->z());
+						item->setText(0, QString("Roll"));
 						break;
 				}
-				hbox->addWidget(spinners[i]);
-				connect(spinners[i], changeSignal, [=](double value) {
+				line->addChild(item);
+
+				auto widget = widgetForVariant(item, [=] () {
 					switch (i) {
 						case 0:
-							vector->setX(value);
+							return vector->x();
+						case 1:
+							return vector->y();
+						case 2:
+							return vector->z();
+					}
+				}, [=] (const QVariant& val) {
+					switch (i) {
+						case 0:
+							vector->setX(val.toFloat());
 							break;
 						case 1:
-							vector->setY(value);
+							vector->setY(val.toFloat());
 							break;
 						case 2:
-							vector->setZ(value);
+							vector->setZ(val.toFloat());
 							break;
 					}
+					label->setText(toString(*vector));
 					set(fromEuler(*vector));
 				});
+
+				line->treeWidget()->setItemWidget(item, 1, widget);
 			}
 
-			return container;
+			return label;
+		}
+		case QMetaType::Float: {
+			void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
+			auto spinner = new QDoubleSpinBox;
+			spinner->setRange(-2147483647, 2147483647);
+			spinner->setValue(prop.toFloat());
+			connect(spinner, changeSignal, [=](double value) {
+				set(value);
+			});
+			return spinner;
 		}
 		default:
 			qDebug() << prop.type();

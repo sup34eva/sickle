@@ -13,20 +13,21 @@ private slots:
 	void cleanup();
 	// Editor core
 	void renderBenchmark();
+	void viewMove_data();
 	void viewMove();
 	void infobox();
-	/*void newZone();*/
+	void newZone();
 	void saveLoad();
 	// Object creator
 	void addCube();
 	// Object editor
 	void moveObject();
 	void scaleObject();
-	/*void createGroup();
+	void createGroup();
 	void moveGroup();
 	void paintFace();
 	// Zone linker
-	void linkZones();*/
+	void linkZones();
 private:
 	void moveVector(int row);
 	MainWindow win;
