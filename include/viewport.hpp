@@ -35,14 +35,13 @@ public:
 		makeCurrent();
 		auto child = new T(this);
 		doneCurrent();
-		// auto name = QString(tr("New Object %1")).arg(findChildren<Geometry>().length());
-		child->setObjectName(tr("New Object"));
 		emit childAdded(child);
 		return child;
 	}
 
 	propRO(Camera*, camera);
 	prop(GLenum, renderMode);
+	propSig(bool, isInitialized, initialized);
 
 #ifdef QT_QTTEST_MODULE_H
 	void updateNow() {
@@ -59,7 +58,6 @@ public slots:
 
 signals:
 	void childAdded(QObject* child);
-	void initialized();
 
 protected:
 	void initializeGL() Q_DECL_OVERRIDE;

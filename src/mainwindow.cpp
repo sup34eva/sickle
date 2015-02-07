@@ -1,6 +1,7 @@
 // Copyright 2015 PsychoLama
 
 #include <mainwindow.hpp>
+#include <sphere.hpp>
 #include <QVariant>
 #include <QFileDialog>
 #include <QSpinBox>
@@ -10,21 +11,29 @@
 #include <QPushButton>
 #include <QList>
 #include <QtMath>
+#include <limits>
 #include "./ui_mainwindow.h"
 
 QString toString(const QVector3D& vector) {
-	return QString("X: %1, Y: %2, Z: %3").arg(vector.x()).arg(vector.y()).arg(vector.z());
+	return QString(MainWindow::tr("X: %1, Y: %2, Z: %3")).arg(vector.x()).arg(vector.y()).arg(vector.z());
 }
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
-	connect(ui->viewport->camera(), &Camera::moved, [=] (const QVector3D& position) {
-		ui->camPos->setText(toString(position));
-	});
 
-	connect(ui->viewport, &Viewport::initialized, [=] () {
+	QMenu* addMenu = new QMenu(tr("Add Geometry"));
+	addMenu->addAction(ui->newCube);
+	addMenu->addAction(ui->newSphere);
+	addMenu->menuAction()->setIcon(QIcon(":/icons/add-geo.png"));
+	ui->toolBar->addAction(addMenu->menuAction());
+
+	ui->camPos->setText(toString(QVector3D(0, 0, 0)));
+	connect(ui->viewport->camera(), &Camera::moved,
+			[=](const QVector3D& position) { ui->camPos->setText(toString(position)); });
+
+	connect(ui->viewport, &Viewport::initialized, [=]() {
 		auto args = QCoreApplication::arguments();
-		if(args.length() > 1) {
+		if (args.length() > 1) {
 			ui->viewport->load(args.at(1));
 		}
 	});
@@ -41,9 +50,7 @@ void MainWindow::on_viewport_childAdded(QObject* obj) {
 	auto ptr = QVariant::fromValue(obj);
 	item->setData(0, Qt::UserRole, ptr);
 
-	connect(obj, &QObject::objectNameChanged, [=](QString newName) {
-		item->setText(0, newName);
-	});
+	connect(obj, &QObject::objectNameChanged, [=](QString newName) { item->setText(0, newName); });
 
 	connect(obj, &QObject::destroyed, [=]() {
 		auto index = ui->actorList->indexOfTopLevelItem(item);
@@ -70,7 +77,7 @@ QVector3D* toEuler(const QQuaternion& quat) {
 	const auto z2 = q.z() * q.z();
 	const auto unitLength = w2 + x2 + y2 + z2;
 	const auto abcd = q.w() * q.x() + q.y() * q.z();
-	const auto eps = 1e-7;
+	const auto eps = std::numeric_limits<float>::epsilon();
 	if (abcd > (0.5 - eps) * unitLength) {
 		yaw = 2 * qAtan2(q.y(), q.w());
 		pitch = M_PI;
@@ -112,7 +119,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 				}
 				line->addChild(item);
 
-				auto widget = widgetForVariant(item, [=] () {
+				auto widget = widgetForVariant(item, [=]() {
 					switch (i) {
 						case 0:
 							return vector->x();
@@ -121,7 +128,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 						case 2:
 							return vector->z();
 					}
-				}, [=] (const QVariant& val) {
+				}, [=](const QVariant& val) {
 					switch (i) {
 						case 0:
 							vector->setX(val.toFloat());
@@ -151,7 +158,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 		case QMetaType::QColor: {
 			auto colBtn = new QPushButton;
 
-			connect(colBtn, &QPushButton::clicked, [=] () {
+			connect(colBtn, &QPushButton::clicked, [=]() {
 				auto value = qvariant_cast<QColor>(get());
 				auto col = QColorDialog::getColor(value, nullptr, tr("Face color"));
 				set(col);
@@ -169,9 +176,9 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 				item->setText(0, QString("Item %1").arg(i));
 				line->addChild(item);
 
-				auto widget = widgetForVariant(item, [=] () {
+				auto widget = widgetForVariant(item, [=]() {
 					return list->at(i);
-				}, [=] (const QVariant& val) {
+				}, [=](const QVariant& val) {
 					list->operator[](i) = val;
 					set(*list);
 				});
@@ -202,7 +209,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 				}
 				line->addChild(item);
 
-				auto widget = widgetForVariant(item, [=] () {
+				auto widget = widgetForVariant(item, [=]() {
 					switch (i) {
 						case 0:
 							return vector->x();
@@ -211,7 +218,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 						case 2:
 							return vector->z();
 					}
-				}, [=] (const QVariant& val) {
+				}, [=](const QVariant& val) {
 					switch (i) {
 						case 0:
 							vector->setX(val.toFloat());
@@ -237,9 +244,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			auto spinner = new QDoubleSpinBox;
 			spinner->setRange(-2147483647, 2147483647);
 			spinner->setValue(prop.toFloat());
-			connect(spinner, changeSignal, [=](double value) {
-				set(value);
-			});
+			connect(spinner, changeSignal, [=](double value) { set(value); });
 			return spinner;
 		}
 		default:
@@ -252,7 +257,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 
 void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
 	ui->infoWidget->clear();
-	if(current != nullptr) {
+	if (current != nullptr) {
 		auto ptr = current->data(0, Qt::UserRole);
 		if ((!ptr.isNull()) && ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
 			QObject* obj = qvariant_cast<QObject*>(ptr);
@@ -264,9 +269,10 @@ void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
 					auto line = new QTreeWidgetItem;
 					line->setText(0, prop);
 					ui->infoWidget->addTopLevelItem(line);
-					ui->infoWidget->setItemWidget(line, 1, widgetForVariant(line, [=] () {
+					ui->infoWidget->setItemWidget(
+						line, 1, widgetForVariant(line, [=]() {
 						return obj->property(prop);
-					}, [=] (const QVariant& val) {
+					}, [=](const QVariant& val) {
 						obj->setProperty(prop, val);
 					}));
 				}
@@ -302,6 +308,10 @@ void MainWindow::on_actionWireframe_toggled(bool checked) {
 	}
 }
 
-void MainWindow::on_newGeo_triggered() {
+void MainWindow::on_newCube_triggered() {
 	ui->viewport->addChild<Cube>();
+}
+
+void MainWindow::on_newSphere_triggered() {
+	ui->viewport->addChild<Sphere>();
 }

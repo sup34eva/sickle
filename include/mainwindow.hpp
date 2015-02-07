@@ -35,7 +35,9 @@ private slots:
 	void on_actionWireframe_toggled(bool arg1);
 	void on_viewport_childAdded(QObject *obj);
 
-	void on_newGeo_triggered();
+	void on_newCube_triggered();
+
+	void on_newSphere_triggered();
 
 private:
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);

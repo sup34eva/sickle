@@ -3,15 +3,34 @@
 #include <cube.hpp>
 #include <vector>
 
+template<>
+int Cube::tBase::s_instances = 0;
+
 Cube::Cube(QObject* parent) : Geometry(parent) {
-	initProgram<Cube>(parent);
+	setObjectName(QString(tr("Cube %1")).arg(Cube::tBase::s_instances));
 	colors({
 		QColor(1, 0, 0),
-		QColor(1, 1, 0)
+		QColor(1, 1, 0),
+		QColor(0, 1, 0),
+		QColor(0, 1, 1),
+		QColor(0, 0, 1),
+		QColor(1, 0, 1)
 	});
 }
 
-std::vector<GLfloat> Cube::s_vertices = {
+template<>
+QOpenGLVertexArrayObject* Cube::tBase::s_vao = nullptr;
+template<>
+QOpenGLShaderProgram* Cube::tBase::s_program = nullptr;
+template<>
+QOpenGLBuffer* Cube::tBase::s_vertexBuffer = nullptr;
+template<>
+QOpenGLBuffer* Cube::tBase::s_colorBuffer = nullptr;
+template<>
+QOpenGLBuffer* Cube::tBase::s_indexBuffer = nullptr;
+
+template<>
+std::vector<GLfloat> Cube::tBase::s_vertices = {
 	-1.0f, -1.0f, -1.0f,		// Face 1
 	-1.0f, -1.0f,  1.0f,		//
 	-1.0f,  1.0f,  1.0f,		//
@@ -37,7 +56,9 @@ std::vector<GLfloat> Cube::s_vertices = {
 	 1.0f,  1.0f,  1.0f,		//
 	-1.0f,  1.0f,  1.0f,		//
 };
-std::vector<quint32> Cube::s_indices = {
+
+template<>
+std::vector<quint32> Cube::tBase::s_indices = {
 	0,  1,  3,		// Face 1
 	3,  1,  2,		//
 	4,  5,  7,		// Face 2
@@ -51,7 +72,9 @@ std::vector<quint32> Cube::s_indices = {
 	20, 21, 23,		// Face 6
 	23, 21, 22,		//
 };
-std::vector<GLfloat> Cube::s_colors = {
+
+template<>
+std::vector<GLfloat> Cube::tBase::s_colors = {
 	1.0f, 0.0f, 0.0f,		// Face 1
 	1.0f, 0.0f, 0.0f,		//
 	1.0f, 0.0f, 0.0f,		//

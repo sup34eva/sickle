@@ -14,12 +14,11 @@ int main(int argc, char *argv[]) {
 	app.setStyleSheet(style.readAll());
 
 	QTranslator translator;
-	QString locale = QLocale::system().name();
+	auto locale = QLocale::system().name();
 	translator.load(QString(":/lang/editor_") + locale);
 	app.installTranslator(&translator);
 
 	MainWindow window;
-	window.resize(800, 600);
 	window.showMaximized();
 
 	return app.exec();

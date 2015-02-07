@@ -27,7 +27,9 @@ SOURCES += \
     src/viewport.cpp \
     src/group.cpp \
     src/mainwindow.cpp \
-    src/cube.cpp
+    src/cube.cpp \
+    src/sphere.cpp \
+    src/actor.cpp
 
 HEADERS  += \
     include/camera.hpp \
@@ -36,7 +38,9 @@ HEADERS  += \
     include/globals.hpp \
     include/group.hpp \
     include/mainwindow.hpp \
-    include/viewport.hpp
+    include/viewport.hpp \
+    include/sphere.hpp \
+    include/actor.hpp
 
 DISTFILES += \
     README.md \

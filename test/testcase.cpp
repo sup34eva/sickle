@@ -1,25 +1,30 @@
 #include "testcase.hpp"
+#include <cube.hpp>
 #include <mainwindow.hpp>
 #include <QDoubleSpinBox>
+#include <QSignalSpy>
 #include "./ui_mainwindow.h"
 
 void TestCase::initTestCase() {
 	ui = win.getUI();
 	win.show();
+	QTest::qWaitForWindowExposed(&win);
 }
 
 void TestCase::addCube() {
-	auto before = ui->viewport->findChildren<Geometry>().length();
-	ui->newGeo->trigger();
-	auto after = ui->viewport->findChildren<Geometry>().length();
+	auto before = ui->viewport->findChildren<Cube>().length();
+	ui->newCube->trigger();
+	auto after = ui->viewport->findChildren<Cube>().length();
 	QCOMPARE(after, before + 1);
 }
 
 void TestCase::renderBenchmark() {
-	for(int i = 0, num = 1000; i < num; i++) {
-		auto child = ui->viewport->addChild<Cube>();
-		child->position(QVector3D(i, i, i));
-	}
+	for(int i = 0, num = 10; i < num; i++)
+		for(int j = 0; j < num; j++)
+			for(int k = 0; k < num; k++) {
+				auto child = ui->viewport->addChild<Cube>();
+				child->position(QVector3D(i, j, k));
+			}
 
 	QBENCHMARK {
 		ui->viewport->updateNow();
@@ -86,7 +91,7 @@ void TestCase::viewMove() {
 	auto view = cam->view();
 	QFETCH(Qt::Key, key);
 	QTest::keyPress(ui->viewport, key);
-	QVERIFY(cam->view() != view);
+	QVERIFY2(cam->view() != view, "Key event didn't change the camera view");
 }
 
 void TestCase::infobox() {
@@ -109,7 +114,6 @@ void TestCase::paintFace() {
 
 void TestCase::linkZones() {
 }
-
 
 void TestCase::cleanup() {
 	ui->viewport->clearLevel();

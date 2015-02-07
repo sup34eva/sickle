@@ -36,17 +36,17 @@ void Viewport::initializeGL() {
 	auto bg = palette().color(QPalette::Background);
 	glClearColor(bg.redF(), bg.greenF(), bg.blueF(), bg.alphaF());
 
-	emit initialized();
+	isInitialized(true);
 }
 
 void Viewport::paintGL() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	QMatrix4x4 view = m_camera->view();
+	auto view = m_camera->view();
+	DrawInfo info{view, m_projection, m_renderMode, context()};
 
-	DrawInfo info{view, m_projection, m_renderMode};
 	for (auto i : children()) {
-		auto child = dynamic_cast<Geometry*>(i);
+		auto child = dynamic_cast<Actor*>(i);
 		if (child) child->draw(info);
 	}
 }
@@ -140,7 +140,7 @@ void Viewport::save(QString name) {
 
 	// Data
 	out << *camera();
-	auto childList = findChildren<Geometry*>();
+	auto childList = findChildren<Actor*>();
 	out << static_cast<quint32>(childList.size());
 	for (auto obj : childList) {
 		int type = QMetaType::type(obj->metaObject()->className());
@@ -150,7 +150,7 @@ void Viewport::save(QString name) {
 }
 
 void Viewport::clearLevel() {
-	auto childList = findChildren<Geometry*>();
+	auto childList = findChildren<Actor*>();
 	for (auto obj : childList) {
 		delete obj;
 	}
@@ -189,7 +189,7 @@ void Viewport::load(QString name) {
 	for (quint32 i = 0; i < size; i++) {
 		int id;
 		in >> id;
-		auto obj = static_cast<Geometry*>(QMetaType::create(id));
+		auto obj = static_cast<Actor*>(QMetaType::create(id));
 		qDebug() << "Restoring object of type" << QMetaType::typeName(id);
 		in >> *obj;
 		obj->setParent(this);

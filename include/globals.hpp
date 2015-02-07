@@ -3,7 +3,7 @@
 #ifndef GLOBALS
 #define GLOBALS
 
-/*! \file globals.h
+/*! \file globals.hpp
  * \brief Definitions globales
  *
  * Contient les macros utilitaires globales au projet.
