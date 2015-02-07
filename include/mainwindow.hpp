@@ -14,8 +14,7 @@ namespace Ui {
 	class MainWindow;
 }
 
-/*! \class MainWindow
- * \brief Fenetre principale
+/*! \brief Fenetre principale
  *
  * Charge l'interface de la fenetre principale et en gère les evenements.
  */

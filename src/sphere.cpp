@@ -44,28 +44,24 @@ std::vector<GLfloat> calcVertices(quint32 rings, quint32 sectors) {
 	return vertices;
 }
 
-template<>
-std::vector<GLfloat> Sphere::tBase::s_vertices = calcVertices(12, 24);
-
 std::vector<quint32> calcIndices(quint32 rings, quint32 sectors) {
 	std::vector<quint32> indices;
 	indices.resize(rings * sectors * 6);
 	auto i = indices.begin();
 	for (quint32 r = 0; r < rings; r++) for (quint32 s = 0; s < sectors; s++) {
-		auto curRow = r * sectors;
+		auto currRow = r * sectors;
 		auto nextRow = (r+1) * sectors;
-		*i++ = curRow + s;
+
 		*i++ = nextRow + s;
+		*i++ = currRow + (s + 1);
+		*i++ = currRow + s;
+
 		*i++ = nextRow + (s + 1);
-		*i++ = curRow + s;
-		*i++ = nextRow + (s + 1);
-		*i++ = curRow + (s + 1);
+		*i++ = currRow + (s + 1);
+		*i++ = nextRow + s;
 	}
 	return indices;
 }
-
-template<>
-std::vector<quint32> Sphere::tBase::s_indices = calcIndices(12, 24);
 
 std::vector<GLfloat> calcColors(quint32 rings, quint32 sectors) {
 	std::vector<GLfloat> colors;
@@ -79,5 +75,9 @@ std::vector<GLfloat> calcColors(quint32 rings, quint32 sectors) {
 	return colors;
 }
 
+template<>
+std::vector<GLfloat> Sphere::tBase::s_vertices = calcVertices(12, 24);
+template<>
+std::vector<quint32> Sphere::tBase::s_indices = calcIndices(12, 24);
 template<>
 std::vector<GLfloat> Sphere::tBase::s_colors = calcColors(12, 24);

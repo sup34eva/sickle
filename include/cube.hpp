@@ -9,19 +9,15 @@
 #include <QMetaProperty>
 #include <vector>
 
+/*! \brief Un simple cube
+ *
+ * Une classe gérant la géometrie simple d'un cube.
+ */
 class Cube : public Geometry<Cube> {
 	Q_OBJECT
 
 public:
 	explicit Cube(QObject* parent = nullptr);
-	Cube(const Cube& copy) : Geometry(copy.parent()) {
-		auto metaObject = copy.metaObject();
-		for (int i = 0; i < metaObject->propertyCount(); ++i) {
-			auto prop = metaObject->property(i);
-			setProperty(prop.name(), copy.property(prop.name()));
-		}
-	}
-	prop(QVariantList, colors);
 	typedef Geometry<Cube> tBase;
 };
 

@@ -9,6 +9,9 @@
  * Contient les macros utilitaires globales au projet.
 */
 
+/*! \class QObject
+ */
+
 /*! \class QWidget
  * \extends QObject
  */

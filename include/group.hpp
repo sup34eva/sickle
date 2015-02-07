@@ -6,8 +6,7 @@
 #include <QVector>
 #include <geometry.hpp>
 
-/*! \class Group
- * \brief Groupe de geometries
+/*! \brief Groupe de geometries
  *
  * Toute les géometries enfant de cet objet seront affichés avec une transformation relative a celle du groupe.
  */

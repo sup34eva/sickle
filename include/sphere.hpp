@@ -7,19 +7,16 @@
 #include <QMetaProperty>
 #include <QColor>
 
+/*! \brief Une simple sphere
+ * \todo Générer les vertices a la compilation.
+ *
+ * Cette classe affiche la géometrie d'un sphere. Les vertices sont généré dynamiquement pour aléger le code.
+ */
 class Sphere : public Geometry<Sphere> {
 	Q_OBJECT
 
 public:
 	explicit Sphere(QObject* parent = nullptr);
-	Sphere(const Sphere& copy) : Geometry(copy.parent()) {
-		auto metaObject = copy.metaObject();
-		for (int i = 0; i < metaObject->propertyCount(); ++i) {
-			auto prop = metaObject->property(i);
-			setProperty(prop.name(), copy.property(prop.name()));
-		}
-	}
-	prop(QVariantList, colors);
 	typedef Geometry<Sphere> tBase;
 };
 

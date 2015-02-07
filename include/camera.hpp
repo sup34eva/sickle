@@ -10,9 +10,7 @@
 #include <QMetaProperty>
 #include <QPropertyAnimation>
 
-/*!
- * \class Camera
- * \brief Gestion de la camera
+/*! \brief Gestion de la camera
  *
  * Permet de calculer la matrice view d'une camera a partir de 2 angles (vertical et horizontal) et une position.
  * Les propriétés bias permettent de déclaer les angles pour eviter que la caméra ne retourne a son point de départ

@@ -10,8 +10,7 @@
 #include <camera.hpp>
 #include <cube.hpp>
 
-/*! \class Viewport
- * \brief Cadre de vue 3D
+/*! \brief Cadre de vue 3D
  *
  * Ce widget affiche une scène en 3D composée de géometries a partir d'une caméra.
  */

@@ -14,12 +14,13 @@
 #include <memory>
 #include <vector>
 
-/*! \class Geometry
- * \brief Base de toutes les géometries
+/*! \brief Base de toutes les géometries
+ * \tparam Child La classe heritant de Geometry (utilisé pour initialiser les membres statiques)
  *
  * Cette classe est une base gerant de rendu d'un buffer de vertices.
  * Elle dispose de 3 buffers (s_vertices, s_colors et s_indices) devant être remplis par les classes enfant pour
  * afficher un objet.
+ *
  */
 template <typename Child>
 class Geometry : public Actor {
@@ -109,6 +110,8 @@ protected:
 			Child::s_program->enableAttributeArray(colAttr);
 		}
 	}
+
+	prop(QVariantList, colors);
 
 protected:
 	// Instances
