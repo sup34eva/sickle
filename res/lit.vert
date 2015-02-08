@@ -6,32 +6,25 @@ in vec3 vertexNormal;
 
 uniform mat4 model;
 uniform mat4 view;
-uniform mat4 projection;
-uniform vec3 lightPosition;
+uniform mat4 MVP;
+uniform vec3 lightD;
 
 out vec3 fragColor;
-out vec3 lightDir;
 out vec3 normal;
 out vec3 eyeDir;
-out float lightDist;
+out vec3 lightDir;
 
 void main(){
     vec4 v = vec4(vertexPosition, 1);
-    mat4 MVP = projection * view * model;
     gl_Position = MVP * v;
     fragColor = vertexColor;
-
-    // Light dist
-    vec3 position_w = vec3(model * v);
-    lightDist = distance(position_w, lightPosition);
 
     // Eye dir
     vec3 vertexPosition_c = vec3(view * model * v);
     eyeDir = vec3(0,0,0) - vertexPosition_c;
 
     // Light dir
-    vec3 lightPosition_c = vec3(view * vec4(lightPosition, 1));
-    lightDir = lightPosition_c + eyeDir;
+    lightDir = vec3(view * vec4(lightD, 0));
 
     // Normal
     normal = vec3(view * model * vec4(vertexNormal, 0));

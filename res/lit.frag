@@ -1,10 +1,9 @@
 #version 330 core
 
 in vec3 fragColor;
-in vec3 lightDir;
 in vec3 normal;
 in vec3 eyeDir;
-in float lightDist;
+in vec3 lightDir;
 
 uniform vec3 lightColor;
 uniform float lightPower;
@@ -29,6 +28,6 @@ void main(){
 
     // Final color
     color = vec4(ambientColor +
-    fragColor * lightColor * lightPower * cosTheta / (lightDist * lightDist) +
-    specularColor * lightColor * lightPower * pow(cosAlpha, 5) / (lightDist * lightDist), 1);
+    fragColor * lightColor * lightPower * cosTheta +
+    specularColor * lightColor * lightPower * pow(cosAlpha, 5), 1);
 }

@@ -27,10 +27,15 @@ QOpenGLBuffer* Cube::tBase::s_vertexBuffer = nullptr;
 template<>
 QOpenGLBuffer* Cube::tBase::s_colorBuffer = nullptr;
 template<>
+QOpenGLBuffer* Cube::tBase::s_normalBuffer = nullptr;
+template<>
 QOpenGLBuffer* Cube::tBase::s_indexBuffer = nullptr;
 
 template<>
-std::vector<GLfloat> Cube::tBase::s_vertices = {
+QVector<GLfloat> Cube::tBase::s_normals = {};
+
+template<>
+QVector<GLfloat> Cube::tBase::s_vertices = {
 	-1.0f, -1.0f, -1.0f,		// Face 1
 	-1.0f, -1.0f,  1.0f,		//
 	-1.0f,  1.0f,  1.0f,		//
@@ -58,7 +63,7 @@ std::vector<GLfloat> Cube::tBase::s_vertices = {
 };
 
 template<>
-std::vector<quint32> Cube::tBase::s_indices = {
+QVector<quint32> Cube::tBase::s_indices = {
 	0,  1,  3,		// Face 1
 	3,  1,  2,		//
 	4,  5,  7,		// Face 2
@@ -74,7 +79,7 @@ std::vector<quint32> Cube::tBase::s_indices = {
 };
 
 template<>
-std::vector<GLfloat> Cube::tBase::s_colors = {
+QVector<GLfloat> Cube::tBase::s_colors = {
 	1.0f, 0.0f, 0.0f,		// Face 1
 	1.0f, 0.0f, 0.0f,		//
 	1.0f, 0.0f, 0.0f,		//

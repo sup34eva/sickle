@@ -8,6 +8,7 @@ Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_renderMode(GL_TRI
 	setFocusPolicy(Qt::StrongFocus);
 
 	qRegisterMetaType<Cube>("Cube");
+	qRegisterMetaType<Sphere>("Sphere");
 
 	QSurfaceFormat format;
 	format.setProfile(QSurfaceFormat::CoreProfile);

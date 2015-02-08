@@ -9,6 +9,7 @@
 #include <QKeyEvent>
 #include <camera.hpp>
 #include <cube.hpp>
+#include <sphere.hpp>
 
 /*! \brief Cadre de vue 3D
  *

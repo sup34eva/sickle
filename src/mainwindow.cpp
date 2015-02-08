@@ -98,48 +98,22 @@ QVector3D* toEuler(const QQuaternion& quat) {
 
 QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set) {
 	auto prop = get();
-	switch (prop.type()) {
+	switch (static_cast<QMetaType::Type>(prop.type())) {
 		case QMetaType::QVector3D: {
 			auto value = qvariant_cast<QVector3D>(prop);
 			auto vector = new QVector3D(value);
 			auto label = new QLabel(toString(*vector));
+			QString axis[] = {"X", "Y", "Z"};
 
 			for (int i = 0; i < 3; i++) {
 				auto item = new QTreeWidgetItem;
-				switch (i) {
-					case 0:
-						item->setText(0, QString("X"));
-						break;
-					case 1:
-						item->setText(0, QString("Y"));
-						break;
-					case 2:
-						item->setText(0, QString("Z"));
-						break;
-				}
+				item->setText(0, axis[i]);
 				line->addChild(item);
 
 				auto widget = widgetForVariant(item, [=]() {
-					switch (i) {
-						case 0:
-							return vector->x();
-						case 1:
-							return vector->y();
-						case 2:
-							return vector->z();
-					}
+					return (*vector)[i];
 				}, [=](const QVariant& val) {
-					switch (i) {
-						case 0:
-							vector->setX(val.toFloat());
-							break;
-						case 1:
-							vector->setY(val.toFloat());
-							break;
-						case 2:
-							vector->setZ(val.toFloat());
-							break;
-					}
+					(*vector)[i] = val.toFloat();
 					label->setText(toString(*vector));
 					set(*vector);
 				});
@@ -193,43 +167,17 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			auto quat = new QQuaternion(value);
 			auto vector = toEuler(*quat);
 			auto label = new QLabel(toString(*vector));
+			QString axis[] = {"Pitch", "Yaw", "Roll"};
 
 			for (int i = 0; i < 3; i++) {
 				auto item = new QTreeWidgetItem;
-				switch (i) {
-					case 0:
-						item->setText(0, QString("Pitch"));
-						break;
-					case 1:
-						item->setText(0, QString("Yaw"));
-						break;
-					case 2:
-						item->setText(0, QString("Roll"));
-						break;
-				}
+				item->setText(0, axis[i]);
 				line->addChild(item);
 
 				auto widget = widgetForVariant(item, [=]() {
-					switch (i) {
-						case 0:
-							return vector->x();
-						case 1:
-							return vector->y();
-						case 2:
-							return vector->z();
-					}
+					return (*vector)[i];
 				}, [=](const QVariant& val) {
-					switch (i) {
-						case 0:
-							vector->setX(val.toFloat());
-							break;
-						case 1:
-							vector->setY(val.toFloat());
-							break;
-						case 2:
-							vector->setZ(val.toFloat());
-							break;
-					}
+					(*vector)[i] = val.toFloat();
 					label->setText(toString(*vector));
 					set(fromEuler(*vector));
 				});
@@ -242,7 +190,8 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 		case QMetaType::Float: {
 			void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
 			auto spinner = new QDoubleSpinBox;
-			spinner->setRange(-2147483647, 2147483647);
+			auto limit = std::numeric_limits<float>::max();
+			spinner->setRange(-limit, limit);
 			spinner->setValue(prop.toFloat());
 			connect(spinner, changeSignal, [=](double value) { set(value); });
 			return spinner;
