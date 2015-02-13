@@ -16,18 +16,18 @@ void main(){
     vec3 n = normalize(normal);
     vec3 l = normalize(lightDir);
     float cosTheta = clamp(dot(n,l), 0, 1);
+    vec3 direct = fragColor * lightColor * lightPower * cosTheta;
 
     // Ambient
-    vec3 ambientColor = ambientColor * fragColor;
+    vec3 ambient = ambientColor * fragColor;
 
     // Specular
     vec3 specularColor = vec3(1, 1, 1);
     vec3 E = normalize(eyeDir);
     vec3 R = reflect(-l,n);
     float cosAlpha = clamp(dot(E, R), 0, 1);
+    vec3 specular = specularColor * lightColor * lightPower * pow(cosAlpha, 5);
 
     // Final color
-    color = vec4(ambientColor +
-    fragColor * lightColor * lightPower * cosTheta +
-    specularColor * lightColor * lightPower * pow(cosAlpha, 5), 1);
+    color = vec4(ambient + direct + specular, 1);
 }

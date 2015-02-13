@@ -4,6 +4,8 @@
         <file>lit.vert</file>
         <file>unlit.frag</file>
         <file>unlit.vert</file>
+        <file>brdf.frag</file>
+        <file>brdf.vert</file>
     </qresource>
     <qresource prefix="/icons">
         <file>add-geo.png</file>

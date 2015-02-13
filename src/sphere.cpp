@@ -30,8 +30,8 @@ QOpenGLBuffer* Sphere::tBase::s_indexBuffer = nullptr;
 template<>
 QVector<GLfloat> Sphere::tBase::s_normals = {};
 
-const quint32 rings = 12;
-const quint32 sectors = 24;
+const quint32 rings = 24;
+const quint32 sectors = 48;
 
 QVector<GLfloat> calcVertices() {
 	const auto R = 1. / (qreal)(rings - 1);
@@ -45,7 +45,6 @@ QVector<GLfloat> calcVertices() {
 		*v++ = qSin(-M_PI_2 + M_PI * r * R);
 		*v++ = qSin(2 * M_PI * s * S) * qSin(M_PI * r * R);
 	}
-
 	return vertices;
 }
 

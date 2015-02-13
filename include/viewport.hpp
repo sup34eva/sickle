@@ -43,7 +43,7 @@ public:
 	prop(GLenum, renderMode);
 	propSig(bool, isInitialized, initialized);
 
-#ifdef QT_QTTEST_MODULE_H
+#ifdef UNIT_TEST
 	void updateNow() {
 		makeCurrent();
 		paintGL();

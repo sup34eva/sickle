@@ -96,7 +96,7 @@ protected:
 				return;
 			}
 
-			Child::s_program->setUniformValue("lightPower", 0.6f);
+			Child::s_program->setUniformValue("lightPower", 1.2f);
 			Child::s_program->setUniformValue("lightColor", QVector3D(1, 1, 1));
 			Child::s_program->setUniformValue("ambientColor", QVector3D(0.1, 0.1, 0.1));
 

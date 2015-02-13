@@ -10,6 +10,12 @@
 #include <QMetaProperty>
 #include <QPropertyAnimation>
 
+#ifdef UNIT_TEST
+#define ANIM_DUR 0
+#else
+#define ANIM_DUR 100
+#endif
+
 /*! \brief Gestion de la camera
  *
  * Permet de calculer la matrice view d'une camera a partir de 2 angles (vertical et horizontal) et une position.
@@ -23,20 +29,13 @@ class Camera : public QObject {
 public:
 	explicit Camera(QObject* parent = nullptr);
 	explicit Camera(Camera* copy);
-	~Camera();
 	void resetBias();
 	QVector3D move(QVector3D val);
 	QVector3D right();
 	QVector3D direction();
 	QVector3D up();
 	QMatrix4x4 view();
-	void velocity(QVector3D v, int dur = 0) {
-		QPropertyAnimation *animation = new QPropertyAnimation(this, "position");
-		animation->setDuration(dur);
-		animation->setStartValue(position());
-		animation->setEndValue(position() + (v * speed()));
-		animation->start();
-	}
+	void velocity(QVector3D v, int dur = ANIM_DUR);
 	propSig(QVector3D, position, moved);
 	prop(float, vAngle);
 	prop(float, vBias);

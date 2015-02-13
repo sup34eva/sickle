@@ -1,5 +1,6 @@
 #include "testcase.hpp"
 #include <cube.hpp>
+#include <sphere.hpp>
 #include <mainwindow.hpp>
 #include <QDoubleSpinBox>
 #include <QSignalSpy>
@@ -22,7 +23,7 @@ void TestCase::renderBenchmark() {
 	for(int i = 0, num = 10; i < num; i++)
 		for(int j = 0; j < num; j++)
 			for(int k = 0; k < num; k++) {
-				auto child = ui->viewport->addChild<Cube>();
+				auto child = ui->viewport->addChild<Sphere>();
 				child->position(QVector3D(i, j, k));
 			}
 

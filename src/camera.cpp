@@ -3,7 +3,7 @@
 #include <camera.hpp>
 
 Camera::Camera(QObject* parent) : QObject(parent), m_vAngle(0.0f), m_vBias(0.0f), m_hAngle(3.14f), m_hBias(0.0f),
-	m_speed(5.0f) {
+	m_speed(2.5f) {
 	position(QVector3D(0, 0, 0));
 }
 
@@ -14,9 +14,6 @@ Camera::Camera(Camera* copy) {
 	m_vBias = copy->vBias();
 	m_speed = copy->speed();
 	position(copy->position());
-}
-
-Camera::~Camera() {
 }
 
 void Camera::resetBias() {
@@ -38,6 +35,14 @@ QVector3D Camera::direction() {
 
 QVector3D Camera::up() {
 	return QVector3D::crossProduct(right(), direction());
+}
+
+void Camera::velocity(QVector3D v, int dur) {
+	QPropertyAnimation *animation = new QPropertyAnimation(this, "position");
+	animation->setDuration(dur);
+	animation->setStartValue(position());
+	animation->setEndValue(position() + (v * speed()));
+	animation->start();
 }
 
 QMatrix4x4 Camera::view() {

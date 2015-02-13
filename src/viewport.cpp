@@ -38,6 +38,8 @@ void Viewport::initializeGL() {
 	glClearColor(bg.redF(), bg.greenF(), bg.blueF(), bg.alphaF());
 
 	isInitialized(true);
+
+	qDebug() << "OpenGL version:" << reinterpret_cast<const char*>(glGetString(GL_VERSION));
 }
 
 void Viewport::paintGL() {

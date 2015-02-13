@@ -15,6 +15,8 @@ HEADERS += \
 SOURCES += \
     test/testcase.cpp
 
+DEFINES += UNIT_TEST
+
 unix {
 	QMAKE_LFLAGS += --coverage
 	QMAKE_CXXFLAGS += --coverage
