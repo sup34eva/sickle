@@ -249,7 +249,6 @@ private:
 		auto btan = (W * UV1.x() - V * UV2.x()) * r;
 		return btan;
 	}
-
 };
 
 #endif  // GEOMETRY_H

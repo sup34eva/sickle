@@ -4,6 +4,9 @@ in vec3 fragColor;
 in vec3 normal;
 in vec3 eyeDir;
 in vec3 lightDir;
+in vec2 texCoord;
+in vec3 tangent;
+in vec3 bitangent;
 
 uniform vec3 lightColor;
 uniform float lightPower;

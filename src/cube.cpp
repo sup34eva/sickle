@@ -117,4 +117,29 @@ QVector<GLfloat> Cube::tBase::s_colors = {
 };
 
 template<>
-QVector<GLfloat> Cube::tBase::s_uv = {}; // TODO
+QVector<GLfloat> Cube::tBase::s_uv = {
+	 0.0f,  0.0f,		// Face 1
+	 0.0f,  1.0f,		//
+	 1.0f,  1.0f,		//
+	 1.0f,  0.0f,		//
+	 0.0f,  0.0f,		// Face 2
+	 1.0f,  0.0f,		//
+	 1.0f,  1.0f,		//
+	 0.0f,  1.0f,		//
+	 0.0f,  0.0f,		// Face 3
+	 1.0f,  0.0f,		//
+	 1.0f,  1.0f,		//
+	 0.0f,  1.0f,		//
+	 0.0f,  0.0f,		// Face 4
+	 0.0f,  1.0f,		//
+	 1.0f,  1.0f,		//
+	 1.0f,  0.0f,		//
+	 0.0f,  0.0f,		// Face 5
+	 0.0f,  1.0f,		//
+	 1.0f,  1.0f,		//
+	 1.0f,  0.0f,		//
+	 0.0f,  0.0f,		// Face 6
+	 1.0f,  0.0f,		//
+	 1.0f,  1.0f,		//
+	 0.0f,  1.0f,		//
+};
