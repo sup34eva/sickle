@@ -4,6 +4,9 @@ in vec3 fragColor;
 in vec3 normal;
 in vec3 eyeDir;
 in vec3 lightDir;
+in vec2 texCoord;
+in vec3 tangent;
+in vec3 bitangent;
 
 uniform vec3 lightColor;
 uniform float lightPower;
@@ -163,54 +166,22 @@ vec3 TrowbridgeReitz( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
     return vec3(D);
 }
 
-/*float HanrahanKrueger_fresnel(vec3 wi, vec3 n, float etaExt, float etaInt) {
-    float eta = etaExt / etaInt;
-    float cosTheta1 = dot(wi, n);
-    float cosTheta2 = sqrt(1.0 - eta*eta*
-    (1.0 - cosTheta1 * cosTheta1));
-    float Rs = (etaExt * cosTheta1 - etaInt * cosTheta2)
-        / (etaExt * cosTheta1 + etaInt * cosTheta2);
-    float Rp = (etaInt * cosTheta1 - etaExt * cosTheta2)
-        / (etaInt * cosTheta1 + etaExt * cosTheta2);
-    return (Rs * Rs + Rp * Rp) / 2.0;
-}
-
-float HanrahanKrueger_phaseHG(float cosTheta, float g) {
-    float gSq = g*g;
-    return 0.5 * (1 - gSq) / pow(1 + gSq - 2 * g * cosTheta, 1.5);
-}
-
-vec3 HanrahanKrueger(vec2 uv, vec3 wi, vec3 wo) {
-    if (wi.z < 0.0 || wo.z < 0.0)
-        return vec3(0.0);
-    float cosThetaI = dot(wi, normal);
-    float cosThetaO = dot(wo, normal);
-    float cosTheta = dot(wo, wi);
-    float FrI = HanrahanKrueger_fresnel(wi, normal, HanrahanKrueger_etaExt, HanrahanKrueger_etaInt);
-    float FtI = 1-FrI;
-    float FrO = HanrahanKrueger_fresnel(wo, normal, HanrahanKrueger_etaExt, HanrahanKrueger_etaInt);
-    float FtO = 1-FrO;
-    float p = HanrahanKrueger_phaseHG(cosTheta, HanrahanKrueger_g);
-    return HanrahanKrueger_albedo * FtI * FtO * p / (abs(cosThetaI) + abs(cosThetaO));
-}*/
-
 void main() {
-    const vec3 z = vec3(0);
     vec3 l = normalize(lightDir);
     vec3 v = normalize(eyeDir);
     vec3 n = normalize(normal);
-    float nl = clamp(dot(n, l), 0, 1);
+    vec3 x = normalize(tangent);
+    vec3 y = normalize(bitangent);
+    float NoL = clamp(dot(n, l), 0, 1);
 
     /* Couples Diffuse / Specular sympas:
       - Oren-Nayar / Blinn-Phong (Default)
       - Lambert / Cook-Torrance (Far Cry 3)
      */
 
-    vec3 seeligen = vec3(nl / nl + dot(n, v));
+    vec3 diffuse = OrenNayar(l, v, n, x, y);
+    vec3 specular = BlinnPhong(l, v, n, x, y);
 
-    vec3 diffuse = OrenNayar(l, v, n, z, z);
-    vec3 specular = BlinnPhong(l, v, n, z, z);
-
-    vec3 radiance = (lightPower * nl * ((diffuse * fragColor) + specular)) + (ambientColor * fragColor);
-    color = vec4(seeligen * nl, 1);
+    vec3 radiance = (lightPower * NoL * ((diffuse * fragColor) + specular)) + (ambientColor * fragColor);
+    color = vec4(radiance, 1);
 }

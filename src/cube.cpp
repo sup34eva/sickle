@@ -29,10 +29,20 @@ QOpenGLBuffer* Cube::tBase::s_colorBuffer = nullptr;
 template<>
 QOpenGLBuffer* Cube::tBase::s_normalBuffer = nullptr;
 template<>
+QOpenGLBuffer* Cube::tBase::s_UVBuffer = nullptr;
+template<>
+QOpenGLBuffer* Cube::tBase::s_tangentBuffer = nullptr;
+template<>
+QOpenGLBuffer* Cube::tBase::s_bitangentBuffer = nullptr;
+template<>
 QOpenGLBuffer* Cube::tBase::s_indexBuffer = nullptr;
 
 template<>
 QVector<GLfloat> Cube::tBase::s_normals = {};
+template<>
+QVector<GLfloat> Cube::tBase::s_tangents = {};
+template<>
+QVector<GLfloat> Cube::tBase::s_bitangents = {};
 
 template<>
 QVector<GLfloat> Cube::tBase::s_vertices = {
@@ -105,3 +115,6 @@ QVector<GLfloat> Cube::tBase::s_colors = {
 	1.0f, 0.0f, 1.0f,		//
 	1.0f, 0.0f, 1.0f,		//
 };
+
+template<>
+QVector<GLfloat> Cube::tBase::s_uv = {}; // TODO

@@ -103,7 +103,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			auto value = qvariant_cast<QVector3D>(prop);
 			auto vector = new QVector3D(value);
 			auto label = new QLabel(toString(*vector));
-			QString axis[] = {"X", "Y", "Z"};
+			const QString axis[] = {"X", "Y", "Z"};
 
 			for (int i = 0; i < 3; i++) {
 				auto item = new QTreeWidgetItem;
@@ -167,7 +167,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			auto quat = new QQuaternion(value);
 			auto vector = toEuler(*quat);
 			auto label = new QLabel(toString(*vector));
-			QString axis[] = {"Pitch", "Yaw", "Roll"};
+			const QString axis[] = {"Pitch", "Yaw", "Roll"};
 
 			for (int i = 0; i < 3; i++) {
 				auto item = new QTreeWidgetItem;

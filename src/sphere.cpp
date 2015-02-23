@@ -25,10 +25,20 @@ QOpenGLBuffer* Sphere::tBase::s_colorBuffer = nullptr;
 template<>
 QOpenGLBuffer* Sphere::tBase::s_normalBuffer = nullptr;
 template<>
+QOpenGLBuffer* Sphere::tBase::s_UVBuffer = nullptr;
+template<>
+QOpenGLBuffer* Sphere::tBase::s_tangentBuffer = nullptr;
+template<>
+QOpenGLBuffer* Sphere::tBase::s_bitangentBuffer = nullptr;
+template<>
 QOpenGLBuffer* Sphere::tBase::s_indexBuffer = nullptr;
 
 template<>
 QVector<GLfloat> Sphere::tBase::s_normals = {};
+template<>
+QVector<GLfloat> Sphere::tBase::s_tangents = {};
+template<>
+QVector<GLfloat> Sphere::tBase::s_bitangents = {};
 
 const quint32 rings = 24;
 const quint32 sectors = 48;
@@ -80,9 +90,25 @@ QVector<GLfloat> calcColors() {
 	return colors;
 }
 
+QVector<GLfloat> calcUVs() {
+	const auto R = 1. / (qreal)(rings - 1);
+	const auto S = 1. / (qreal)(sectors - 1);
+	QVector<GLfloat> UVs;
+	UVs.resize(rings * sectors * 2);
+
+	auto t = UVs.begin();
+	for (quint32 r = 0; r < rings; r++) for (quint32 s = 0; s < sectors; s++) {
+		*t++ = s * S;
+		*t++ = r * R;
+	}
+	return UVs;
+}
+
 template<>
 QVector<GLfloat> Sphere::tBase::s_vertices = calcVertices();
 template<>
 QVector<quint32> Sphere::tBase::s_indices = calcIndices();
 template<>
 QVector<GLfloat> Sphere::tBase::s_colors = calcColors();
+template<>
+QVector<GLfloat> Sphere::tBase::s_uv = calcUVs();
