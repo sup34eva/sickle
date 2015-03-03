@@ -31,10 +31,24 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(ui->viewport->camera(), &Camera::moved,
 			[=](const QVector3D& position) { ui->camPos->setText(toString(position)); });
 
+	plugins.append(new DefaultFileLoader());
+
+	foreach(QObject* plugin, plugins) {
+		auto loader = qobject_cast<FileLoaderInterface*>(plugin);
+		if(loader) {
+			auto extensions = loader->extensions();
+			formats.append(QString("%1 (%2)").arg(loader->name()).arg(extensions.join(", *.").prepend("*.")));
+			foreach (QString suffix, extensions) {
+				loaders[suffix] = loader;
+			}
+		}
+	}
+
 	connect(ui->viewport, &Viewport::initialized, [=]() {
 		auto args = QCoreApplication::arguments();
 		if (args.length() > 1) {
-			ui->viewport->load(args.at(1));
+			auto fileName = args.at(1);
+			loaders[QFileInfo(fileName).suffix()]->load(ui->viewport, fileName);
 		}
 	});
 }
@@ -231,14 +245,14 @@ void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
 }
 
 void MainWindow::on_actionOpen_triggered() {
-	auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), tr("Sickle World (*.wld)"));
-	ui->viewport->load(fileName);
+	auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), formats.join(";;"));
+	loaders[QFileInfo(fileName).suffix()]->load(ui->viewport, fileName);
 	m_lastFile = fileName;
 }
 
 void MainWindow::on_actionSave_as_triggered() {
-	auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("Sickle World (*.wld)"));
-	ui->viewport->save(fileName);
+	auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), formats.join(";;"));
+	loaders[QFileInfo(fileName).suffix()]->save(ui->viewport, fileName);
 	m_lastFile = fileName;
 }
 
@@ -246,7 +260,7 @@ void MainWindow::on_action_Save_triggered() {
 	if (m_lastFile.isEmpty())
 		on_actionSave_as_triggered();
 	else
-		ui->viewport->save(m_lastFile);
+		loaders[QFileInfo(m_lastFile).suffix()]->save(ui->viewport, m_lastFile);
 }
 
 void MainWindow::on_actionWireframe_toggled(bool checked) {

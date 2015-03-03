@@ -29,7 +29,8 @@ SOURCES += \
     src/mainwindow.cpp \
     src/cube.cpp \
     src/sphere.cpp \
-    src/actor.cpp
+    src/actor.cpp \
+    src/fileloader.cpp
 
 HEADERS  += \
     include/camera.hpp \
@@ -40,7 +41,8 @@ HEADERS  += \
     include/mainwindow.hpp \
     include/viewport.hpp \
     include/sphere.hpp \
-    include/actor.hpp
+    include/actor.hpp \
+    include/fileloader.hpp
 
 DISTFILES += \
     README.md \

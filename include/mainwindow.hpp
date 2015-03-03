@@ -3,6 +3,7 @@
 #ifndef TESTMAIN_H
 #define TESTMAIN_H
 
+#include <fileloader.hpp>
 #include <QMainWindow>
 #include <QTreeWidgetItem>
 #include <functional>
@@ -42,6 +43,9 @@ private:
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);
 	QString m_lastFile;
 	Ui::MainWindow* ui;
+	QObjectList plugins;
+	QStringList formats;
+	QMap<QString, FileLoaderInterface*> loaders;
 };
 
 #endif  // TESTMAIN_H

@@ -52,8 +52,6 @@ public:
 #endif
 
 public slots:
-	void save(QString name);
-	void load(QString name);
 	void clearLevel();
 
 signals:
