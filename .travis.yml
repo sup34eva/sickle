@@ -8,13 +8,13 @@ cache:
   directories:
     - Qt
 before_install:
-  - sudo add-apt-repository --yes ppa:beineri/opt-qt54
+  - sudo add-apt-repository --yes ppa:beineri/opt-qt541
   - sudo apt-add-repository --yes ppa:libreoffice/libreoffice-4-2
   - sudo apt-get update -qq
-  - sudo pip install PyYAML cpp-coveralls cpplint
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
 install:
+  - sudo pip install PyYAML cpp-coveralls cpplint
   - sudo apt-get install qt54base qt54tools qt54declarative doxygen graphviz
   - chmod ugo+x scripts/build-docs.sh
 before_script: /opt/qt54/bin/qmake -unix SickleTest.pro
