@@ -12,18 +12,22 @@ class Viewport;
  *
  * Les classes implémentant cette interface permettent d'utiliser un certain format de fichier.
  */
-class FileLoaderInterface {
+class FileLoader {
 	public:
-		virtual ~FileLoaderInterface() {}
+		virtual ~FileLoader() {}
 		virtual void save(Viewport*, const QString&) = 0;
 		virtual void load(Viewport*, const QString&) = 0;
 };
 
-Q_DECLARE_INTERFACE(FileLoaderInterface, "com.sup3asc2.sickle.FileLoaderInterface/1.0")
+Q_DECLARE_INTERFACE(FileLoader, "com.sup3asc2.sickle.FileLoader/1.0")
 
-class DefaultFileLoader : public QObject, public FileLoaderInterface {
+/*! \brief Chargeur de fichier par defaut
+ *
+ * Gestionnaire de fichier pour le format WLD
+ */
+class DefaultFileLoader : public QObject, public FileLoader {
 	Q_OBJECT
-	Q_INTERFACES(FileLoaderInterface)
+	Q_INTERFACES(FileLoader)
 	public:
 		virtual void save(Viewport*, const QString&);
 		virtual void load(Viewport*, const QString&);

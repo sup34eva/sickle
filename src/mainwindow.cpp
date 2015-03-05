@@ -75,7 +75,7 @@ void MainWindow::loadPlugins() {
 	}
 
 	foreach(Plugin plugin, plugins) {
-		auto loader = qobject_cast<FileLoaderInterface*>(std::get<0>(plugin));
+		auto loader = qobject_cast<FileLoader*>(std::get<0>(plugin));
 		auto data = std::get<1>(plugin);
 		if(loader) {
 			QStringList extensions;
@@ -83,7 +83,7 @@ void MainWindow::loadPlugins() {
 				extensions.append(ext.toString());
 
 			QString type = data["type"].toString();
-			qDebug() << "FileLoaderPlugin" << data;
+			qDebug() << "FileLoader" << data;
 			formats.append(QString("%1 (%2)").arg(type).arg(extensions.join(", *.").prepend("*.")));
 			foreach(QString suffix, extensions)
 				loaders[suffix] = loader;

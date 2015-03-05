@@ -9,7 +9,7 @@ if(!isEmpty(ENV_CXX)) {
     QMAKE_LINK = $$(CXX)
 }
 
-VERSION = $$system(git rev-list HEAD --count)
+VERSION = $$system(git rev-list --count HEAD $$PWD/include/fileloader.hpp $$PWD/src/fileloader.cpp)
 !isEmpty(VERSION){
     VERSION = $${VERSION}
 }

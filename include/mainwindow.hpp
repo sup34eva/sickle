@@ -50,7 +50,7 @@ private:
 	typedef std::tuple<QObject*, QJsonObject> Plugin;
 	QList<Plugin> plugins;
 	QStringList formats;
-	QMap<QString, FileLoaderInterface*> loaders;
+	QMap<QString, FileLoader*> loaders;
 };
 
 #endif  // TESTMAIN_H
