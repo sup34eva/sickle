@@ -4,13 +4,12 @@
 #include <QString>
 #include <QFile>
 
+class Viewport;
+
 /*! \brief Interface de gestion des fichiers
  *
  * Les classes implémentant cette interface permettent d'utiliser un certain format de fichier.
  */
-
-class Viewport;
-
 class FileLoaderInterface {
 	public:
 		virtual ~FileLoaderInterface() {}

@@ -31,7 +31,48 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(ui->viewport->camera(), &Camera::moved,
 			[=](const QVector3D& position) { ui->camPos->setText(toString(position)); });
 
+	loadPlugins();
+
+	connect(ui->viewport, &Viewport::initialized, [=]() {
+		auto args = QCoreApplication::arguments();
+		if (args.length() > 1) {
+			auto fileName = args.at(1);
+			loaders[QFileInfo(fileName).suffix()]->load(ui->viewport, fileName);
+		}
+	});
+}
+
+void MainWindow::loadPlugins() {
+	// Plugins par defaut
 	plugins.append(new DefaultFileLoader());
+
+	foreach (QObject *plugin, QPluginLoader::staticInstances())
+		plugins.append(plugin);
+
+	auto pluginsDir = QDir(qApp->applicationDirPath());
+#if defined(Q_OS_WIN)
+	if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release") {
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+	}
+#elif defined(Q_OS_MAC)
+	if (pluginsDir.dirName() == "MacOS") {
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+	}
+#endif
+	pluginsDir.cd("plugins");
+
+	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
+		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
+		auto plugin = loader.instance();
+		if (plugin)
+			plugins.append(plugin);
+		else
+			qWarning() << loader.errorString();
+	}
 
 	foreach(QObject* plugin, plugins) {
 		auto loader = qobject_cast<FileLoaderInterface*>(plugin);
@@ -43,14 +84,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 			}
 		}
 	}
-
-	connect(ui->viewport, &Viewport::initialized, [=]() {
-		auto args = QCoreApplication::arguments();
-		if (args.length() > 1) {
-			auto fileName = args.at(1);
-			loaders[QFileInfo(fileName).suffix()]->load(ui->viewport, fileName);
-		}
-	});
 }
 
 MainWindow::~MainWindow() {
@@ -246,14 +279,19 @@ void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
 
 void MainWindow::on_actionOpen_triggered() {
 	auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), formats.join(";;"));
-	loaders[QFileInfo(fileName).suffix()]->load(ui->viewport, fileName);
-	m_lastFile = fileName;
+	auto info = QFileInfo(fileName);
+	if(info.exists()) {
+		loaders[info.suffix()]->load(ui->viewport, fileName);
+		m_lastFile = fileName;
+	}
 }
 
 void MainWindow::on_actionSave_as_triggered() {
 	auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), formats.join(";;"));
-	loaders[QFileInfo(fileName).suffix()]->save(ui->viewport, fileName);
-	m_lastFile = fileName;
+	if(!fileName.isEmpty()) {
+		loaders[QFileInfo(fileName).suffix()]->save(ui->viewport, fileName);
+		m_lastFile = fileName;
+	}
 }
 
 void MainWindow::on_action_Save_triggered() {

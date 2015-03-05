@@ -6,6 +6,7 @@
 #include <fileloader.hpp>
 #include <QMainWindow>
 #include <QTreeWidgetItem>
+#include <QPluginLoader>
 #include <functional>
 
 typedef std::function<QVariant(void)> VarGetter;
@@ -40,6 +41,7 @@ private slots:
 	void on_newSphere_triggered();
 
 private:
+	void loadPlugins();
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);
 	QString m_lastFile;
 	Ui::MainWindow* ui;
