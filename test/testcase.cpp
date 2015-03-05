@@ -63,10 +63,11 @@ void TestCase::scaleObject() {
 }
 
 void TestCase::saveLoad() {
+	DefaultFileLoader loader;
 	ui->viewport->addChild<Cube>();
-	ui->viewport->save("test.wld");
+	loader.save(ui->viewport, "test.wld");
 	ui->viewport->clearLevel();
-	ui->viewport->load("test.wld");
+	loader.load(ui->viewport, "test.wld");
 	QCOMPARE(ui->viewport->findChildren<Cube>().length(), 1);
 }
 

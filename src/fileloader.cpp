@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #include <fileloader.hpp>
 #include <viewport.hpp>
 

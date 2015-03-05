@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #ifndef FILELOADER_HPP
 #define FILELOADER_HPP
 
@@ -27,4 +29,4 @@ class DefaultFileLoader : public QObject, public FileLoaderInterface {
 		virtual void load(Viewport*, const QString&);
 };
 
-#endif // FILELOADER_HPP
+#endif  // FILELOADER_HPP

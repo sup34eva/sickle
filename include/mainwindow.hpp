@@ -9,6 +9,7 @@
 #include <QPluginLoader>
 #include <QJsonArray>
 #include <functional>
+#include <tuple>
 
 typedef std::function<QVariant(void)> VarGetter;
 typedef std::function<void(const QVariant&)> VarSetter;

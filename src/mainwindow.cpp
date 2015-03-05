@@ -65,7 +65,7 @@ void MainWindow::loadPlugins() {
 #endif
 	pluginsDir.cd("plugins");
 
-	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
+	foreach(QString fileName, pluginsDir.entryList(QDir::Files)) {
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		auto plugin = loader.instance();
 		if (plugin)
@@ -85,7 +85,7 @@ void MainWindow::loadPlugins() {
 			QString type = data["type"].toString();
 			qDebug() << "FileLoaderPlugin" << data;
 			formats.append(QString("%1 (%2)").arg(type).arg(extensions.join(", *.").prepend("*.")));
-			foreach (QString suffix, extensions)
+			foreach(QString suffix, extensions)
 				loaders[suffix] = loader;
 		}
 	}
