@@ -44,10 +44,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 void MainWindow::loadPlugins() {
 	// Plugins par defaut
-	plugins.append(new DefaultFileLoader());
-
-	foreach (QObject *plugin, QPluginLoader::staticInstances())
-		plugins.append(plugin);
+	QJsonObject data;
+	data["type"] = DefaultFileLoader::tr("Sickle World");
+	data["extensions"] = QJsonArray({"wld"});
+	plugins.append(Plugin(new DefaultFileLoader(), data));
 
 	auto pluginsDir = QDir(qApp->applicationDirPath());
 #if defined(Q_OS_WIN)
@@ -69,19 +69,24 @@ void MainWindow::loadPlugins() {
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		auto plugin = loader.instance();
 		if (plugin)
-			plugins.append(plugin);
+			plugins.append(Plugin(plugin, loader.metaData()["MetaData"].toObject()));
 		else
 			qWarning() << loader.errorString();
 	}
 
-	foreach(QObject* plugin, plugins) {
-		auto loader = qobject_cast<FileLoaderInterface*>(plugin);
+	foreach(Plugin plugin, plugins) {
+		auto loader = qobject_cast<FileLoaderInterface*>(std::get<0>(plugin));
+		auto data = std::get<1>(plugin);
 		if(loader) {
-			auto extensions = loader->extensions();
-			formats.append(QString("%1 (%2)").arg(loader->name()).arg(extensions.join(", *.").prepend("*.")));
-			foreach (QString suffix, extensions) {
+			QStringList extensions;
+			foreach(QJsonValue ext, data["extensions"].toArray())
+				extensions.append(ext.toString());
+
+			QString type = data["type"].toString();
+			qDebug() << "FileLoaderPlugin" << data;
+			formats.append(QString("%1 (%2)").arg(type).arg(extensions.join(", *.").prepend("*.")));
+			foreach (QString suffix, extensions)
 				loaders[suffix] = loader;
-			}
 		}
 	}
 }

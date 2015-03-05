@@ -7,6 +7,7 @@
 #include <QMainWindow>
 #include <QTreeWidgetItem>
 #include <QPluginLoader>
+#include <QJsonArray>
 #include <functional>
 
 typedef std::function<QVariant(void)> VarGetter;
@@ -45,7 +46,8 @@ private:
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);
 	QString m_lastFile;
 	Ui::MainWindow* ui;
-	QObjectList plugins;
+	typedef std::tuple<QObject*, QJsonObject> Plugin;
+	QList<Plugin> plugins;
 	QStringList formats;
 	QMap<QString, FileLoaderInterface*> loaders;
 };

@@ -9,8 +9,6 @@ class VMFFileLoader : public QObject, public FileLoaderInterface {
 	Q_INTERFACES(FileLoaderInterface)
 	Q_PLUGIN_METADATA(IID "com.sup3asc2.sickle.VMFLoader" FILE "vmf_loader.json")
 	public:
-		virtual QString name();
-		virtual QStringList extensions();
 		virtual void save(Viewport*, const QString&);
 		virtual void load(Viewport*, const QString&);
 };

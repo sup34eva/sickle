@@ -1,16 +1,6 @@
 #include <fileloader.hpp>
 #include <viewport.hpp>
 
-QString DefaultFileLoader::name() {
-	return tr("Sickle World");
-}
-
-QStringList DefaultFileLoader::extensions() {
-	return QStringList({
-						   "wld"
-					   });
-}
-
 void DefaultFileLoader::save(Viewport* view, const QString& name) {
 	QFile file(name);
 	file.open(QIODevice::WriteOnly);

@@ -1,1 +1,6 @@
-{}
+{
+	"type": "Hammer Map",
+	"extensions": [
+		"vmf"
+	]
+}
