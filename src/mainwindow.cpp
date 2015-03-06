@@ -196,6 +196,30 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			connect(spinner, changeSignal, [=](double value) { set(value); });
 			return spinner;
 		}
+		case QMetaType::QObjectStar: {
+			auto obj = qvariant_cast<QObject*>(prop);
+			if (obj != nullptr) {
+				auto metaObject = obj->metaObject();
+				auto count = metaObject->propertyCount();
+				for (int i = metaObject->propertyOffset(); i < count; i++) {
+					auto name = metaObject->property(i).name();
+
+					auto item = new QTreeWidgetItem;
+					item->setText(0, name);
+					line->addChild(item);
+
+					auto widget = widgetForVariant(item, [=]() {
+						return obj->property(name);
+					}, [=](const QVariant& val) {
+						obj->setProperty(name, val);
+					});
+
+					line->treeWidget()->setItemWidget(item, 1, widget);
+				}
+			}
+
+			break;
+		}
 		default:
 			qDebug() << prop.type();
 			return new QLabel(prop.toString());
@@ -209,12 +233,14 @@ void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
 	if (current != nullptr) {
 		auto ptr = current->data(0, Qt::UserRole);
 		if ((!ptr.isNull()) && ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
-			QObject* obj = qvariant_cast<QObject*>(ptr);
+			auto obj = qvariant_cast<QObject*>(ptr);
 			if (obj != nullptr) {
 				auto metaObject = obj->metaObject();
 				auto count = metaObject->propertyCount();
+				qDebug() << metaObject->className() << count;
 				for (int i = 0; i < count; i++) {
 					auto prop = metaObject->property(i).name();
+					qDebug() << i << prop;
 					auto line = new QTreeWidgetItem;
 					line->setText(0, prop);
 					ui->infoWidget->addTopLevelItem(line);

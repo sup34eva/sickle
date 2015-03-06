@@ -24,7 +24,7 @@ script:
   - make check
 after_success:
   - ./scripts/build-docs.sh
-  - coveralls
+  - coveralls --exclude-pattern moc_
 deploy:
   provider: releases
   api-key:

@@ -8,23 +8,25 @@ in vec2 texCoord;
 in vec3 tangent;
 in vec3 bitangent;
 
+struct Material {
+    float metallic;
+    float subsurface;
+    float specular;
+    float roughness;
+    float specularTint;
+    float anisotropic;
+    float sheen;
+    float sheenTint;
+    float clearcoat;
+    float clearcoatGloss;
+};
+
 uniform vec3 lightColor;
 uniform float lightPower;
 uniform vec3 ambientColor;
+uniform Material material;
 
 out vec4 color;
-
-// Params
-const float metallic = 0;
-const float subsurface = 0;
-const float specular = .5;
-const float roughness = .5;
-const float specularTint = 0;
-const float anisotropic = 0;
-const float sheen = 0;
-const float sheenTint = .5;
-const float clearcoat = 0;
-const float clearcoatGloss = 1;
 
 const float PI = 3.14159265358979323846;
 
@@ -73,37 +75,37 @@ vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
     vec3 Cdlin = mon2lin(fragColor);
     float Cdlum = .3 * Cdlin[0] + .6 * Cdlin[1] + .1 * Cdlin[2]; // luminance approx.
     vec3 Ctint = Cdlum > 0 ? Cdlin/Cdlum : vec3(1); // normalize lum. to isolate hue+sat
-    vec3 Cspec0 = mix(specular * .08 * mix(vec3(1), Ctint, specularTint), Cdlin, metallic);
-    vec3 Csheen = mix(vec3(1), Ctint, sheenTint);
+    vec3 Cspec0 = mix(material.specular * .08 * mix(vec3(1), Ctint, material.specularTint), Cdlin, material.metallic);
+    vec3 Csheen = mix(vec3(1), Ctint, material.sheenTint);
     // Diffuse fresnel - go from 1 at normal incidence to .5 at grazing
     // and mix in diffuse retro-reflection based on roughness
     float FL = SchlickFresnel(NdotL), FV = SchlickFresnel(NdotV);
-    float Fd90 = 0.5 + 2 * LdotH * LdotH * roughness;
+    float Fd90 = 0.5 + 2 * LdotH * LdotH * material.roughness;
     float Fd = mix(1, Fd90, FL) * mix(1, Fd90, FV);
     // Based on Hanrahan-Krueger brdf approximation of isotropic bssrdf
     // 1.25 scale is used to (roughly) preserve albedo
     // Fss90 used to "flatten" retroreflection based on roughness
-    float Fss90 = LdotH * LdotH * roughness;
+    float Fss90 = LdotH * LdotH * material.roughness;
     float Fss = mix(1, Fss90, FL) * mix(1, Fss90, FV);
     float ss = 1.25 * (Fss * (1 / (NdotL + NdotV) - .5) + .5);
     // specular
-    float aspect = sqrt(1 - anisotropic * .9);
-    float ax = max(.001, sqr(roughness) / aspect);
-    float ay = max(.001, sqr(roughness) * aspect);
+    float aspect = sqrt(1 - material.anisotropic * .9);
+    float ax = max(.001, sqr(material.roughness) / aspect);
+    float ay = max(.001, sqr(material.roughness) * aspect);
     float Ds = GTR2_aniso(NdotH, dot(H, X), dot(H, Y), ax, ay);
     float FH = SchlickFresnel(LdotH);
     vec3 Fs = mix(Cspec0, vec3(1), FH);
-    float roughg = sqr(roughness * .5 + .5);
+    float roughg = sqr(material.roughness * .5 + .5);
     float Gs = smithG_GGX(NdotL, roughg) * smithG_GGX(NdotV, roughg);
     // sheen
-    vec3 Fsheen = FH * sheen * Csheen;
+    vec3 Fsheen = FH * material.sheen * Csheen;
     // clearcoat (ior = 1.5 -> F0 = 0.04)
-    float Dr = GTR1(NdotH, mix(.1, .001, clearcoatGloss));
+    float Dr = GTR1(NdotH, mix(.1, .001, material.clearcoatGloss));
     float Fr = mix(.04, 1, FH);
     float Gr = smithG_GGX(NdotL, .25) * smithG_GGX(NdotV, .25);
-    return ((1/PI) * mix(Fd, ss, subsurface) * Cdlin + Fsheen)
-            * (1 - metallic)
-            + Gs * Fs * Ds + .25 * clearcoat * Gr * Fr * Dr;
+    return ((1/PI) * mix(Fd, ss, material.subsurface) * Cdlin + Fsheen)
+            * (1 - material.metallic)
+            + Gs * Fs * Ds + .25 * material.clearcoat * Gr * Fr * Dr;
 }
 
 

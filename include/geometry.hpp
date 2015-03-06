@@ -14,6 +14,48 @@
 #include <memory>
 #include <vector>
 
+/*! \brief Définit les propriétés d'un materiau
+ *
+ * Cette structure contient tous les paramètres passés au shader pour définir un materiau, basé sur le principe des
+ * shaders Disney.
+ */
+struct Material : public QObject {
+	Q_OBJECT
+public:
+	Material() {
+		specular(50);
+		roughness(50);
+		sheenTint(50);
+		clearcoatGloss(100);
+	}
+	prop(float, metallic); //! Si la surface est refléchissante (ex: metal)
+	prop(float, subsurface); //! Si la surface diffuse la lumière (ex: peau, bougie)
+	prop(float, specular); //! Si la surface est brillante (ex: plastique)
+	prop(float, roughness); //! Si la surface est rugeuse (ex: bois, tissu)
+	prop(float, specularTint); //! Si la composante speculaire doit prendre la couleur de la surface
+	prop(float, anisotropic); //! Si la reflection est anisotropique (ex: soie, cheveux)
+	prop(float, sheen); //! Si la surface a un eclat supplémentaire (ex: tissu)
+	prop(float, sheenTint); //! Si l'eclat doit prendre la teinte de la surface
+	prop(float, clearcoat); //! Si la surface est vernie
+	prop(float, clearcoatGloss); //! Si le vernis est brillant
+};
+
+/*! \brief Base pour la classe Geometry
+ *
+ * Cette classe sert de base a la classe Geometry. Elle est nécéssaire car la système de meta-objet de Qt ne supporte
+ * pas les classes template, toutes les propriétés de la classe Geometry sont donc déclarées ici.
+ */
+class GeoBase : public Actor {
+	Q_OBJECT
+
+public:
+	explicit GeoBase(QObject* parent = nullptr) : Actor(parent) {
+		material(new Material());
+	}
+	prop(QVariantList, colors);
+	prop(QObject*, material);
+};
+
 /*! \brief Base de toutes les géometries
  * \tparam Child La classe heritant de Geometry (utilisé pour initialiser les membres statiques)
  *
@@ -23,9 +65,9 @@
  *
  */
 template <typename Child>
-class Geometry : public Actor {
+class Geometry : public GeoBase {
 public:
-	explicit Geometry(QObject* parent = nullptr) : Actor(parent) {
+	explicit Geometry(QObject* parent = nullptr) : GeoBase(parent) {
 		initProgram(parent);
 	}
 	noinline void draw(const DrawInfo& info) {
@@ -37,6 +79,12 @@ public:
 		Child::s_program->setUniformValue("model", Model);
 		Child::s_program->setUniformValue("view", info.View);
 		Child::s_program->setUniformValue("MVP", MVP);
+
+		auto mat = material()->metaObject();
+		for(int i = mat->propertyOffset(); i < mat->propertyCount(); i++) {
+			auto name = mat->property(i).name();
+			Child::s_program->setUniformValue(QString("material.%1").arg(name).toStdString().c_str(), material()->property(name).toFloat() / 100.0f);
+		}
 
 		Child::s_program->setUniformValue("lightD", QVector3D(1, 1, 1));
 
@@ -160,8 +208,6 @@ protected:
 			Child::s_program->enableAttributeArray(btanAttr);
 		}
 	}
-
-	prop(QVariantList, colors);
 
 	// Instances
 	static int s_instances;
