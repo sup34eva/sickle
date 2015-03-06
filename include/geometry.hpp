@@ -28,16 +28,16 @@ public:
 		sheenTint(50);
 		clearcoatGloss(100);
 	}
-	prop(float, metallic); //! Si la surface est refléchissante (ex: metal)
-	prop(float, subsurface); //! Si la surface diffuse la lumière (ex: peau, bougie)
-	prop(float, specular); //! Si la surface est brillante (ex: plastique)
-	prop(float, roughness); //! Si la surface est rugeuse (ex: bois, tissu)
-	prop(float, specularTint); //! Si la composante speculaire doit prendre la couleur de la surface
-	prop(float, anisotropic); //! Si la reflection est anisotropique (ex: soie, cheveux)
-	prop(float, sheen); //! Si la surface a un eclat supplémentaire (ex: tissu)
-	prop(float, sheenTint); //! Si l'eclat doit prendre la teinte de la surface
-	prop(float, clearcoat); //! Si la surface est vernie
-	prop(float, clearcoatGloss); //! Si le vernis est brillant
+	prop(float, metallic);  //! Si la surface est refléchissante (ex: metal)
+	prop(float, subsurface);  //! Si la surface diffuse la lumière (ex: peau, bougie)
+	prop(float, specular);  //! Si la surface est brillante (ex: plastique)
+	prop(float, roughness);  //! Si la surface est rugeuse (ex: bois, tissu)
+	prop(float, specularTint);  //! Si la composante speculaire doit prendre la couleur de la surface
+	prop(float, anisotropic);  //! Si la reflection est anisotropique (ex: soie, cheveux)
+	prop(float, sheen);  //! Si la surface a un eclat supplémentaire (ex: tissu)
+	prop(float, sheenTint);  //! Si l'eclat doit prendre la teinte de la surface
+	prop(float, clearcoat);  //! Si la surface est vernie
+	prop(float, clearcoatGloss);  //! Si le vernis est brillant
 };
 
 /*! \brief Base pour la classe Geometry
@@ -52,7 +52,17 @@ public:
 	explicit GeoBase(QObject* parent = nullptr) : Actor(parent) {
 		material(new Material());
 	}
+	/*! \var m_colors
+	 * \brief Liste des couleurs
+	 *
+	 * Liste des couleurs utilisées pour les différentes faces de la géometrie
+	 */
 	prop(QVariantList, colors);
+	/*! \var m_material
+	 * \brief Materiau de la geometrie
+	 *
+	 * Propriétés de la surface de la geometrie
+	 */
 	prop(QObject*, material);
 };
 
@@ -83,7 +93,9 @@ public:
 		auto mat = material()->metaObject();
 		for(int i = mat->propertyOffset(); i < mat->propertyCount(); i++) {
 			auto name = mat->property(i).name();
-			Child::s_program->setUniformValue(QString("material.%1").arg(name).toStdString().c_str(), material()->property(name).toFloat() / 100.0f);
+			Child::s_program->setUniformValue(
+							QString("material.%1").arg(name).toStdString().c_str(),
+							material()->property(name).toFloat() / 100.0f);
 		}
 
 		Child::s_program->setUniformValue("lightD", QVector3D(1, 1, 1));
