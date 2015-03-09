@@ -8,9 +8,23 @@ in vec2 texCoord;
 in vec3 tangent;
 in vec3 bitangent;
 
+struct Material {
+    float metallic;
+    float subsurface;
+    float specular;
+    float roughness;
+    float specularTint;
+    float anisotropic;
+    float sheen;
+    float sheenTint;
+    float clearcoat;
+    float clearcoatGloss;
+};
+
 uniform vec3 lightColor;
 uniform float lightPower;
 uniform vec3 ambientColor;
+uniform Material material;
 
 out vec4 color;
 
@@ -31,8 +45,6 @@ vec3 Lambert( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
 }
 
 vec3 OrenNayar( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
-    const float roughness = 0.5;
-
     // calculate intermediary values
     float NdotL = dot(N, L);
     float NdotV = dot(N, V);
@@ -44,7 +56,7 @@ vec3 OrenNayar( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
     float beta = min(angleVN, angleLN);
     float gamma = dot(V - N * dot(V, N), L - N * dot(L, N));
 
-    float roughnessSquared = roughness * roughness;
+    float roughnessSquared = sqr(material.roughness);
     float roughnessSquared9 = (roughnessSquared / (roughnessSquared + 0.09));
 
     // calculate C1, C2 and C3
@@ -77,27 +89,22 @@ vec3 OrenNayar( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
 }
 
 vec3 Schlick( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
-    const float f0 = .5;
-
     vec3 H = normalize(L+V);
-    return vec3(Fresnel(f0, 1.0, 5.0, H, L));
+    return vec3(Fresnel(material.roughness, 1.0, 5.0, H, L));
 }
 
 // Specular BRDF
 vec3 BlinnPhong( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
-    const float n = 100;
     const bool divide_by_NdotL = true;
 
     vec3 H = normalize(L+V);
-    float val = pow(max(0,dot(N,H)),n);
+    float val = pow(max(0,dot(N,H)),material.specular * 100);
     if (divide_by_NdotL)
         val = val / dot(N,L);
     return vec3(val);
 }
 
 vec3 CookTorrance( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
-    const float m = .1;
-    const float f0 = .1;
     const bool include_F = true;
     const bool include_G = true;
 
@@ -109,10 +116,10 @@ vec3 CookTorrance( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
     float NdotV = dot(N, V);
     float oneOverNdotV = 1.0 / NdotV;
 
-    float M = sqr(m);
+    float M = sqr(material.roughness);
     float T = sqr(NdotH);
     float D = exp((T - 1) / (M * T)) / (PI * M * T * T);
-    float F = Fresnel(f0, 1.0, 5.0, V, H);
+    float F = Fresnel(material.specular, 1.0, 5.0, V, H);
 
     NdotH = NdotH + NdotH;
     float G = (NdotV < NdotL) ?
@@ -133,35 +140,31 @@ vec3 CookTorrance( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
     return vec3(val);
 }
 
-vec3 Gaussian( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
-{
-    const float c = .2;
+vec3 Gaussian( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
     vec3 H = normalize( L + V );
     float NdotH = dot(N, H);
     float thetaH = acos(NdotH);
-    float D = exp(-thetaH*thetaH/sqr(c));
+    float D = exp(-thetaH*thetaH/sqr(material.specular));
     return vec3(D);
 }
 
 vec3 GGX( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
 {
-    const float alpha = .1;
     vec3 H = normalize( L + V );
     float CosSquared = sqr(dot(N,H));
     float TanSquared = (1-CosSquared)/CosSquared;
-    float D = (1.0/PI) * sqr(alpha/(CosSquared * (alpha*alpha + TanSquared)));
+    float D = (1.0/PI) * sqr(material.specular/(CosSquared * (sqr(material.specular) + TanSquared)));
     return vec3(D);
 }
 
 vec3 TrowbridgeReitz( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
-    const float c = .1;
     const bool normalized = true;
 
     vec3 H = normalize( L + V );
-    float cSquared = sqr(c);
+    float cSquared = sqr(material.specular);
     float D = sqr(cSquared / (sqr(dot(N,H))*(cSquared-1)+1));
     if (normalized) {
-        D *= 1/(c*c*PI);
+        D *= 1/(cSquared*PI);
     }
     return vec3(D);
 }

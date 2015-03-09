@@ -237,10 +237,8 @@ void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
 			if (obj != nullptr) {
 				auto metaObject = obj->metaObject();
 				auto count = metaObject->propertyCount();
-				qDebug() << metaObject->className() << count;
 				for (int i = 0; i < count; i++) {
 					auto prop = metaObject->property(i).name();
-					qDebug() << i << prop;
 					auto line = new QTreeWidgetItem;
 					line->setText(0, prop);
 					ui->infoWidget->addTopLevelItem(line);

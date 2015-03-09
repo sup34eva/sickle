@@ -66,9 +66,8 @@ vec3 mon2lin(vec3 x) {
 }
 
 vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
-    float NdotL = dot(N, L);
-    float NdotV = dot(N, V);
-    if (NdotL < 0 || NdotV < 0) return vec3(0);
+    float NdotL = max(dot(N, L), 0);
+    float NdotV = max(dot(N, V), 0);
     vec3 H = normalize(L + V);
     float NdotH = dot(N, H);
     float LdotH = dot(L, H);
