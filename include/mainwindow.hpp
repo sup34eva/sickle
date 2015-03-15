@@ -5,6 +5,8 @@
 
 #include <QMainWindow>
 #include <QTreeWidgetItem>
+#include <QCheckBox>
+#include <QComboBox>
 #include <functional>
 
 typedef std::function<QVariant(void)> VarGetter;
@@ -33,10 +35,10 @@ private slots:
 	void on_action_Save_triggered();
 	void on_actionWireframe_toggled(bool arg1);
 	void on_viewport_childAdded(QObject *obj);
-
 	void on_newCube_triggered();
-
 	void on_newSphere_triggered();
+	void on_actionBuffers_toggled(bool arg1);
+	void showProperties(QObject* obj);
 
 private:
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);

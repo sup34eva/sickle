@@ -6,6 +6,7 @@
         <file>unlit.vert</file>
         <file>brdf.frag</file>
         <file>disney.frag</file>
+        <file>depth.frag</file>
     </qresource>
     <qresource prefix="/icons">
         <file>add-geo.png</file>

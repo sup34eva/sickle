@@ -21,7 +21,15 @@ Cube::Cube(QObject* parent) : Geometry(parent) {
 template<>
 QOpenGLVertexArrayObject* Cube::tBase::s_vao = nullptr;
 template<>
-QOpenGLShaderProgram* Cube::tBase::s_program = nullptr;
+ShaderList Cube::tBase::s_shaderList = {
+	ShaderInfo{S_UNLIT, ":/shaders/unlit.vert", ":/shaders/unlit.frag"},
+	ShaderInfo{S_LIT, ":/shaders/lit.vert", ":/shaders/lit.frag"},
+	ShaderInfo{S_BRDF, ":/shaders/lit.vert", ":/shaders/brdf.frag"},
+	ShaderInfo{S_DISNEY, ":/shaders/lit.vert", ":/shaders/disney.frag"},
+	ShaderInfo{S_DEPTH, ":/shaders/lit.vert", ":/shaders/depth.frag"}
+};
+template<>
+ProgramList Cube::tBase::s_programList = {};
 template<>
 QOpenGLBuffer* Cube::tBase::s_vertexBuffer = nullptr;
 template<>

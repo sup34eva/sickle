@@ -7,10 +7,16 @@ in vec3 lightDir;
 in vec2 texCoord;
 in vec3 tangent;
 in vec3 bitangent;
+in vec4 shadow;
 
+uniform mat4 view;
+uniform mat4 model;
+uniform mat4 MVP;
+uniform mat4 dMVP;
 uniform vec3 lightColor;
 uniform float lightPower;
 uniform vec3 ambientColor;
+uniform sampler2DShadow shadowMap;
 
 out vec4 color;
 
@@ -19,7 +25,9 @@ void main(){
     vec3 n = normalize(normal);
     vec3 l = normalize(lightDir);
     float cosTheta = clamp(dot(n,l), 0, 1);
-    vec3 direct = fragColor * lightColor * lightPower * cosTheta;
+    vec3 uv = (((shadow.xyz/ shadow.w) * 0.5) + 0.5);
+    float visibility = texture(shadowMap, uv);
+    vec3 direct = fragColor * lightColor * lightPower * (cosTheta * visibility);
 
     // Ambient
     vec3 ambient = ambientColor * fragColor;
@@ -32,5 +40,6 @@ void main(){
     vec3 specular = specularColor * lightColor * lightPower * pow(cosAlpha, 5);
 
     // Final color
-    color = vec4(ambient + direct + specular, 1);
+    color = vec4(ambient + (visibility * direct) + (visibility * specular), 1);
+    //color = vec4(uv.xy, visibility, 1);
 }

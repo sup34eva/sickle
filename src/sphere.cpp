@@ -17,7 +17,15 @@ Sphere::Sphere(QObject* parent) : Geometry(parent) {
 template<>
 QOpenGLVertexArrayObject* Sphere::tBase::s_vao = nullptr;
 template<>
-QOpenGLShaderProgram* Sphere::tBase::s_program = nullptr;
+ShaderList Sphere::tBase::s_shaderList = {
+	ShaderInfo{S_UNLIT, ":/shaders/unlit.vert", ":/shaders/unlit.frag"},
+	ShaderInfo{S_LIT, ":/shaders/lit.vert", ":/shaders/lit.frag"},
+	ShaderInfo{S_BRDF, ":/shaders/lit.vert", ":/shaders/brdf.frag"},
+	ShaderInfo{S_DISNEY, ":/shaders/lit.vert", ":/shaders/disney.frag"},
+	ShaderInfo{S_DEPTH, ":/shaders/lit.vert", ":/shaders/depth.frag"}
+};
+template<>
+ProgramList Sphere::tBase::s_programList = ProgramList();
 template<>
 QOpenGLBuffer* Sphere::tBase::s_vertexBuffer = nullptr;
 template<>

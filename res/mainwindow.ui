@@ -98,6 +98,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionWireframe"/>
+   <addaction name="actionBuffers"/>
   </widget>
   <widget class="QDockWidget" name="listDock">
    <property name="windowTitle">
@@ -285,6 +286,14 @@
    </property>
    <property name="toolTip">
     <string>Add a new sphere to the scene</string>
+   </property>
+  </action>
+  <action name="actionBuffers">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show the Buffers</string>
    </property>
   </action>
  </widget>

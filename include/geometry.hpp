@@ -47,11 +47,22 @@ public:
  */
 class GeoBase : public Actor {
 	Q_OBJECT
+	Q_ENUMS(Shader)
 
 public:
 	explicit GeoBase(QObject* parent = nullptr) : Actor(parent) {
 		material(new Material());
+		shader(S_LIT);
 	}
+
+	enum Shader {
+		S_UNLIT,
+		S_LIT,
+		S_BRDF,
+		S_DISNEY,
+		S_DEPTH
+	};
+
 	/*! \var m_colors
 	 * \brief Liste des couleurs
 	 *
@@ -64,7 +75,12 @@ public:
 	 * Propriétés de la surface de la geometrie
 	 */
 	prop(QObject*, material);
+	prop(Shader, shader);
 };
+
+typedef std::tuple<GeoBase::Shader, QString, QString> ShaderInfo;
+typedef QVector<ShaderInfo> ShaderList;
+typedef QHash<GeoBase::Shader, QOpenGLShaderProgram*> ProgramList;
 
 /*! \brief Base de toutes les géometries
  * \tparam Child La classe heritant de Geometry (utilisé pour initialiser les membres statiques)
@@ -81,29 +97,34 @@ public:
 		initProgram(parent);
 	}
 	noinline void draw(const DrawInfo& info) {
-		Child::s_program->bind();
+		auto func = info.context->functions();
+		auto program = Child::s_programList.value(info.buffer == RB_DEPTH ? S_DEPTH : shader());
+		program->bind();
 		Child::s_vao->bind();
 
 		auto Model = transform();
 		auto MVP = info.Projection * info.View * Model;
-		Child::s_program->setUniformValue("model", Model);
-		Child::s_program->setUniformValue("view", info.View);
-		Child::s_program->setUniformValue("MVP", MVP);
+		program->setUniformValue("model", Model);
+		program->setUniformValue("view", info.View);
+		program->setUniformValue("MVP", MVP);
+
+		auto dMVP = info.depth * Model;
+		program->setUniformValue("dMVP", dMVP);
 
 		auto mat = material()->metaObject();
 		for(int i = mat->propertyOffset(); i < mat->propertyCount(); i++) {
 			auto name = mat->property(i).name();
-			Child::s_program->setUniformValue(
+			program->setUniformValue(
 							QString("material.%1").arg(name).toStdString().c_str(),
 							material()->property(name).toFloat() / 100.0f);
 		}
 
-		Child::s_program->setUniformValue("lightD", QVector3D(1, 1, 1));
+		program->setUniformValue("lightD", info.light.orientation);
 
-		auto func = info.context->functions();
 		func->glDrawElements(info.mode, Child::s_indices.size(), GL_UNSIGNED_INT, nullptr);
 
-		Child::s_program->release();
+		Child::s_vao->release();
+		program->release();
 	}
 
 protected:
@@ -127,6 +148,10 @@ protected:
 					Child::s_uv[id + 1]);
 	}
 
+	std::initializer_list<std::tuple<Shader, QString, QString>> getShaderList() {
+		return Child::s_shaderList;
+	}
+
 	/*! \brief Initialise les shaders et alloue les buffer
 	 *
 	 * Cette méthode statique est appelée par le constructeur de toutes les classes enfant de Geometry.
@@ -136,37 +161,11 @@ protected:
 	 */
 	noinline static void initProgram(QObject* parent) {
 		if (Child::s_instances++ == 0) {
-			Child::s_program = new QOpenGLShaderProgram(parent);
+			calcNormals();
 
 			Child::s_vao = new QOpenGLVertexArrayObject(parent);
 			Child::s_vao->create();
 			Child::s_vao->bind();
-
-			if (!Child::s_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/lit.vert")) {
-				qCritical() << "Could not load vertex shader:" << Child::s_program->log();
-				return;
-			}
-
-			if (!Child::s_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/disney.frag")) {
-				qCritical() << "Could not load fragment shader:" << Child::s_program->log();
-				return;
-			}
-
-			if (!Child::s_program->link()) {
-				qCritical() << "Could not link shaders:" << Child::s_program->log();
-				return;
-			}
-
-			if (!Child::s_program->bind()) {
-				qCritical() << "Could not bind shader to context";
-				return;
-			}
-
-			Child::s_program->setUniformValue("lightPower", 1.2f);
-			Child::s_program->setUniformValue("lightColor", QVector3D(1, 1, 1));
-			Child::s_program->setUniformValue("ambientColor", QVector3D(0.1, 0.1, 0.1));
-
-			calcNormals();
 
 			Child::s_vertexBuffer = initBuffer(QOpenGLBuffer::VertexBuffer, Child::s_vertices);
 			Q_CHECK_PTR(Child::s_vertexBuffer);
@@ -189,41 +188,73 @@ protected:
 			Child::s_indexBuffer = initBuffer(QOpenGLBuffer::IndexBuffer, Child::s_indices);
 			Q_CHECK_PTR(Child::s_indexBuffer);
 
-			auto posAttr = Child::s_program->attributeLocation("vertexPosition");
-			Child::s_vertexBuffer->bind();
-			Child::s_program->setAttributeBuffer(posAttr, GL_FLOAT, 0, 3);
-			Child::s_program->enableAttributeArray(posAttr);
+			for(auto shader : Child::s_shaderList) {
+				auto name = std::get<0>(shader);
+				auto program = new QOpenGLShaderProgram(parent);
 
-			auto colAttr = Child::s_program->attributeLocation("vertexColor");
-			Child::s_colorBuffer->bind();
-			Child::s_program->setAttributeBuffer(colAttr, GL_FLOAT, 0, 3);
-			Child::s_program->enableAttributeArray(colAttr);
+				if (!program->addShaderFromSourceFile(QOpenGLShader::Vertex, std::get<1>(shader))) {
+					qWarning() << "Could not load vertex shader:" << program->log();
+					continue;
+				}
 
-			auto normAttr = Child::s_program->attributeLocation("vertexNormal");
-			Child::s_normalBuffer->bind();
-			Child::s_program->setAttributeBuffer(normAttr, GL_FLOAT, 0, 3);
-			Child::s_program->enableAttributeArray(normAttr);
+				if (!program->addShaderFromSourceFile(QOpenGLShader::Fragment, std::get<2>(shader))) {
+					qWarning() << "Could not load fragment shader:" << program->log();
+					continue;
+				}
 
-			auto uvAttr = Child::s_program->attributeLocation("vertexUV");
-			Child::s_UVBuffer->bind();
-			Child::s_program->setAttributeBuffer(uvAttr, GL_FLOAT, 0, 2);
-			Child::s_program->enableAttributeArray(uvAttr);
+				if (!program->link()) {
+					qWarning() << "Could not link shaders:" << program->log();
+					continue;
+				}
 
-			auto tanAttr = Child::s_program->attributeLocation("vertexTangent");
-			Child::s_tangentBuffer->bind();
-			Child::s_program->setAttributeBuffer(tanAttr, GL_FLOAT, 0, 3);
-			Child::s_program->enableAttributeArray(tanAttr);
+				if (!program->bind()) {
+					qWarning() << "Could not bind shader to context";
+					continue;
+				}
 
-			auto btanAttr = Child::s_program->attributeLocation("vertexBitangent");
-			Child::s_bitangentBuffer->bind();
-			Child::s_program->setAttributeBuffer(btanAttr, GL_FLOAT, 0, 3);
-			Child::s_program->enableAttributeArray(btanAttr);
+				program->setUniformValue("lightPower", 1.2f);
+				program->setUniformValue("lightColor", QVector3D(1, 1, 1));
+				program->setUniformValue("ambientColor", QVector3D(0.1, 0.1, 0.1));
+
+				auto posAttr = program->attributeLocation("vertexPosition");
+				Child::s_vertexBuffer->bind();
+				program->setAttributeBuffer(posAttr, GL_FLOAT, 0, 3);
+				program->enableAttributeArray(posAttr);
+
+				auto colAttr = program->attributeLocation("vertexColor");
+				Child::s_colorBuffer->bind();
+				program->setAttributeBuffer(colAttr, GL_FLOAT, 0, 3);
+				program->enableAttributeArray(colAttr);
+
+				auto normAttr = program->attributeLocation("vertexNormal");
+				Child::s_normalBuffer->bind();
+				program->setAttributeBuffer(normAttr, GL_FLOAT, 0, 3);
+				program->enableAttributeArray(normAttr);
+
+				auto uvAttr = program->attributeLocation("vertexUV");
+				Child::s_UVBuffer->bind();
+				program->setAttributeBuffer(uvAttr, GL_FLOAT, 0, 2);
+				program->enableAttributeArray(uvAttr);
+
+				auto tanAttr = program->attributeLocation("vertexTangent");
+				Child::s_tangentBuffer->bind();
+				program->setAttributeBuffer(tanAttr, GL_FLOAT, 0, 3);
+				program->enableAttributeArray(tanAttr);
+
+				auto btanAttr = program->attributeLocation("vertexBitangent");
+				Child::s_bitangentBuffer->bind();
+				program->setAttributeBuffer(btanAttr, GL_FLOAT, 0, 3);
+				program->enableAttributeArray(btanAttr);
+
+				Child::s_programList.insert(name, program);
+			}
 		}
 	}
 
 	// Instances
 	static int s_instances;
-	static QOpenGLShaderProgram* s_program;
+	static ShaderList s_shaderList;
+	static ProgramList s_programList;
 	static QOpenGLVertexArrayObject* s_vao;
 	static QOpenGLBuffer* s_vertexBuffer;
 	static QOpenGLBuffer* s_colorBuffer;

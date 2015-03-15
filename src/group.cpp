@@ -6,8 +6,8 @@ Group::Group(QObject* parent) : Actor(parent) {
 }
 
 void Group::draw(const DrawInfo& info) {
-	auto localView = info.View * transform();
-	DrawInfo localInfo{localView, info.Projection, info.mode, info.context};
+	auto localInfo = info;
+	localInfo.View = info.View * transform();
 	for (auto i : children()) {
 		auto child = dynamic_cast<Actor*>(i);
 		if (child) child->draw(localInfo);

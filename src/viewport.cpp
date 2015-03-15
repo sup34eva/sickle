@@ -3,7 +3,10 @@
 #include <viewport.hpp>
 #include <QStyle>
 
-Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_renderMode(GL_TRIANGLES) {
+Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_renderMode(GL_TRIANGLES), m_frameBuffer(0) {
+	showBuffers(false);
+	nearZ(0);
+	farZ(32);
 	m_camera = new Camera(this);
 	setFocusPolicy(Qt::StrongFocus);
 
@@ -26,6 +29,16 @@ Viewport::~Viewport() {
 void Viewport::initializeGL() {
 	initializeOpenGLFunctions();
 
+	glGenFramebuffers(1, &m_frameBuffer);
+	glGenTextures(1, &m_depthTexture);
+	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
@@ -33,7 +46,6 @@ void Viewport::initializeGL() {
 #ifdef GL_MULTISAMPLE
 	glEnable(GL_MULTISAMPLE);
 #endif
-
 	auto bg = palette().color(QPalette::Background);
 	glClearColor(bg.redF(), bg.greenF(), bg.blueF(), bg.alphaF());
 
@@ -43,10 +55,50 @@ void Viewport::initializeGL() {
 }
 
 void Viewport::paintGL() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if(m_showBuffers) {
+		glViewport(0, 0, width() / 2, height() / 2);
+	} else {
+		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
+		glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthTexture, 0);
+		glDrawBuffer(GL_NONE);
+		glViewport(0, 0, 1024, 1024);
 
-	auto view = m_camera->view();
-	DrawInfo info{view, m_projection, m_renderMode, context()};
+		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			qWarning() << "Nope";
+			return;
+		}
+	}
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_FRONT);
+
+	Light light = {QVector3D(0.5, 2, 2)};
+
+	QMatrix4x4 dP, dV;
+	dP.ortho(-10, 10, -10, 10, nearZ(), farZ());
+	dV.lookAt(light.orientation, QVector3D(0, 0, 0), QVector3D(0, 1, 0));
+
+	DrawInfo info{dV, dP, m_renderMode, context(), RB_DEPTH, dP * dV, light};
+
+	for (auto i : children()) {
+		auto child = dynamic_cast<Actor*>(i);
+		if (child) child->draw(info);
+	}
+
+	if(m_showBuffers) {
+		glViewport(width() / 2, height() / 2, width() / 2, height() / 2);
+	} else {
+		glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+		glViewport(0, 0, width(), height());
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	glCullFace(GL_BACK);
+
+	info.Projection = m_projection;
+	info.View = m_camera->view();
+	info.buffer = RB_FULL;
 
 	for (auto i : children()) {
 		auto child = dynamic_cast<Actor*>(i);
@@ -55,7 +107,7 @@ void Viewport::paintGL() {
 }
 
 void Viewport::resizeGL(int w, int h) {
-	if (QOpenGLFunctions::isInitialized(QOpenGLFunctions::d_ptr)) glViewport(0, 0, w, h);
+	//if (QOpenGLFunctions::isInitialized(QOpenGLFunctions::d_ptr)) glViewport(0, 0, w, h);
 	m_projection.setToIdentity();
 	m_projection.perspective(45.0f, static_cast<float>(w) / static_cast<float>(h), 0.1f, 1000.0f);
 }

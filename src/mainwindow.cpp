@@ -37,6 +37,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 			ui->viewport->load(args.at(1));
 		}
 	});
+
+	//showProperties(ui->viewport);
 }
 
 MainWindow::~MainWindow() {
@@ -196,6 +198,24 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			connect(spinner, changeSignal, [=](double value) { set(value); });
 			return spinner;
 		}
+		case QMetaType::Double: {
+			void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
+			auto spinner = new QDoubleSpinBox;
+			auto limit = std::numeric_limits<double>::max();
+			spinner->setRange(-limit, limit);
+			spinner->setValue(prop.toDouble());
+			connect(spinner, changeSignal, [=](double value) { set(value); });
+			return spinner;
+		}
+		case QMetaType::Int: {
+			void (QSpinBox::*changeSignal)(int) = &QSpinBox::valueChanged;
+			auto spinner = new QSpinBox;
+			auto limit = std::numeric_limits<int>::max();
+			spinner->setRange(-limit, limit);
+			spinner->setValue(prop.toInt());
+			connect(spinner, changeSignal, [=](int value) { set(value); });
+			return spinner;
+		}
 		case QMetaType::QObjectStar: {
 			auto obj = qvariant_cast<QObject*>(prop);
 			if (obj != nullptr) {
@@ -220,8 +240,14 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 
 			break;
 		}
+		case QMetaType::Bool: {
+			auto checkbox = new QCheckBox;
+			checkbox->setChecked(prop.toBool());
+			connect(checkbox, QCheckBox::toggled, [&] (bool checked) { set(checked); });
+			return checkbox;
+		}
 		default:
-			qDebug() << prop.type();
+			qDebug() << "Uknown property type:" << prop.type();
 			return new QLabel(prop.toString());
 	}
 
@@ -235,22 +261,47 @@ void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
 		if ((!ptr.isNull()) && ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
 			auto obj = qvariant_cast<QObject*>(ptr);
 			if (obj != nullptr) {
-				auto metaObject = obj->metaObject();
-				auto count = metaObject->propertyCount();
-				for (int i = 0; i < count; i++) {
-					auto prop = metaObject->property(i).name();
-					auto line = new QTreeWidgetItem;
-					line->setText(0, prop);
-					ui->infoWidget->addTopLevelItem(line);
-					ui->infoWidget->setItemWidget(
-						line, 1, widgetForVariant(line, [=]() {
-						return obj->property(prop);
-					}, [=](const QVariant& val) {
-						obj->setProperty(prop, val);
-					}));
-				}
+				showProperties(obj);
 			}
 		}
+	}
+}
+
+void MainWindow::showProperties(QObject* obj) {
+	auto metaObject = obj->metaObject();
+	auto count = metaObject->propertyCount();
+	for (int i = 0; i < count; i++) {
+		auto prop = metaObject->property(i).name();
+		auto line = new QTreeWidgetItem;
+		line->setText(0, prop);
+		ui->infoWidget->addTopLevelItem(line);
+		QWidget* widget;
+
+		if(metaObject->property(i).isEnumType()) {
+			auto enumerator = metaObject->property(i).enumerator();
+			auto cb = new QComboBox;
+
+			for(int i = 0; i < enumerator.keyCount(); i++) {
+				cb->insertItem(i, enumerator.key(i));
+			}
+
+			cb->setCurrentIndex(obj->property(prop).toInt());
+
+			void (QComboBox::*changeSignal)(int) = &QComboBox::currentIndexChanged;
+			connect(cb, changeSignal, [=] (int index) {
+				obj->setProperty(prop, index);
+			});
+
+			widget = cb;
+		} else {
+			widget = widgetForVariant(line, [=]() {
+				return obj->property(prop);
+			}, [=](const QVariant& val) {
+				obj->setProperty(prop, val);
+			});
+		}
+
+		ui->infoWidget->setItemWidget(line, 1, widget);
 	}
 }
 
@@ -287,4 +338,8 @@ void MainWindow::on_newCube_triggered() {
 
 void MainWindow::on_newSphere_triggered() {
 	ui->viewport->addChild<Sphere>();
+}
+
+void MainWindow::on_actionBuffers_toggled(bool show) {
+	ui->viewport->showBuffers(show);
 }

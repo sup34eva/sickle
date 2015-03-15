@@ -7,6 +7,7 @@ in vec3 lightDir;
 in vec2 texCoord;
 in vec3 tangent;
 in vec3 bitangent;
+in vec4 shadow;
 
 struct Material {
     float metallic;
@@ -25,6 +26,7 @@ uniform vec3 lightColor;
 uniform float lightPower;
 uniform vec3 ambientColor;
 uniform Material material;
+uniform sampler2DShadow shadowMap;
 
 out vec4 color;
 
@@ -185,6 +187,9 @@ void main() {
     vec3 diffuse = OrenNayar(l, v, n, x, y);
     vec3 specular = BlinnPhong(l, v, n, x, y);
 
-    vec3 radiance = (lightPower * NoL * ((diffuse * fragColor) + specular)) + (ambientColor * fragColor);
+    vec3 uv = (((shadow.xyz/ shadow.w) * 0.5) + 0.5);
+    float visibility = texture(shadowMap, uv);
+
+    vec3 radiance = (lightPower * (NoL * visibility) * ((diffuse * fragColor) + specular)) + (ambientColor * fragColor);
     color = vec4(radiance, 1);
 }

@@ -4,7 +4,9 @@
 #define GLWIDGET_H
 
 #include <QOpenGLWidget>
-#include <QOpenGLFunctions>
+#include <QOpenGLFunctions_4_3_Core>
+#include <QOpenGLFramebufferObject>
+#include <QPainter>
 #include <QWheelEvent>
 #include <QKeyEvent>
 #include <camera.hpp>
@@ -15,7 +17,7 @@
  *
  * Ce widget affiche une scène en 3D composée de géometries a partir d'une caméra.
  */
-class Viewport : public QOpenGLWidget, protected QOpenGLFunctions {
+class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core {
 	Q_OBJECT
 
 public:
@@ -42,6 +44,9 @@ public:
 	propRO(Camera*, camera);
 	prop(GLenum, renderMode);
 	propSig(bool, isInitialized, initialized);
+	prop(bool, showBuffers);
+	prop(float, nearZ);
+	prop(float, farZ);
 
 #ifdef UNIT_TEST
 	void updateNow() {
@@ -62,6 +67,8 @@ signals:
 protected:
 	void initializeGL() Q_DECL_OVERRIDE;
 	void paintGL() Q_DECL_OVERRIDE;
+	void initQuad();
+	void renderQuad();
 	void resizeGL(int w, int h) Q_DECL_OVERRIDE;
 	void wheelEvent(QWheelEvent* event) Q_DECL_OVERRIDE;
 	void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
@@ -74,6 +81,8 @@ protected:
 private:
 	QMatrix4x4 m_projection;
 	QPoint m_cursor;
+	GLuint m_frameBuffer;
+	GLuint m_depthTexture;
 };
 
 QDataStream& operator<<(QDataStream&, const QObject&);

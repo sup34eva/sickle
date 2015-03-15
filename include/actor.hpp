@@ -8,6 +8,15 @@
 #include <QOpenGLFunctions>
 #include <QMetaProperty>
 
+enum RenderBuffer {
+	RB_DEPTH,
+	RB_FULL
+};
+
+typedef struct Light {
+	QVector3D orientation;
+} Light;
+
 /*! \brief Structure contenant les infos sur la frame courante
  *
  * Cette structure contient toutes les informations utiles pour les acteurs a propos de l'image en cours de rendu:
@@ -21,6 +30,9 @@ typedef struct DrawInfo {
 	QMatrix4x4 Projection;
 	GLenum mode;
 	QOpenGLContext* context;
+	RenderBuffer buffer;
+	QMatrix4x4 depth;
+	Light light;
 } DrawInfo;
 
 /*! \brief Base de tous les objets de la scène

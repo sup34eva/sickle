@@ -7,6 +7,7 @@ in vec3 lightDir;
 in vec2 texCoord;
 in vec3 tangent;
 in vec3 bitangent;
+in vec4 shadow;
 
 struct Material {
     float metallic;
@@ -25,8 +26,9 @@ uniform vec3 lightColor;
 uniform float lightPower;
 uniform vec3 ambientColor;
 uniform Material material;
+uniform sampler2DShadow shadowMap;
 
-out vec4 color;
+layout(location = 0) out vec4 color;
 
 const float PI = 3.14159265358979323846;
 
@@ -114,7 +116,12 @@ void main() {
     vec3 n = normalize(normal);
     vec3 x = normalize(tangent);
     vec3 y = normalize(bitangent);
+
     float NoL = clamp(dot(n, l), 0, 1);
-    vec3 light = (lightPower * NoL * BRDF(l, v, n, x, y)) + (ambientColor * fragColor);
+
+    vec3 uv = (((shadow.xyz/ shadow.w) * 0.5) + 0.5);
+    float visibility = texture(shadowMap, uv);
+
+    vec3 light = (lightPower * (visibility * NoL) * BRDF(l, v, n, x, y)) + (ambientColor * fragColor);
     color = vec4(light, 1);
 }
