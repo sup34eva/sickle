@@ -28,7 +28,7 @@ uniform vec3 ambientColor;
 uniform Material material;
 uniform sampler2DShadow shadowMap;
 
-out vec4 color;
+layout(location = 0) out vec4 color;
 
 const float PI = 3.14159265358979323846;
 

@@ -18,7 +18,7 @@ uniform float lightPower;
 uniform vec3 ambientColor;
 uniform sampler2DShadow shadowMap;
 
-out vec4 color;
+layout(location = 0) out vec4 color;
 
 void main(){
     // Light

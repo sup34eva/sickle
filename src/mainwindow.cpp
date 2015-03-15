@@ -247,7 +247,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			return checkbox;
 		}
 		default:
-			qDebug() << "Uknown property type:" << prop.type();
+			qDebug() << "Unknown property type:" << prop.type();
 			return new QLabel(prop.toString());
 	}
 

@@ -47,6 +47,7 @@ public:
 	prop(bool, showBuffers);
 	prop(float, nearZ);
 	prop(float, farZ);
+	prop(QVector3D, lightDir);
 
 #ifdef UNIT_TEST
 	void updateNow() {
@@ -67,7 +68,11 @@ signals:
 protected:
 	void initializeGL() Q_DECL_OVERRIDE;
 	void paintGL() Q_DECL_OVERRIDE;
+	void initLight();
+	void initScene();
 	void initQuad();
+	void renderLight(DrawInfo&);
+	void renderScene(DrawInfo&);
 	void renderQuad();
 	void resizeGL(int w, int h) Q_DECL_OVERRIDE;
 	void wheelEvent(QWheelEvent* event) Q_DECL_OVERRIDE;
@@ -81,8 +86,16 @@ protected:
 private:
 	QMatrix4x4 m_projection;
 	QPoint m_cursor;
-	GLuint m_frameBuffer;
-	GLuint m_depthTexture;
+
+	// Deferred shading
+	GLuint m_lightBuffer;
+	GLuint m_lightTexture;
+	GLuint m_sceneBuffer;
+	GLuint m_sceneTexture;
+	GLuint m_sceneDepth;
+	GLuint m_quadVAO;
+	GLuint m_quadBuffer;
+	QOpenGLShaderProgram* m_quadProgram;
 };
 
 QDataStream& operator<<(QDataStream&, const QObject&);

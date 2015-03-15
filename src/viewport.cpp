@@ -3,11 +3,14 @@
 #include <viewport.hpp>
 #include <QStyle>
 
-Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_renderMode(GL_TRIANGLES), m_frameBuffer(0) {
+Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_renderMode(GL_TRIANGLES) {
 	showBuffers(false);
-	nearZ(0);
-	farZ(32);
+	nearZ(-35);
+	farZ(35);
+	lightDir(QVector3D(0.5, 2, 2));
+
 	m_camera = new Camera(this);
+
 	setFocusPolicy(Qt::StrongFocus);
 
 	qRegisterMetaType<Cube>("Cube");
@@ -26,19 +29,62 @@ Viewport::~Viewport() {
 	delete m_camera;
 }
 
-void Viewport::initializeGL() {
-	initializeOpenGLFunctions();
+void Viewport::initLight() {
+	glGenFramebuffers(1, &m_lightBuffer);
 
-	glGenFramebuffers(1, &m_frameBuffer);
-	glGenTextures(1, &m_depthTexture);
-	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+	glGenTextures(1, &m_lightTexture);
+	glBindTexture(GL_TEXTURE_2D, m_lightTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+}
+
+void Viewport::initScene() {
+	glGenFramebuffers(1, &m_sceneBuffer);
+
+	glGenTextures(1, &m_sceneTexture);
+	glBindTexture(GL_TEXTURE_2D, m_sceneTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 
+	glGenRenderbuffers(1, &m_sceneDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_sceneDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 1024);
+}
+
+void Viewport::initQuad() {
+	glGenVertexArrays(1, &m_quadVAO);
+	glBindVertexArray(m_quadVAO);
+
+	static const GLfloat data[] = {
+		-1.0f, -1.0f, 0.0f,
+		 1.0f, -1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		 1.0f, -1.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f,
+	};
+
+	glGenBuffers(1, &m_quadBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, m_quadBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+
+	m_quadProgram = new QOpenGLShaderProgram(this);
+	m_quadProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/deferred.vert");
+	m_quadProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/deferred.frag");
+	m_quadProgram->link();
+}
+
+void Viewport::initializeGL() {
+	initializeOpenGLFunctions();
+
+	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
@@ -46,6 +92,11 @@ void Viewport::initializeGL() {
 #ifdef GL_MULTISAMPLE
 	glEnable(GL_MULTISAMPLE);
 #endif
+
+	initLight();
+	initScene();
+	initQuad();
+
 	auto bg = palette().color(QPalette::Background);
 	glClearColor(bg.redF(), bg.greenF(), bg.blueF(), bg.alphaF());
 
@@ -54,44 +105,53 @@ void Viewport::initializeGL() {
 	qDebug() << "OpenGL version:" << reinterpret_cast<const char*>(glGetString(GL_VERSION));
 }
 
-void Viewport::paintGL() {
-	if(m_showBuffers) {
-		glViewport(0, 0, width() / 2, height() / 2);
-	} else {
-		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
-		glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthTexture, 0);
-		glDrawBuffer(GL_NONE);
-		glViewport(0, 0, 1024, 1024);
+void Viewport::renderLight(DrawInfo& info) {
+	glBindFramebuffer(GL_FRAMEBUFFER, m_lightBuffer);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_lightTexture, 0);
+	glDrawBuffer(GL_NONE);
 
-		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-			qWarning() << "Nope";
-			return;
-		}
+	glViewport(0, 0, 1024, 1024);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if(status != GL_FRAMEBUFFER_COMPLETE) {
+		qWarning() << "Light buffer status:" << status;
+		return;
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 
-	Light light = {QVector3D(0.5, 2, 2)};
+	Light light = {lightDir()};
 
 	QMatrix4x4 dP, dV;
-	dP.ortho(-10, 10, -10, 10, nearZ(), farZ());
+	dP.ortho(-32, 32, -32, 32, nearZ(), farZ());
 	dV.lookAt(light.orientation, QVector3D(0, 0, 0), QVector3D(0, 1, 0));
 
-	DrawInfo info{dV, dP, m_renderMode, context(), RB_DEPTH, dP * dV, light};
+	info = {dV, dP, m_renderMode, context(), RB_DEPTH, dP * dV, light};
 
 	for (auto i : children()) {
 		auto child = dynamic_cast<Actor*>(i);
 		if (child) child->draw(info);
 	}
+}
 
-	if(m_showBuffers) {
-		glViewport(width() / 2, height() / 2, width() / 2, height() / 2);
-	} else {
-		glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
-		glViewport(0, 0, width(), height());
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void Viewport::renderScene(DrawInfo& info) {
+	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneBuffer);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_lightTexture);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_sceneDepth);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_sceneTexture, 0);
+	const GLenum buffers[] = {GL_COLOR_ATTACHMENT0};
+	glDrawBuffers(1, buffers);
+
+	glViewport(0, 0, 1024, 1024);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if(status != GL_FRAMEBUFFER_COMPLETE) {
+		qWarning() << "Scene buffer status:" << status;
+		return;
 	}
 
 	glCullFace(GL_BACK);
@@ -106,8 +166,35 @@ void Viewport::paintGL() {
 	}
 }
 
+void Viewport::renderQuad() {
+	glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_sceneTexture);
+	glViewport(0, 0, width(), height());
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if(status != GL_FRAMEBUFFER_COMPLETE) {
+		qWarning() << "Status:" << status;
+		return;
+	}
+
+	m_quadProgram->bind();
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_quadBuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisableVertexAttribArray(0);
+}
+
+void Viewport::paintGL() {
+	DrawInfo info;
+	renderLight(info);
+	renderScene(info);
+	if(!m_showBuffers) renderQuad();
+}
+
 void Viewport::resizeGL(int w, int h) {
-	//if (QOpenGLFunctions::isInitialized(QOpenGLFunctions::d_ptr)) glViewport(0, 0, w, h);
 	m_projection.setToIdentity();
 	m_projection.perspective(45.0f, static_cast<float>(w) / static_cast<float>(h), 0.1f, 1000.0f);
 }

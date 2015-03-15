@@ -7,6 +7,8 @@
         <file>brdf.frag</file>
         <file>disney.frag</file>
         <file>depth.frag</file>
+        <file>deferred.frag</file>
+        <file>deferred.vert</file>
     </qresource>
     <qresource prefix="/icons">
         <file>add-geo.png</file>

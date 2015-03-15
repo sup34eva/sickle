@@ -52,7 +52,7 @@ class GeoBase : public Actor {
 public:
 	explicit GeoBase(QObject* parent = nullptr) : Actor(parent) {
 		material(new Material());
-		shader(S_LIT);
+		shader(S_DISNEY);
 	}
 
 	enum Shader {
