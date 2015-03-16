@@ -33,12 +33,13 @@ private slots:
 	void on_actionOpen_triggered();
 	void on_actionSave_as_triggered();
 	void on_action_Save_triggered();
-	void on_actionWireframe_toggled(bool arg1);
 	void on_viewport_childAdded(QObject *obj);
 	void on_newCube_triggered();
 	void on_newSphere_triggered();
 	void on_actionBuffers_toggled(bool arg1);
 	void showProperties(QObject* obj);
+
+	void on_actionSceneProp_triggered();
 
 private:
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);

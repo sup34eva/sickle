@@ -40,6 +40,10 @@ public:
 	prop(float, clearcoatGloss);  //! Si le vernis est brillant
 };
 
+typedef std::tuple<RenderBuffer, QString, QString> ShaderInfo;
+typedef QVector<ShaderInfo> ShaderList;
+typedef QHash<RenderBuffer, QOpenGLShaderProgram*> ProgramList;
+
 /*! \brief Base pour la classe Geometry
  *
  * Cette classe sert de base a la classe Geometry. Elle est nécéssaire car la système de meta-objet de Qt ne supporte
@@ -47,21 +51,11 @@ public:
  */
 class GeoBase : public Actor {
 	Q_OBJECT
-	Q_ENUMS(Shader)
 
 public:
 	explicit GeoBase(QObject* parent = nullptr) : Actor(parent) {
 		material(new Material());
-		shader(S_DISNEY);
 	}
-
-	enum Shader {
-		S_UNLIT,
-		S_LIT,
-		S_BRDF,
-		S_DISNEY,
-		S_DEPTH
-	};
 
 	/*! \var m_colors
 	 * \brief Liste des couleurs
@@ -75,12 +69,8 @@ public:
 	 * Propriétés de la surface de la geometrie
 	 */
 	prop(QObject*, material);
-	prop(Shader, shader);
+	static ShaderList s_shaderList;
 };
-
-typedef std::tuple<GeoBase::Shader, QString, QString> ShaderInfo;
-typedef QVector<ShaderInfo> ShaderList;
-typedef QHash<GeoBase::Shader, QOpenGLShaderProgram*> ProgramList;
 
 /*! \brief Base de toutes les géometries
  * \tparam Child La classe heritant de Geometry (utilisé pour initialiser les membres statiques)
@@ -98,28 +88,45 @@ public:
 	}
 	noinline void draw(const DrawInfo& info) {
 		auto func = info.context->functions();
-		auto program = Child::s_programList.value(info.buffer == RB_DEPTH ? S_DEPTH : shader());
+		auto program = Child::s_programList.value(info.buffer);
 		program->bind();
 		Child::s_vao->bind();
 
-		auto Model = transform();
-		auto MVP = info.Projection * info.View * Model;
-		program->setUniformValue("model", Model);
-		program->setUniformValue("view", info.View);
-		program->setUniformValue("MVP", MVP);
+		for(auto i = info.uniforms.constBegin(); i != info.uniforms.constEnd(); ++i) {
+			auto loc = program->uniformLocation(i.key());
+			switch(static_cast<QMetaType::Type>(i.value().type())) {
+				case QMetaType::QVector3D:
+					program->setUniformValue(loc, qvariant_cast<QVector3D>(i.value()));
+					break;
+				case QMetaType::QMatrix4x4:
+					program->setUniformValue(loc, qvariant_cast<QMatrix4x4>(i.value()));
+					break;
+				case QMetaType::Float:
+					program->setUniformValue(loc, i.value().toFloat());
+					break;
+				default:
+					qDebug() << "Unknown uniform type" << i.value().type();
+					break;
+			}
+		}
 
-		auto dMVP = info.depth * Model;
-		program->setUniformValue("dMVP", dMVP);
+		auto Model = transform();
+		auto View = qvariant_cast<QMatrix4x4>(info.uniforms.value("view"));
+		auto Projection = qvariant_cast<QMatrix4x4>(info.uniforms.value("projection"));
+		program->setUniformValue("model", Model);
+		program->setUniformValue("MVP", Projection * View * Model);
+
+		if(info.buffer == RB_SCENE) {
+			auto Depth = qvariant_cast<QMatrix4x4>(info.uniforms.value("depth"));
+			program->setUniformValue("depth", Depth * Model);
+		}
 
 		auto mat = material()->metaObject();
 		for(int i = mat->propertyOffset(); i < mat->propertyCount(); i++) {
 			auto name = mat->property(i).name();
-			program->setUniformValue(
-							QString("material.%1").arg(name).toStdString().c_str(),
-							material()->property(name).toFloat() / 100.0f);
+			auto loc = program->uniformLocation(QString("material.%1").arg(name));
+			program->setUniformValue(loc, material()->property(name).toFloat() / 100.0f);
 		}
-
-		program->setUniformValue("lightD", info.light.orientation);
 
 		func->glDrawElements(info.mode, Child::s_indices.size(), GL_UNSIGNED_INT, nullptr);
 
@@ -146,10 +153,6 @@ protected:
 		return QVector2D(
 					Child::s_uv[id],
 					Child::s_uv[id + 1]);
-	}
-
-	std::initializer_list<std::tuple<Shader, QString, QString>> getShaderList() {
-		return Child::s_shaderList;
 	}
 
 	/*! \brief Initialise les shaders et alloue les buffer
@@ -188,7 +191,7 @@ protected:
 			Child::s_indexBuffer = initBuffer(QOpenGLBuffer::IndexBuffer, Child::s_indices);
 			Q_CHECK_PTR(Child::s_indexBuffer);
 
-			for(auto shader : Child::s_shaderList) {
+			for(auto shader : GeoBase::s_shaderList) {
 				auto name = std::get<0>(shader);
 				auto program = new QOpenGLShaderProgram(parent);
 
@@ -197,9 +200,11 @@ protected:
 					continue;
 				}
 
-				if (!program->addShaderFromSourceFile(QOpenGLShader::Fragment, std::get<2>(shader))) {
-					qWarning() << "Could not load fragment shader:" << program->log();
-					continue;
+				if(name != RB_DEPTH) {
+					if (!program->addShaderFromSourceFile(QOpenGLShader::Fragment, std::get<2>(shader))) {
+						qWarning() << "Could not load fragment shader:" << program->log();
+						continue;
+					}
 				}
 
 				if (!program->link()) {
@@ -253,7 +258,6 @@ protected:
 
 	// Instances
 	static int s_instances;
-	static ShaderList s_shaderList;
 	static ProgramList s_programList;
 	static QOpenGLVertexArrayObject* s_vao;
 	static QOpenGLBuffer* s_vertexBuffer;

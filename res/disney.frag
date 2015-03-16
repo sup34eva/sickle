@@ -1,34 +1,37 @@
 #version 330 core
 
-in vec3 fragColor;
-in vec3 normal;
-in vec3 eyeDir;
-in vec3 lightDir;
-in vec2 texCoord;
-in vec3 tangent;
-in vec3 bitangent;
-in vec4 shadow;
+in vec2 UV;
+
+uniform sampler2D color;
+uniform sampler2D normal;
+uniform sampler2D tangent;
+uniform sampler2D bitangent;
+uniform sampler2D shadow;
+uniform sampler2DShadow shadowMap;
+uniform vec3 lightD;
+uniform vec3 eyeD;
 
 struct Material {
     float metallic;
     float subsurface;
     float specular;
     float roughness;
+
     float specularTint;
     float anisotropic;
     float sheen;
     float sheenTint;
+
     float clearcoat;
     float clearcoatGloss;
 };
 
-uniform vec3 lightColor;
-uniform float lightPower;
-uniform vec3 ambientColor;
+const float lightPower = 1.0;
+const vec3 ambientColor = vec3(0.1, 0.1, 0.1);
 uniform Material material;
-uniform sampler2DShadow shadowMap;
+const vec3 lightColor = vec3(1, 1, 1);
 
-layout(location = 0) out vec4 color;
+layout(location = 0) out vec4 output;
 
 const float PI = 3.14159265358979323846;
 
@@ -67,13 +70,13 @@ vec3 mon2lin(vec3 x) {
     return vec3(pow(x[0], 2.2), pow(x[1], 2.2), pow(x[2], 2.2));
 }
 
-vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
+vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y, vec3 C) {
     float NdotL = max(dot(N, L), 0);
     float NdotV = max(dot(N, V), 0);
     vec3 H = normalize(L + V);
     float NdotH = dot(N, H);
     float LdotH = dot(L, H);
-    vec3 Cdlin = mon2lin(fragColor);
+    vec3 Cdlin = mon2lin(C);
     float Cdlum = .3 * Cdlin[0] + .6 * Cdlin[1] + .1 * Cdlin[2]; // luminance approx.
     vec3 Ctint = Cdlum > 0 ? Cdlin/Cdlum : vec3(1); // normalize lum. to isolate hue+sat
     vec3 Cspec0 = mix(material.specular * .08 * mix(vec3(1), Ctint, material.specularTint), Cdlin, material.metallic);
@@ -109,19 +112,17 @@ vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y ) {
             + Gs * Fs * Ds + .25 * material.clearcoat * Gr * Fr * Dr;
 }
 
-
 void main() {
-    vec3 l = normalize(lightDir);
-    vec3 v = normalize(eyeDir);
-    vec3 n = normalize(normal);
-    vec3 x = normalize(tangent);
-    vec3 y = normalize(bitangent);
+    vec3 c = texture(color, UV).xyz;
+    vec3 n = texture(normal, UV).xyz;
+    vec3 x = texture(tangent, UV).xyz;
+    vec3 y = texture(bitangent, UV).xyz;
+    vec3 s = texture(shadow, UV).xyz;
 
-    float NoL = clamp(dot(n, l), 0, 1);
+    float NoL = clamp(dot(n, lightD), 0, 1);
 
-    vec3 uv = (((shadow.xyz/ shadow.w) * 0.5) + 0.5);
-    float visibility = texture(shadowMap, uv);
+    float visibility = texture(shadowMap, s);
 
-    vec3 light = (lightPower * (visibility * NoL) * BRDF(l, v, n, x, y)) + (ambientColor * fragColor);
-    color = vec4(light, 1);
+    vec3 light = (lightPower * NoL * BRDF(lightD, eyeD, n, x, y, c)) + (ambientColor * c);
+    output = vec4(light, 1);
 }

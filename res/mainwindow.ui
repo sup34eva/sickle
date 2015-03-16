@@ -97,8 +97,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionWireframe"/>
    <addaction name="actionBuffers"/>
+   <addaction name="actionSceneProp"/>
   </widget>
   <widget class="QDockWidget" name="listDock">
    <property name="windowTitle">
@@ -269,17 +269,6 @@
     <string>&amp;Open</string>
    </property>
   </action>
-  <action name="actionWireframe">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Wireframe</string>
-   </property>
-   <property name="toolTip">
-    <string>Show the scene in wireframe</string>
-   </property>
-  </action>
   <action name="newSphere">
    <property name="text">
     <string>New Sphere</string>
@@ -294,6 +283,11 @@
    </property>
    <property name="text">
     <string>Show the Buffers</string>
+   </property>
+  </action>
+  <action name="actionSceneProp">
+   <property name="text">
+    <string>Scene Properties</string>
    </property>
   </action>
  </widget>

@@ -21,6 +21,9 @@ QString toString(const QVector3D& vector) {
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
 
+	auto modeList = new QComboBox;
+	ui->toolBar->addWidget(modeList);
+
 	QMenu* addMenu = new QMenu(tr("Add Geometry"));
 	addMenu->addAction(ui->newCube);
 	addMenu->addAction(ui->newSphere);
@@ -32,13 +35,20 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 			[=](const QVector3D& position) { ui->camPos->setText(toString(position)); });
 
 	connect(ui->viewport, &Viewport::initialized, [=]() {
+		auto list = ui->viewport->programList();
+		for(auto i = list.constBegin(); i != list.constEnd(); ++i) {
+			modeList->insertItem(i - list.constBegin(), *i);
+		}
+		modeList->setCurrentText(ui->viewport->program());
+		connect(modeList, &QComboBox::currentTextChanged, [=] (const QString& index) {
+			ui->viewport->program(index);
+		});
+
 		auto args = QCoreApplication::arguments();
 		if (args.length() > 1) {
 			ui->viewport->load(args.at(1));
 		}
 	});
-
-	//showProperties(ui->viewport);
 }
 
 MainWindow::~MainWindow() {
@@ -100,6 +110,8 @@ QVector3D* toEuler(const QQuaternion& quat) {
 
 QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set) {
 	auto prop = get();
+	if(!prop.isValid())
+		return nullptr;
 	switch (static_cast<QMetaType::Type>(prop.type())) {
 		case QMetaType::QVector3D: {
 			auto value = qvariant_cast<QVector3D>(prop);
@@ -228,11 +240,30 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 					item->setText(0, name);
 					line->addChild(item);
 
-					auto widget = widgetForVariant(item, [=]() {
-						return obj->property(name);
-					}, [=](const QVariant& val) {
-						obj->setProperty(name, val);
-					});
+					QWidget* widget;
+					if(metaObject->property(i).isEnumType()) {
+						auto enumerator = metaObject->property(i).enumerator();
+						auto cb = new QComboBox;
+
+						for(int i = 0; i < enumerator.keyCount(); i++) {
+							cb->insertItem(i, enumerator.key(i));
+						}
+
+						cb->setCurrentIndex(obj->property(name).toInt());
+
+						void (QComboBox::*changeSignal)(int) = &QComboBox::currentIndexChanged;
+						connect(cb, changeSignal, [=] (int index) {
+							obj->setProperty(name, index);
+						});
+
+						widget = cb;
+					} else {
+						widget = widgetForVariant(item, [=]() {
+							return obj->property(name);
+						}, [=](const QVariant& val) {
+							obj->setProperty(name, val);
+						});
+					}
 
 					line->treeWidget()->setItemWidget(item, 1, widget);
 				}
@@ -248,6 +279,16 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 		}
 		default:
 			qDebug() << "Unknown property type:" << prop.type();
+		case QMetaType::QRect:
+		case QMetaType::QPoint:
+		case QMetaType::QSize:
+		case QMetaType::QRegion:
+		case QMetaType::QSizePolicy:
+		case QMetaType::QPalette:
+		case QMetaType::QFont:
+		case QMetaType::QCursor:
+		case QMetaType::QIcon:
+		case QMetaType::QLocale:
 			return new QLabel(prop.toString());
 	}
 
@@ -255,7 +296,6 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 }
 
 void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
-	ui->infoWidget->clear();
 	if (current != nullptr) {
 		auto ptr = current->data(0, Qt::UserRole);
 		if ((!ptr.isNull()) && ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
@@ -268,6 +308,7 @@ void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
 }
 
 void MainWindow::showProperties(QObject* obj) {
+	ui->infoWidget->clear();
 	auto metaObject = obj->metaObject();
 	auto count = metaObject->propertyCount();
 	for (int i = 0; i < count; i++) {
@@ -324,14 +365,6 @@ void MainWindow::on_action_Save_triggered() {
 		ui->viewport->save(m_lastFile);
 }
 
-void MainWindow::on_actionWireframe_toggled(bool checked) {
-	if (checked) {
-		ui->viewport->renderMode(GL_LINES);
-	} else {
-		ui->viewport->renderMode(GL_TRIANGLES);
-	}
-}
-
 void MainWindow::on_newCube_triggered() {
 	ui->viewport->addChild<Cube>();
 }
@@ -342,4 +375,8 @@ void MainWindow::on_newSphere_triggered() {
 
 void MainWindow::on_actionBuffers_toggled(bool show) {
 	ui->viewport->showBuffers(show);
+}
+
+void MainWindow::on_actionSceneProp_triggered() {
+	showProperties(ui->viewport);
 }

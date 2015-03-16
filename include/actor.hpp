@@ -10,12 +10,8 @@
 
 enum RenderBuffer {
 	RB_DEPTH,
-	RB_FULL
+	RB_SCENE
 };
-
-typedef struct Light {
-	QVector3D orientation;
-} Light;
 
 /*! \brief Structure contenant les infos sur la frame courante
  *
@@ -26,13 +22,14 @@ typedef struct Light {
  * nouvelles informations sans impacter les classes existantes.
  */
 typedef struct DrawInfo {
-	QMatrix4x4 View;
-	QMatrix4x4 Projection;
 	GLenum mode;
 	QOpenGLContext* context;
 	RenderBuffer buffer;
+	QVariantHash uniforms;
+	/*QMatrix4x4 View;
+	QMatrix4x4 Projection;
 	QMatrix4x4 depth;
-	Light light;
+	Light light;*/
 } DrawInfo;
 
 /*! \brief Base de tous les objets de la scène
