@@ -98,6 +98,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionBuffers"/>
+   <addaction name="showMaps"/>
    <addaction name="actionSceneProp"/>
   </widget>
   <widget class="QDockWidget" name="listDock">
@@ -288,6 +289,22 @@
   <action name="actionSceneProp">
    <property name="text">
     <string>Scene Properties</string>
+   </property>
+  </action>
+  <action name="newLight">
+   <property name="text">
+    <string>New Light</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a new directional light to the scene</string>
+   </property>
+  </action>
+  <action name="showMaps">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Shadow Maps</string>
    </property>
   </action>
  </widget>

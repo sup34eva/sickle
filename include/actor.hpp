@@ -8,6 +8,8 @@
 #include <QOpenGLFunctions>
 #include <QMetaProperty>
 
+class Viewport;
+
 enum RenderBuffer {
 	RB_DEPTH,
 	RB_SCENE
@@ -26,10 +28,6 @@ typedef struct DrawInfo {
 	QOpenGLContext* context;
 	RenderBuffer buffer;
 	QVariantHash uniforms;
-	/*QMatrix4x4 View;
-	QMatrix4x4 Projection;
-	QMatrix4x4 depth;
-	Light light;*/
 } DrawInfo;
 
 /*! \brief Base de tous les objets de la scène
@@ -51,12 +49,27 @@ class Actor : public QObject {
 			}
 		}
 		virtual void draw(const DrawInfo& info) = 0;
+		virtual void setParent(QObject*);
+		virtual bool event(QEvent*);
 
 		propSig(QVector3D, position, moved);
 		propSig(QQuaternion, orientation, rotated);
 		propSig(QVector3D, scale, scaled);
 	protected:
 		virtual QMatrix4x4 transform();
+
+		template<typename T>
+		T* findParent() {
+			QObject* par = this;
+			do {
+				par = par->parent();
+			} while(par != nullptr && static_cast<T*>(par) == nullptr);
+			return static_cast<T*>(par);
+		}
+
+		Viewport* viewport();
+private:
+		Viewport* m_viewport;
 };
 
 #endif  // ACTOR_HPP

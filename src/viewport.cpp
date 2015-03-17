@@ -2,6 +2,7 @@
 
 #include <viewport.hpp>
 #include <QStyle>
+#include <light.hpp>
 
 Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent) {
 	m_camera = new Camera(this);
@@ -10,6 +11,7 @@ Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent) {
 
 	qRegisterMetaType<Cube>("Cube");
 	qRegisterMetaType<Sphere>("Sphere");
+	qRegisterMetaType<Light>("Light");
 
 	QSurfaceFormat format;
 	format.setProfile(QSurfaceFormat::CoreProfile);
@@ -24,27 +26,30 @@ Viewport::~Viewport() {
 	delete m_camera;
 }
 
-void Viewport::initLight() {
-	glGenFramebuffers(1, &m_lightBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_lightBuffer);
+void Viewport::initLight(Light& light) {
+	makeCurrent();
+	glGenFramebuffers(1, light.getBuffer());
+	glBindFramebuffer(GL_FRAMEBUFFER, light.buffer());
 
-	glGenTextures(1, &m_lightTexture);
-	glBindTexture(GL_TEXTURE_2D, m_lightTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glGenTextures(1, light.getTexture());
+	glBindTexture(GL_TEXTURE_2D, light.texture());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+	doneCurrent();
 }
 
 void Viewport::initScene() {
 	glGenFramebuffers(1, &m_sceneBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneBuffer);
 
-	GLuint tex[5];
-	glGenTextures(5, tex);
-	for(int i = 0; i < 5; i++) {
+	int num = 8;
+	GLuint tex[num];
+	glGenTextures(num, tex);
+	for(int i = 0; i < num; i++) {
 		glBindTexture(GL_TEXTURE_2D, tex[i]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -75,20 +80,18 @@ void Viewport::initQuad() {
 	glBindBuffer(GL_ARRAY_BUFFER, m_quadBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
 
-	static const std::initializer_list<std::pair<QString, QString>> list = {
-		{"Wireframe", ":/shaders/unlit.frag"},
-		{"Unlit", ":/shaders/unlit.frag"},
-		{"Lit", ":/shaders/lit.frag"},
-		{"BRDF", ":/shaders/brdf.frag"},
-		{"Disney", ":/shaders/disney.frag"}
+	static const QList<QString> list = {
+		":/shaders/unlit.frag",
+		":/shaders/light.frag",
+		":/shaders/ambient.frag"
 	};
 
-	for(auto i : list) {
+	for(int i = 0; i < list.length(); i++) {
 		auto prog = new QOpenGLShaderProgram(this);
 		prog->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/deferred.vert");
-		prog->addShaderFromSourceFile(QOpenGLShader::Fragment, i.second);
+		prog->addShaderFromSourceFile(QOpenGLShader::Fragment, list.at(i));
 		prog->link();
-		m_quadPrograms.insert(i.first, prog);
+		m_quadPrograms.insert(i, prog);
 	}
 }
 
@@ -96,10 +99,9 @@ void Viewport::initializeGL() {
 	initializeOpenGLFunctions();
 
 	showBuffers(false);
-	nearZ(-35);
-	farZ(35);
-	lightDir(QVector3D(0.5, 2, 2));
-	program("Lit");
+	showMaps(false);
+	ambient(QColor(50, 50, 50));
+	program(tr("Light"));
 
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
@@ -110,12 +112,11 @@ void Viewport::initializeGL() {
 	glEnable(GL_MULTISAMPLE);
 #endif
 
-	initLight();
 	initScene();
 	initQuad();
 
-	auto bg = palette().color(QPalette::Background);
-	glClearColor(bg.redF(), bg.greenF(), bg.blueF(), bg.alphaF());
+	/*auto bg = palette().color(QPalette::Background);
+	glClearColor(bg.redF(), bg.greenF(), bg.blueF(), bg.alphaF());*/
 
 	auto error = glGetError();
 	if(error != 0)
@@ -126,9 +127,9 @@ void Viewport::initializeGL() {
 	qDebug() << "OpenGL version:" << reinterpret_cast<const char*>(glGetString(GL_VERSION));
 }
 
-void Viewport::renderLight(DrawInfo& info) {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_lightBuffer);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_lightTexture, 0);
+void Viewport::renderLight(Light* light) {
+	glBindFramebuffer(GL_FRAMEBUFFER, light->buffer());
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, light->texture(), 0);
 
 	glDrawBuffer(GL_NONE);
 
@@ -143,16 +144,11 @@ void Viewport::renderLight(DrawInfo& info) {
 
 	glCullFace(GL_FRONT);
 
-	QMatrix4x4 dP, dV;
-	dP.ortho(-32, 32, -32, 32, nearZ(), farZ());
-	dV.lookAt(lightDir().normalized(), QVector3D(0, 0, 0), QVector3D(0, 1, 0));
-
 	QVariantHash uniforms;
-	uniforms.insert("view", dV);
-	uniforms.insert("projection", dP);
-	uniforms.insert("depth", dP * dV);
+	uniforms.insert("projection", light->projection());
+	uniforms.insert("view", light->view());
 
-	info = {GL_TRIANGLES, context(), RB_DEPTH, uniforms};
+	DrawInfo info = {GL_TRIANGLES, context(), RB_DEPTH, uniforms};
 
 	for (auto i : children()) {
 		auto child = dynamic_cast<Actor*>(i);
@@ -160,7 +156,7 @@ void Viewport::renderLight(DrawInfo& info) {
 	}
 }
 
-void Viewport::renderScene(DrawInfo info) {
+void Viewport::renderScene() {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneBuffer);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_sceneDepth);
 
@@ -183,15 +179,21 @@ void Viewport::renderScene(DrawInfo info) {
 
 	glCullFace(GL_BACK);
 
-	info.mode = (m_program == "Wireframe" && !m_showBuffers) ? GL_LINES : GL_TRIANGLES;
-	info.uniforms.insert("projection", m_projection);
-	info.uniforms.insert("view", m_camera->view());
-	info.buffer = RB_SCENE;
+	QVariantHash uniforms;
+	uniforms.insert("projection", m_projection);
+	uniforms.insert("view", m_camera->view());
+
+	GLenum mode = m_program == tr("Wireframe") ? GL_LINES : GL_TRIANGLES;
+	DrawInfo info = {mode, context(), RB_SCENE, uniforms};
 
 	for (auto i : children()) {
 		auto child = dynamic_cast<Actor*>(i);
 		if (child) child->draw(info);
 	}
+}
+
+QVector3D toVector(const QColor& col) {
+	return QVector3D(col.redF(), col.greenF(), col.blueF());
 }
 
 void Viewport::renderQuad() {
@@ -205,61 +207,46 @@ void Viewport::renderQuad() {
 		return;
 	}
 
-	if(m_showBuffers) {
-		auto prog = m_quadPrograms.value("Unlit");
+	if(m_showBuffers || m_showMaps) {
+		auto prog = m_quadPrograms.value(0);
 		prog->bind();
-		for(int i = 0; i <= m_sceneTextures.length() + 1; i++) {
-			glActiveTexture(GL_TEXTURE0);
 
-			if(i < m_sceneTextures.length())
-				glBindTexture(GL_TEXTURE_2D, m_sceneTextures.at(i));
-			else {
-				glBindTexture(GL_TEXTURE_2D, m_lightTexture);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-			}
+		int len;
+		QList<Light*> lights;
+		if(m_showBuffers)
+			len = m_sceneTextures.length();
+		else {
+			lights = findChildren<Light*>();
+			len = lights.length();
+		}
 
-			switch(i) {
-				case 0:
-					glViewport(0, height() / 1.5, width() / 3, height() / 3);
-					break;
-				case 1:
-					glViewport(width() / 3, height() / 1.5, width() / 3, height() / 3);
-					break;
-				case 2:
-					glViewport(width() / 1.5, height() / 1.5, width() / 3, height() / 3);
-					break;
+		if(len <= 1)
+			return;
 
-				case 3:
-					glViewport(0, height() / 3, width() / 3, height() / 3);
-					break;
-				case 4:
-					glViewport(width() / 3, height() / 3, width() / 3, height() / 3);
-					break;
-				case 5:
-					glViewport(width() / 1.5, height() / 3, width() / 3, height() / 3);
-					break;
+		int div = 1, w, h;
+		while(pow(div, 2) < len + 1) div++;
+		w = width() / div;
+		h = height() / div;
 
-				case 6:
-					glViewport(0, 0, width() / 3, height() / 3);
-					break;
-				case 7:
-					glViewport(width() / 3, 0, width() / 3, height() / 3);
-					break;
-				case 8:
-					glViewport(width() / 1.5, 0, width() / 3, height() / 3);
-					break;
-			}
-
-			if(i <= m_sceneTextures.length() && i <= 8) {
+		for(int i = 0; i <= len; i++) {
+			int x = i % div,
+				y = (div - 1) - (i / div);
+			glViewport(x * w, y * h, w, h);
+			if(i < len) {
+				glActiveTexture(GL_TEXTURE0);
+				if(m_showBuffers)
+					glBindTexture(GL_TEXTURE_2D, m_sceneTextures.at(i));
+				else {
+					glBindTexture(GL_TEXTURE_2D, lights.at(i)->texture());
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+				}
 				glEnableVertexAttribArray(0);
 				glBindBuffer(GL_ARRAY_BUFFER, m_quadBuffer);
 				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 				glDrawArrays(GL_TRIANGLES, 0, 6);
 				glDisableVertexAttribArray(0);
-			}
-
-			if(i >= m_sceneTextures.length()) {
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+				if(m_showMaps)
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 			}
 		}
 		prog->release();
@@ -267,35 +254,83 @@ void Viewport::renderQuad() {
 		glViewport(0, 0, width(), height());
 	}
 
-	auto prog = m_quadPrograms.value(m_program);
-	prog->bind();
-	prog->setUniformValue("eyeD", -m_camera->direction().normalized());
-	prog->setUniformValue("lightD", lightDir().normalized());
+	glEnable(GL_BLEND);
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE);
 
-	static const QList<QString> names = {"color", "normal", "tangent", "bitangent", "shadow", "shadowMap"};
-	for(int i = 0; i <= m_sceneTextures.length(); i++) {
-		glActiveTexture(GL_TEXTURE0 + i);
-		auto id = i < m_sceneTextures.length() ? m_sceneTextures.at(i) : m_lightTexture;
-		glBindTexture(GL_TEXTURE_2D, id);
-		auto loc = prog->uniformLocation(names.at(i));
-		prog->setUniformValue(loc, i);
+	int lightsLen = 1;
+	QList<Light*> lightList;
+	bool isLit = m_program == tr("Light");
+	if(isLit) {
+		lightList = findChildren<Light*>();
+		lightsLen = lightList.length() + 1;
 	}
 
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, m_quadBuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glDisableVertexAttribArray(0);
+	for(int i = 0; i < lightsLen; i++) {
+		bool isAmbient = isLit && i == 0;
+		bool isLight = isLit && !isAmbient;
 
-	prog->release();
+		int id;
+		if(isAmbient) id = 2;
+		else if(isLight) id = 1;
+		else id = 0;
+
+		auto prog = m_quadPrograms.value(id);
+		prog->bind();
+
+		Light* light = nullptr;
+		if(isLight)
+			light = lightList.value(i - 1);
+
+		static const QList<QString> names = {"color", "normal", "tangent", "bitangent", "vertPos", "matProp1", "matProp2", "matProp3", "shadowMap"};
+		int texLen = 1;
+		int maxLen = m_sceneTextures.length();
+		if(isLight) texLen = maxLen + 1;
+		for(int j = 0; j < texLen; j++) {
+			glActiveTexture(GL_TEXTURE0 + j);
+			auto tex = (isLight && j >= maxLen) ? light->texture() : m_sceneTextures.at(j);
+			glBindTexture(GL_TEXTURE_2D, tex);
+			auto n = names.at(j);
+			auto loc = prog->uniformLocation(n);
+			if(loc > -1)
+				prog->setUniformValue(loc, j);
+			else
+				qWarning().noquote() << "Uniform" << n << "not found.";
+		}
+
+
+		if(isLit) {
+			if(isAmbient) {
+				prog->setUniformValue("ambientColor", toVector(m_ambient));
+			} else {
+				prog->setUniformValue("lightD", light->direction());
+				prog->setUniformValue("vDepth", light->view());
+				prog->setUniformValue("pDepth", light->projection());
+				prog->setUniformValue("lightPower", light->power());
+				prog->setUniformValue("lightColor", toVector(light->color()));
+				prog->setUniformValue("eyeD", -m_camera->direction().normalized());
+			}
+		}
+
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, m_quadBuffer);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDisableVertexAttribArray(0);
+
+		prog->release();
+	}
+
+	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 }
 
 void Viewport::paintGL() {
-	DrawInfo info;
-	renderLight(info);
-	renderScene(info);
+	for(auto i : m_dirtyLights)
+		renderLight(i);
+	renderScene();
 	renderQuad();
+	m_dirtyLights.clear();
 }
 
 void Viewport::resizeGL(int w, int h) {
@@ -303,7 +338,7 @@ void Viewport::resizeGL(int w, int h) {
 	m_projection.perspective(45.0f, static_cast<float>(w) / static_cast<float>(h), 0.1f, 1000.0f);
 	for(int i = 0; i < m_sceneTextures.length(); i++) {
 		glBindTexture(GL_TEXTURE_2D, m_sceneTextures.at(i));
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, w, h, 0, GL_RGBA, GL_FLOAT, 0);
 	}
 	glBindRenderbuffer(GL_RENDERBUFFER, m_sceneDepth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width(), height());
@@ -313,6 +348,15 @@ void Viewport::wheelEvent(QWheelEvent* event) {
 	m_camera->move(m_camera->direction() * (event->delta() / 120));
 	update();
 	event->accept();
+}
+
+void Viewport::updateLights() {
+	m_dirtyLights.append(findChildren<Light*>());
+}
+
+void Viewport::updateLight(Light* light) {
+	if(m_dirtyLights.indexOf(light) == -1)
+		m_dirtyLights.append(light);
 }
 
 void Viewport::keyPressEvent(QKeyEvent* event) {
@@ -391,6 +435,7 @@ void Viewport::save(QString name) {
 	out.setVersion(format);
 
 	// Data
+	out << m_ambient;
 	out << *camera();
 	auto childList = findChildren<Actor*>();
 	out << static_cast<quint32>(childList.size());
@@ -409,6 +454,9 @@ void Viewport::clearLevel() {
 }
 
 void Viewport::load(QString name) {
+	if(!m_isInitialized)
+		return;
+
 	QFile file(name);
 	file.open(QIODevice::ReadOnly);
 	QDataStream in(&file);
@@ -434,20 +482,21 @@ void Viewport::load(QString name) {
 	clearLevel();
 
 	// Data
+	in >> m_ambient;
 	in >> *camera();
 	quint32 size;
 	in >> size;
-	makeCurrent();
 	for (quint32 i = 0; i < size; i++) {
 		int id;
 		in >> id;
-		auto obj = static_cast<Actor*>(QMetaType::create(id));
+		makeCurrent();
+		Actor* obj = static_cast<Actor*>(QMetaType::create(id));
 		qDebug() << "Restoring object of type" << QMetaType::typeName(id);
 		in >> *obj;
 		obj->setParent(this);
+		doneCurrent();
 		emit childAdded(obj);
 	}
-	doneCurrent();
 }
 
 QDataStream& operator<<(QDataStream& stream, const QObject& obj) {

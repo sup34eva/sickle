@@ -9,9 +9,12 @@
 #include <QPainter>
 #include <QWheelEvent>
 #include <QKeyEvent>
+#include <QColor>
 #include <camera.hpp>
 #include <cube.hpp>
 #include <sphere.hpp>
+
+class Light;
 
 /*! \brief Cadre de vue 3D
  *
@@ -42,16 +45,20 @@ public:
 	}
 
 	QStringList programList() {
-		return m_quadPrograms.keys();
+		static const QStringList list = {
+			tr("Wireframe"),
+			tr("Unlit"),
+			tr("Light")
+		};
+		return list;
 	}
 
 	propRO(Camera*, camera);
 	propSig(bool, isInitialized, initialized);
 	prop(bool, showBuffers);
-	prop(float, nearZ);
-	prop(float, farZ);
-	prop(QVector3D, lightDir);
+	prop(bool, showMaps);
 	prop(QString, program);
+	prop(QColor, ambient);
 
 #ifdef UNIT_TEST
 	void updateNow() {
@@ -65,6 +72,9 @@ public slots:
 	void save(QString name);
 	void load(QString name);
 	void clearLevel();
+	void initLight(Light&);
+	void updateLights();
+	void updateLight(Light* light);
 
 signals:
 	void childAdded(QObject* child);
@@ -72,11 +82,10 @@ signals:
 protected:
 	void initializeGL() Q_DECL_OVERRIDE;
 	void paintGL() Q_DECL_OVERRIDE;
-	void initLight();
 	void initScene();
 	void initQuad();
-	void renderLight(DrawInfo&);
-	void renderScene(DrawInfo);
+	void renderLight(Light*);
+	void renderScene();
 	void renderQuad();
 	void resizeGL(int w, int h) Q_DECL_OVERRIDE;
 	void wheelEvent(QWheelEvent* event) Q_DECL_OVERRIDE;
@@ -92,14 +101,13 @@ private:
 	QPoint m_cursor;
 
 	// Deferred shading
-	GLuint m_lightBuffer;
-	GLuint m_lightTexture;
 	GLuint m_sceneBuffer;
 	QList<GLuint> m_sceneTextures;
 	GLuint m_sceneDepth;
 	GLuint m_quadVAO;
 	GLuint m_quadBuffer;
-	QHash<QString, QOpenGLShaderProgram*> m_quadPrograms;
+	QList<QOpenGLShaderProgram*> m_quadPrograms;
+	QList<Light*> m_dirtyLights;
 };
 
 QDataStream& operator<<(QDataStream&, const QObject&);

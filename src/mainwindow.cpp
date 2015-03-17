@@ -2,6 +2,7 @@
 
 #include <mainwindow.hpp>
 #include <sphere.hpp>
+#include <light.hpp>
 #include <QVariant>
 #include <QFileDialog>
 #include <QSpinBox>
@@ -27,6 +28,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	QMenu* addMenu = new QMenu(tr("Add Geometry"));
 	addMenu->addAction(ui->newCube);
 	addMenu->addAction(ui->newSphere);
+	addMenu->addAction(ui->newLight);
 	addMenu->menuAction()->setIcon(QIcon(":/icons/add-geo.png"));
 	ui->toolBar->addAction(addMenu->menuAction());
 
@@ -277,11 +279,42 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			connect(checkbox, QCheckBox::toggled, [&] (bool checked) { set(checked); });
 			return checkbox;
 		}
+		case QMetaType::QSize: {
+			QSize* value = new QSize(prop.toSize());
+			auto label = new QLabel(prop.toString());
+			const QString axis[] = {
+				tr("Width"),
+				tr("Height")
+			};
+
+			for (int i = 0; i < 2; i++) {
+				auto item = new QTreeWidgetItem;
+				item->setText(0, axis[i]);
+				line->addChild(item);
+
+				auto widget = widgetForVariant(item, [=]() {
+					if(i == 0)
+						return value->width();
+					else
+						return value->height();
+				}, [=](const QVariant& val) {
+					if(i == 0)
+						value->setWidth(val.toInt());
+					else
+						value->setHeight(val.toInt());
+					//label->setText(QVariant(*value).toString());
+					set(*value);
+				});
+
+				line->treeWidget()->setItemWidget(item, 1, widget);
+			}
+
+			return label;
+		}
 		default:
 			qDebug() << "Unknown property type:" << prop.type();
 		case QMetaType::QRect:
 		case QMetaType::QPoint:
-		case QMetaType::QSize:
 		case QMetaType::QRegion:
 		case QMetaType::QSizePolicy:
 		case QMetaType::QPalette:
@@ -289,6 +322,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 		case QMetaType::QCursor:
 		case QMetaType::QIcon:
 		case QMetaType::QLocale:
+		case QMetaType::QMatrix4x4:
 			return new QLabel(prop.toString());
 	}
 
@@ -379,4 +413,12 @@ void MainWindow::on_actionBuffers_toggled(bool show) {
 
 void MainWindow::on_actionSceneProp_triggered() {
 	showProperties(ui->viewport);
+}
+
+void MainWindow::on_newLight_triggered() {
+	ui->viewport->addChild<Light>();
+}
+
+void MainWindow::on_showMaps_toggled(bool arg1) {
+	ui->viewport->showMaps(arg1);
 }

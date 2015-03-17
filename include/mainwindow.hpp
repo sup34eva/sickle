@@ -41,6 +41,10 @@ private slots:
 
 	void on_actionSceneProp_triggered();
 
+	void on_newLight_triggered();
+
+	void on_showMaps_toggled(bool arg1);
+
 private:
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);
 	QString m_lastFile;

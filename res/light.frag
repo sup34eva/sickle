@@ -6,10 +6,11 @@ uniform sampler2D color;
 uniform sampler2D normal;
 uniform sampler2D tangent;
 uniform sampler2D bitangent;
-uniform sampler2D shadow;
+uniform sampler2D vertPos;
+uniform sampler2D matProp1;
+uniform sampler2D matProp2;
+uniform sampler2D matProp3;
 uniform sampler2DShadow shadowMap;
-uniform vec3 lightD;
-uniform vec3 eyeD;
 
 struct Material {
     float metallic;
@@ -26,16 +27,29 @@ struct Material {
     float clearcoatGloss;
 };
 
-const float lightPower = 1.0;
-const vec3 ambientColor = vec3(0.1, 0.1, 0.1);
-uniform Material material;
-const vec3 lightColor = vec3(1, 1, 1);
+uniform float lightPower;
+uniform vec3 lightColor;
+uniform vec3 lightD;
+uniform vec3 eyeD;
+uniform mat4 vDepth;
+uniform mat4 pDepth;
 
 layout(location = 0) out vec4 output;
+
+const vec2 poissonDisk[4] = vec2[](
+    vec2(-0.94201624,  -0.39906216),
+    vec2( 0.94558609,  -0.76890725),
+    vec2(-0.094184101, -0.92938870),
+    vec2( 0.34495938,   0.29387760)
+);
 
 const float PI = 3.14159265358979323846;
 
 float sqr(float x) { return x * x; }
+
+vec3 ConstantBiasScale(vec3 vec, float bias, float scale) {
+    return (vec + bias) * scale;
+}
 
 float SchlickFresnel(float u) {
     float m = clamp(1 - u, 0, 1);
@@ -70,7 +84,7 @@ vec3 mon2lin(vec3 x) {
     return vec3(pow(x[0], 2.2), pow(x[1], 2.2), pow(x[2], 2.2));
 }
 
-vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y, vec3 C) {
+vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y, vec3 C, Material material) {
     float NdotL = max(dot(N, L), 0);
     float NdotV = max(dot(N, V), 0);
     vec3 H = normalize(L + V);
@@ -117,12 +131,36 @@ void main() {
     vec3 n = texture(normal, UV).xyz;
     vec3 x = texture(tangent, UV).xyz;
     vec3 y = texture(bitangent, UV).xyz;
-    vec3 s = texture(shadow, UV).xyz;
+    vec4 s = (pDepth * vDepth) * vec4(texture(vertPos, UV).xyz, 1);
 
     float NoL = clamp(dot(n, lightD), 0, 1);
 
-    float visibility = texture(shadowMap, s);
+    float bias = clamp(0.005 * tan(acos(NoL)), 0, 0.01);
+    vec3 shadowCoord = ConstantBiasScale(s.xyz / s.w, 1.0, 0.5);
+    float visibility = 0.0;
+    for (int i=0; i < 4; i++){
+        vec3 tempS = vec3(shadowCoord.xy + poissonDisk[i] / 700.0, shadowCoord.z);
+        visibility += texture(shadowMap, tempS, bias) * 0.2;
+    }
 
-    vec3 light = (lightPower * NoL * BRDF(lightD, eyeD, n, x, y, c)) + (ambientColor * c);
+    Material mat;
+    vec4 prop1 = texture(matProp1, UV);
+    vec4 prop2 = texture(matProp2, UV);
+    vec4 prop3 = texture(matProp3, UV);
+
+    mat.metallic = prop1.x;
+    mat.subsurface = prop1.y;
+    mat.specular = prop1.z;
+    mat.roughness = prop1.w;
+
+    mat.specularTint = prop2.x;
+    mat.anisotropic = prop2.y;
+    mat.sheen = prop2.z;
+    mat.sheenTint = prop2.w;
+
+    mat.clearcoat = prop3.x;
+    mat.clearcoatGloss = prop3.y;
+
+    vec3 light = lightPower * lightColor * (NoL * visibility) * BRDF(lightD, eyeD, n, x, y, c, mat);
     output = vec4(light, 1);
 }

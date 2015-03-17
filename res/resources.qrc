@@ -1,10 +1,9 @@
 <RCC>
     <qresource prefix="/shaders">
-        <file>lit.frag</file>
+        <file>ambient.frag</file>
         <file>scene.vert</file>
         <file>unlit.frag</file>
-        <file>brdf.frag</file>
-        <file>disney.frag</file>
+        <file>light.frag</file>
         <file>deferred.vert</file>
         <file>buffer.frag</file>
     </qresource>
