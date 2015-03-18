@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #ifndef LIGHT_HPP
 #define LIGHT_HPP
 
@@ -10,9 +12,11 @@ class Light : public Actor {
 	Q_OBJECT
 
 public:
-	Light(QObject* parent = nullptr);
-	virtual void setParent(QObject*);
-	virtual void draw(const DrawInfo&) {}
+	explicit Light(QObject* parent = nullptr);
+	virtual void setParent(QObject* parent);
+	virtual void draw(const DrawInfo& info) {
+		Q_UNUSED(info)
+	}
 
 	prop(QMatrix4x4, projection);
 	prop(QMatrix4x4, view);
@@ -43,4 +47,4 @@ public slots:
 
 Q_DECLARE_METATYPE(Light)
 
-#endif // LIGHT_HPP
+#endif  // LIGHT_HPP

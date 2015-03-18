@@ -46,10 +46,10 @@ void Viewport::initScene() {
 	glGenFramebuffers(1, &m_sceneBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneBuffer);
 
-	int num = 8;
-	GLuint tex[num];
-	glGenTextures(num, tex);
-	for(int i = 0; i < num; i++) {
+	const int kNum = 8;
+	GLuint tex[kNum];
+	glGenTextures(kNum, tex);
+	for(int i = 0; i < kNum; i++) {
 		glBindTexture(GL_TEXTURE_2D, tex[i]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -161,7 +161,7 @@ void Viewport::renderScene() {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_sceneDepth);
 
 	auto len = m_sceneTextures.length();
-	GLenum buffers[len];
+	auto buffers = new GLenum[len];
 	for(int i = 0; i < len; i++) {
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, m_sceneTextures.at(i), 0);
 		buffers[i] = GL_COLOR_ATTACHMENT0 + i;
@@ -190,6 +190,8 @@ void Viewport::renderScene() {
 		auto child = dynamic_cast<Actor*>(i);
 		if (child) child->draw(info);
 	}
+
+	delete[] buffers;
 }
 
 QVector3D toVector(const QColor& col) {
@@ -213,9 +215,9 @@ void Viewport::renderQuad() {
 
 		int len;
 		QList<Light*> lights;
-		if(m_showBuffers)
+		if(m_showBuffers) {
 			len = m_sceneTextures.length();
-		else {
+		} else {
 			lights = findChildren<Light*>();
 			len = lights.length();
 		}
@@ -234,9 +236,9 @@ void Viewport::renderQuad() {
 			glViewport(x * w, y * h, w, h);
 			if(i < len) {
 				glActiveTexture(GL_TEXTURE0);
-				if(m_showBuffers)
+				if(m_showBuffers) {
 					glBindTexture(GL_TEXTURE_2D, m_sceneTextures.at(i));
-				else {
+				} else {
 					glBindTexture(GL_TEXTURE_2D, lights.at(i)->texture());
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 				}
@@ -271,9 +273,12 @@ void Viewport::renderQuad() {
 		bool isLight = isLit && !isAmbient;
 
 		int id;
-		if(isAmbient) id = 2;
-		else if(isLight) id = 1;
-		else id = 0;
+		if (isAmbient)
+			id = 2;
+		else if (isLight)
+			id = 1;
+		else
+			id = 0;
 
 		auto prog = m_quadPrograms.value(id);
 		prog->bind();
@@ -282,7 +287,17 @@ void Viewport::renderQuad() {
 		if(isLight)
 			light = lightList.value(i - 1);
 
-		static const QList<QString> names = {"color", "normal", "tangent", "bitangent", "vertPos", "matProp1", "matProp2", "matProp3", "shadowMap"};
+		static const QList<QString> names = {
+			"color",
+			"normal",
+			"tangent",
+			"bitangent",
+			"vertPos",
+			"matProp1",
+			"matProp2",
+			"matProp3",
+			"shadowMap"
+		};
 		int texLen = 1;
 		int maxLen = m_sceneTextures.length();
 		if(isLight) texLen = maxLen + 1;

@@ -49,12 +49,13 @@ class Actor : public QObject {
 			}
 		}
 		virtual void draw(const DrawInfo& info) = 0;
-		virtual void setParent(QObject*);
-		virtual bool event(QEvent*);
+		virtual void setParent(QObject* parent);
+		virtual bool event(QEvent* event);
 
 		propSig(QVector3D, position, moved);
 		propSig(QQuaternion, orientation, rotated);
 		propSig(QVector3D, scale, scaled);
+
 	protected:
 		virtual QMatrix4x4 transform();
 
@@ -63,11 +64,12 @@ class Actor : public QObject {
 			QObject* par = this;
 			do {
 				par = par->parent();
-			} while(par != nullptr && static_cast<T*>(par) == nullptr);
+			} while (par != nullptr && static_cast<T*>(par) == nullptr);
 			return static_cast<T*>(par);
 		}
 
 		Viewport* viewport();
+
 private:
 		Viewport* m_viewport;
 };

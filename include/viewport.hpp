@@ -84,7 +84,7 @@ protected:
 	void paintGL() Q_DECL_OVERRIDE;
 	void initScene();
 	void initQuad();
-	void renderLight(Light*);
+	void renderLight(Light* light);
 	void renderScene();
 	void renderQuad();
 	void resizeGL(int w, int h) Q_DECL_OVERRIDE;

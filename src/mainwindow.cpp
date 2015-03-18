@@ -276,7 +276,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 		case QMetaType::Bool: {
 			auto checkbox = new QCheckBox;
 			checkbox->setChecked(prop.toBool());
-			connect(checkbox, QCheckBox::toggled, [&] (bool checked) { set(checked); });
+			connect(checkbox, &QCheckBox::toggled, [=] (bool checked) { set(checked); });
 			return checkbox;
 		}
 		case QMetaType::QSize: {
@@ -302,7 +302,6 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 						value->setWidth(val.toInt());
 					else
 						value->setHeight(val.toInt());
-					//label->setText(QVariant(*value).toString());
 					set(*value);
 				});
 

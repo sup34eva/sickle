@@ -13,6 +13,7 @@
 #include <actor.hpp>
 #include <memory>
 #include <vector>
+#include <tuple>
 
 /*! \brief Définit les propriétés d'un materiau
  *
