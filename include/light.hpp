@@ -18,8 +18,6 @@ public:
 		Q_UNUSED(info)
 	}
 
-	prop(QMatrix4x4, projection);
-	prop(QMatrix4x4, view);
 	prop(GLuint, buffer);
 	prop(GLuint, texture);
 	prop(float, power);
@@ -39,10 +37,27 @@ public:
 		return &m_texture;
 	}
 
-public slots:
+	QMatrix4x4 projection() {
+		return m_projection;
+	}
+
+	QMatrix4x4 view() {
+		return m_view;
+	}
+
+	virtual int type() {
+		return 0;
+	}
+
 	virtual void updateProj();
-	void updateView();
+	virtual void updateView();
+
+public slots:
 	void update();
+
+protected:
+	QMatrix4x4 m_projection;
+	QMatrix4x4 m_view;
 };
 
 Q_DECLARE_METATYPE(Light)

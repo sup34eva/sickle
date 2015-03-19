@@ -10,6 +10,7 @@
 #include <QWheelEvent>
 #include <QKeyEvent>
 #include <QColor>
+#include <QtMath>
 #include <camera.hpp>
 #include <cube.hpp>
 #include <sphere.hpp>

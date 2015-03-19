@@ -3,6 +3,7 @@
 #include <mainwindow.hpp>
 #include <sphere.hpp>
 #include <light.hpp>
+#include <spotlight.hpp>
 #include <QVariant>
 #include <QFileDialog>
 #include <QSpinBox>
@@ -29,6 +30,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	addMenu->addAction(ui->newCube);
 	addMenu->addAction(ui->newSphere);
 	addMenu->addAction(ui->newLight);
+	addMenu->addAction(ui->newSpot);
 	addMenu->menuAction()->setIcon(QIcon(":/icons/add-geo.png"));
 	ui->toolBar->addAction(addMenu->menuAction());
 
@@ -420,4 +422,8 @@ void MainWindow::on_newLight_triggered() {
 
 void MainWindow::on_showMaps_toggled(bool arg1) {
 	ui->viewport->showMaps(arg1);
+}
+
+void MainWindow::on_newSpot_triggered() {
+	ui->viewport->addChild<Spotlight>();
 }

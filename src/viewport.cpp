@@ -3,6 +3,7 @@
 #include <viewport.hpp>
 #include <QStyle>
 #include <light.hpp>
+#include <spotlight.hpp>
 
 Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent) {
 	m_camera = new Camera(this);
@@ -12,6 +13,7 @@ Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent) {
 	qRegisterMetaType<Cube>("Cube");
 	qRegisterMetaType<Sphere>("Sphere");
 	qRegisterMetaType<Light>("Light");
+	qRegisterMetaType<Spotlight>("Spotlight");
 
 	QSurfaceFormat format;
 	format.setProfile(QSurfaceFormat::CoreProfile);
@@ -31,13 +33,16 @@ void Viewport::initLight(Light& light) {
 	glGenFramebuffers(1, light.getBuffer());
 	glBindFramebuffer(GL_FRAMEBUFFER, light.buffer());
 
+	static const GLfloat colors[] = {0, 0, 0};
+
 	glGenTextures(1, light.getTexture());
 	glBindTexture(GL_TEXTURE_2D, light.texture());
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, colors);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 	doneCurrent();
 }
@@ -318,11 +323,22 @@ void Viewport::renderQuad() {
 			if(isAmbient) {
 				prog->setUniformValue("ambientColor", toVector(m_ambient));
 			} else {
-				prog->setUniformValue("lightD", light->direction());
+				auto type = light->type();
+				prog->setUniformValue("light.type", type);
+				prog->setUniformValue("light.orientation", light->direction());
+				prog->setUniformValue("light.location", light->position());
+				prog->setUniformValue("light.power", light->power());
+				prog->setUniformValue("light.color", toVector(light->color()));
+
+				if(type == 1) {
+					auto spot = static_cast<Spotlight*>(light);
+					prog->setUniformValue("light.falloff", spot->farZ());
+					prog->setUniformValue("light.inner", static_cast<GLfloat>(qCos(qDegreesToRadians(spot->innerAngle()))));
+					prog->setUniformValue("light.outer", static_cast<GLfloat>(qCos(qDegreesToRadians(spot->outerAngle()))));
+				}
+
 				prog->setUniformValue("vDepth", light->view());
 				prog->setUniformValue("pDepth", light->projection());
-				prog->setUniformValue("lightPower", light->power());
-				prog->setUniformValue("lightColor", toVector(light->color()));
 				prog->setUniformValue("eyeD", -m_camera->direction().normalized());
 			}
 		}

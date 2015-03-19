@@ -27,9 +27,18 @@ struct Material {
     float clearcoatGloss;
 };
 
-uniform float lightPower;
-uniform vec3 lightColor;
-uniform vec3 lightD;
+struct Light {
+    int type;
+    vec3 location;
+    vec3 orientation;
+    vec3 color;
+    float power;
+    float falloff;
+    float inner;
+    float outer;
+};
+
+uniform Light light;
 uniform vec3 eyeD;
 uniform mat4 vDepth;
 uniform mat4 pDepth;
@@ -131,7 +140,20 @@ void main() {
     vec3 n = texture(normal, UV).xyz;
     vec3 x = texture(tangent, UV).xyz;
     vec3 y = texture(bitangent, UV).xyz;
-    vec4 s = (pDepth * vDepth) * vec4(texture(vertPos, UV).xyz, 1);
+    vec3 pos = texture(vertPos, UV).xyz;
+    vec4 s = (pDepth * vDepth) * vec4(pos, 1);
+
+    vec3 lightD;
+    float falloff = 1.0;
+    if(light.type == 0) {
+        lightD = light.orientation;
+    } else if(light.type == 1) {
+        lightD = normalize(light.location - pos);
+        float angle = dot(lightD, light.orientation);
+        float dist = distance(pos, light.location);
+        falloff = sqr(clamp(1.0 - (dist / light.falloff), 0.0, 1.0));
+        falloff *= clamp((angle - light.outer) / (light.inner - light.outer), 0.0, 1.0);
+    }
 
     float NoL = clamp(dot(n, lightD), 0, 1);
 
@@ -161,6 +183,7 @@ void main() {
     mat.clearcoat = prop3.x;
     mat.clearcoatGloss = prop3.y;
 
-    vec3 light = lightPower * lightColor * (NoL * visibility) * BRDF(lightD, eyeD, n, x, y, c, mat);
-    output = vec4(light, 1);
+    vec3 radiance = light.power * light.color * (NoL * visibility * falloff) * BRDF(lightD, eyeD, n, x, y, c, mat);
+    output = vec4(radiance, 1);
+    //output = vec4(light.power * vec3(falloff, visibility, NoL), 1);
 }

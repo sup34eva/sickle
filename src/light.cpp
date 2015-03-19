@@ -14,11 +14,11 @@ Light::Light(QObject* parent) : Actor(parent) {
 	orientation(QQuaternion(QVector3D::dotProduct(up, dir), QVector3D::crossProduct(up, dir)).normalized());
 	setObjectName(tr("New Light"));
 
-	connect(this, &Light::nearZChanged, this, &Light::updateProj);
-	connect(this, &Light::farZChanged, this, &Light::updateProj);
-	connect(this, &Light::mapSizeChanged, this, &Light::updateProj);
-	connect(this, &Light::moved, this, &Light::updateView);
-	connect(this, &Light::rotated, this, &Light::updateView);
+	connect(this, &Light::nearZChanged, this, &Light::update);
+	connect(this, &Light::farZChanged, this, &Light::update);
+	connect(this, &Light::mapSizeChanged, this, &Light::update);
+	connect(this, &Light::moved, this, &Light::update);
+	connect(this, &Light::rotated, this, &Light::update);
 
 	update();
 	if(parent != nullptr)
@@ -29,22 +29,19 @@ void Light::updateProj() {
 	m_projection.setToIdentity();
 	auto size = m_mapSize / 2;
 	m_projection.ortho(-size.width(), size.width(), -size.height(), size.height(), m_nearZ, m_farZ);
-	auto view = viewport();
-	if(view != nullptr)
-		view->updateLight(this);
 }
 
 void Light::updateView() {
 	m_view.setToIdentity();
 	m_view.lookAt(direction(), QVector3D(0, 0, 0), QVector3D(0, 1, 0));
-	auto view = viewport();
-	if(view != nullptr)
-		view->updateLight(this);
 }
 
 void Light::update() {
 	updateProj();
 	updateView();
+	auto view = viewport();
+	if(view != nullptr)
+		view->updateLight(this);
 }
 
 void Light::setParent(QObject* parent) {

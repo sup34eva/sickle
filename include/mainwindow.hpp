@@ -38,12 +38,10 @@ private slots:
 	void on_newSphere_triggered();
 	void on_actionBuffers_toggled(bool arg1);
 	void showProperties(QObject* obj);
-
 	void on_actionSceneProp_triggered();
-
 	void on_newLight_triggered();
-
 	void on_showMaps_toggled(bool arg1);
+	void on_newSpot_triggered();
 
 private:
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);

@@ -30,7 +30,8 @@ SOURCES += \
     src/cube.cpp \
     src/sphere.cpp \
     src/actor.cpp \
-    src/light.cpp
+    src/light.cpp \
+    src/spotlight.cpp
 
 HEADERS  += \
     include/camera.hpp \
@@ -42,7 +43,8 @@ HEADERS  += \
     include/viewport.hpp \
     include/sphere.hpp \
     include/actor.hpp \
-    include/light.hpp
+    include/light.hpp \
+    include/spotlight.hpp
 
 DISTFILES += \
     README.md \
