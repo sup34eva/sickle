@@ -43,7 +43,7 @@ uniform vec3 eyeD;
 uniform mat4 vDepth;
 uniform mat4 pDepth;
 
-layout(location = 0) out vec4 output;
+layout(location = 0) out vec4 outColor;
 
 const vec2 poissonDisk[4] = vec2[](
     vec2(-0.94201624,  -0.39906216),
@@ -184,6 +184,6 @@ void main() {
     mat.clearcoatGloss = prop3.y;
 
     vec3 radiance = light.power * light.color * (NoL * visibility * falloff) * BRDF(lightD, eyeD, n, x, y, c, mat);
-    output = vec4(radiance, 1);
+    outColor = vec4(radiance, 1);
     //output = vec4(light.power * vec3(falloff, visibility, NoL), 1);
 }

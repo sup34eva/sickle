@@ -129,7 +129,7 @@ public:
 			program->setUniformValue(loc, material()->property(name).toFloat() / 100.0f);
 		}
 
-		func->glDrawElements(info.mode, Child::s_indices.size(), GL_UNSIGNED_INT, nullptr);
+		func->glDrawElements(info.mode, Child::s_indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
 
 		Child::s_vao->release();
 		program->release();
@@ -138,22 +138,24 @@ public:
 protected:
 	static QVector3D triangle(int id) {
 		return QVector3D(
-					Child::s_indices[id],
-					Child::s_indices[id + 1],
-					Child::s_indices[id + 2]);
+					Child::s_indexBuffer.at(id),
+					Child::s_indexBuffer.at(id + 1),
+					Child::s_indexBuffer.at(id + 2));
 	}
 
 	static QVector3D vertex(int id) {
+		auto pos = Child::s_buffersData.value("Position");
 		return QVector3D(
-					Child::s_vertices[id],
-					Child::s_vertices[id + 1],
-					Child::s_vertices[id + 2]);
+					pos.at(id),
+					pos.at(id + 1),
+					pos.at(id + 2));
 	}
 
 	static QVector2D UV(int id) {
+		auto uv = Child::s_buffersData.value("UV");
 		return QVector2D(
-					Child::s_uv[id],
-					Child::s_uv[id + 1]);
+					uv.at(id),
+					uv.at(id + 1));
 	}
 
 	/*! \brief Initialise les shaders et alloue les buffer
@@ -171,30 +173,21 @@ protected:
 			Child::s_vao->create();
 			Child::s_vao->bind();
 
-			Child::s_vertexBuffer = initBuffer(QOpenGLBuffer::VertexBuffer, Child::s_vertices);
-			Q_CHECK_PTR(Child::s_vertexBuffer);
+			auto indexB = initBuffer(QOpenGLBuffer::IndexBuffer, Child::s_indexBuffer);
+			Q_CHECK_PTR(indexB);
+			Child::s_buffers.insert("Index", indexB);
 
-			Child::s_colorBuffer = initBuffer(QOpenGLBuffer::VertexBuffer, Child::s_colors);
-			Q_CHECK_PTR(Child::s_colorBuffer);
-
-			Child::s_normalBuffer = initBuffer(QOpenGLBuffer::VertexBuffer, Child::s_normals);
-			Q_CHECK_PTR(Child::s_normalBuffer);
-
-			Child::s_UVBuffer = initBuffer(QOpenGLBuffer::VertexBuffer, Child::s_uv);
-			Q_CHECK_PTR(Child::s_UVBuffer);
-
-			Child::s_tangentBuffer = initBuffer(QOpenGLBuffer::VertexBuffer, Child::s_tangents);
-			Q_CHECK_PTR(Child::s_tangentBuffer);
-
-			Child::s_bitangentBuffer = initBuffer(QOpenGLBuffer::VertexBuffer, Child::s_bitangents);
-			Q_CHECK_PTR(Child::s_bitangentBuffer);
-
-			Child::s_indexBuffer = initBuffer(QOpenGLBuffer::IndexBuffer, Child::s_indices);
-			Q_CHECK_PTR(Child::s_indexBuffer);
+			for(auto it = Child::s_buffersData.constBegin(); it != Child::s_buffersData.constEnd(); ++it) {
+				auto buffer = initBuffer(QOpenGLBuffer::VertexBuffer, it.value());
+				Q_CHECK_PTR(buffer);
+				Child::s_buffers.insert(it.key(), buffer);
+			}
 
 			for(auto shader : GeoBase::s_shaderList) {
 				auto name = std::get<0>(shader);
 				auto program = new QOpenGLShaderProgram(parent);
+
+				qDebug() << "Loading shader" << name << "from files:" << std::get<1>(shader) << std::get<2>(shader);
 
 				if (!program->addShaderFromSourceFile(QOpenGLShader::Vertex, std::get<1>(shader))) {
 					qWarning() << "Could not load vertex shader:" << program->log();
@@ -218,39 +211,20 @@ protected:
 					continue;
 				}
 
-				program->setUniformValue("lightPower", 1.2f);
-				program->setUniformValue("lightColor", QVector3D(1, 1, 1));
-				program->setUniformValue("ambientColor", QVector3D(0.1, 0.1, 0.1));
-
-				auto posAttr = program->attributeLocation("vertexPosition");
-				Child::s_vertexBuffer->bind();
-				program->setAttributeBuffer(posAttr, GL_FLOAT, 0, 3);
-				program->enableAttributeArray(posAttr);
-
-				auto colAttr = program->attributeLocation("vertexColor");
-				Child::s_colorBuffer->bind();
-				program->setAttributeBuffer(colAttr, GL_FLOAT, 0, 3);
-				program->enableAttributeArray(colAttr);
-
-				auto normAttr = program->attributeLocation("vertexNormal");
-				Child::s_normalBuffer->bind();
-				program->setAttributeBuffer(normAttr, GL_FLOAT, 0, 3);
-				program->enableAttributeArray(normAttr);
-
-				auto uvAttr = program->attributeLocation("vertexUV");
-				Child::s_UVBuffer->bind();
-				program->setAttributeBuffer(uvAttr, GL_FLOAT, 0, 2);
-				program->enableAttributeArray(uvAttr);
-
-				auto tanAttr = program->attributeLocation("vertexTangent");
-				Child::s_tangentBuffer->bind();
-				program->setAttributeBuffer(tanAttr, GL_FLOAT, 0, 3);
-				program->enableAttributeArray(tanAttr);
-
-				auto btanAttr = program->attributeLocation("vertexBitangent");
-				Child::s_bitangentBuffer->bind();
-				program->setAttributeBuffer(btanAttr, GL_FLOAT, 0, 3);
-				program->enableAttributeArray(btanAttr);
+				for(auto it = Child::s_buffers.constBegin(); it != Child::s_buffers.constEnd(); ++it) {
+					if(it.key() != "Index") {
+						auto tupleSize = it.key() == "UV" ? 2 : 3;
+						QString name = "vertex" + it.key();
+						auto attr = program->attributeLocation(name);
+						if(attr != -1) {
+							it.value()->bind();
+							program->setAttributeBuffer(attr, GL_FLOAT, 0, tupleSize);
+							program->enableAttributeArray(attr);
+						} else {
+							qWarning().noquote() << "Attribute not found:" << name;
+						}
+					}
+				}
 
 				Child::s_programList.insert(name, program);
 			}
@@ -261,24 +235,13 @@ protected:
 	static int s_instances;
 	static ProgramList s_programList;
 	static QOpenGLVertexArrayObject* s_vao;
-	static QOpenGLBuffer* s_vertexBuffer;
-	static QOpenGLBuffer* s_colorBuffer;
-	static QOpenGLBuffer* s_normalBuffer;
-	static QOpenGLBuffer* s_UVBuffer;
-	static QOpenGLBuffer* s_tangentBuffer;
-	static QOpenGLBuffer* s_bitangentBuffer;
-	static QOpenGLBuffer* s_indexBuffer;
-	static QVector<GLfloat> s_vertices;
-	static QVector<GLfloat> s_colors;
-	static QVector<GLfloat> s_uv;
-	static QVector<GLfloat> s_normals;
-	static QVector<GLfloat> s_tangents;
-	static QVector<GLfloat> s_bitangents;
-	static QVector<quint32> s_indices;
+	static QHash<QString, QOpenGLBuffer*> s_buffers;
+	static QHash<QString, QList<GLfloat>> s_buffersData;
+	static QList<quint32> s_indexBuffer;
 
 private:
 	template <typename T>
-	noinline static QOpenGLBuffer* initBuffer(QOpenGLBuffer::Type type, const QVector<T>& data) {
+	noinline static QOpenGLBuffer* initBuffer(QOpenGLBuffer::Type type, const QList<T>& data) {
 		auto buffer = new QOpenGLBuffer(type);
 		buffer->create();
 		buffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -291,10 +254,10 @@ private:
 	}
 
 	static void calcNormals() {
-		Child::s_normals = Child::s_vertices;
-		Child::s_tangents = Child::s_vertices;
-		Child::s_bitangents = Child::s_vertices;
-		auto size = Child::s_indices.size();
+		auto normals = Child::s_buffersData.value("Position");
+		auto tangents = normals;
+		auto bitangents = normals;
+		auto size = Child::s_indexBuffer.size();
 		for(int i = 0; i < size; i += 3) {
 			auto tri = triangle(i);
 			auto v = calcTriNormal(tri);
@@ -302,11 +265,15 @@ private:
 			auto btan = calcTriBitangent(tri);
 			auto t = tri * 3;
 			for(int j = 0; j < 3; j++) {
-				Child::s_normals[t.x() + j] = Child::s_normals[t.y() + j] = Child::s_normals[t.z() + j] = v[j];
-				Child::s_tangents[t.x() + j] = Child::s_tangents[t.y() + j] = Child::s_tangents[t.z() + j] = tan[j];
-				Child::s_bitangents[t.x() + j] = Child::s_bitangents[t.y() + j] = Child::s_bitangents[t.z() + j] = btan[j];
+				normals[t.x() + j] = normals[t.y() + j] = normals[t.z() + j] = v[j];
+				tangents[t.x() + j] = tangents[t.y() + j] = tangents[t.z() + j] = tan[j];
+				bitangents[t.x() + j] = bitangents[t.y() + j] = bitangents[t.z() + j] = btan[j];
 			}
 		}
+
+		Child::s_buffersData.insert("Normal", normals);
+		Child::s_buffersData.insert("Tangent", tangents);
+		Child::s_buffersData.insert("Bitangent", bitangents);
 	}
 
 	static QVector3D calcTriNormal(QVector3D tri) {

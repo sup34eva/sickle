@@ -4,8 +4,8 @@ in vec2 UV;
 
 uniform sampler2D color;
 
-out vec4 output;
+layout(location = 0) out vec4 outColor;
 
 void main(){
-    output = texture(color, UV);
+    outColor = texture(color, UV);
 }

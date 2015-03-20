@@ -23,57 +23,10 @@ QOpenGLVertexArrayObject* Cube::tBase::s_vao = nullptr;
 template<>
 ProgramList Cube::tBase::s_programList = {};
 template<>
-QOpenGLBuffer* Cube::tBase::s_vertexBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_colorBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_normalBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_UVBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_tangentBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_bitangentBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_indexBuffer = nullptr;
+QHash<QString, QOpenGLBuffer*> Cube::tBase::s_buffers = {};
 
 template<>
-QVector<GLfloat> Cube::tBase::s_normals = {};
-template<>
-QVector<GLfloat> Cube::tBase::s_tangents = {};
-template<>
-QVector<GLfloat> Cube::tBase::s_bitangents = {};
-
-template<>
-QVector<GLfloat> Cube::tBase::s_vertices = {
-	-1.0f, -1.0f, -1.0f,		// Face 1
-	-1.0f, -1.0f,  1.0f,		//
-	-1.0f,  1.0f,  1.0f,		//
-	-1.0f,  1.0f, -1.0f,		//
-	 1.0f, -1.0f, -1.0f,		// Face 2
-	 1.0f,  1.0f, -1.0f,		//
-	 1.0f,  1.0f,  1.0f,		//
-	 1.0f, -1.0f,  1.0f,		//
-	-1.0f, -1.0f, -1.0f,		// Face 3
-	 1.0f, -1.0f, -1.0f,		//
-	 1.0f, -1.0f,  1.0f,		//
-	-1.0f, -1.0f,  1.0f,		//
-	-1.0f,  1.0f, -1.0f,		// Face 4
-	-1.0f,  1.0f,  1.0f,		//
-	 1.0f,  1.0f,  1.0f,		//
-	 1.0f,  1.0f, -1.0f,		//
-	-1.0f, -1.0f, -1.0f,		// Face 5
-	-1.0f,  1.0f, -1.0f,		//
-	 1.0f,  1.0f, -1.0f,		//
-	 1.0f, -1.0f, -1.0f,		//
-	-1.0f, -1.0f,  1.0f,		// Face 6
-	 1.0f, -1.0f,  1.0f,		//
-	 1.0f,  1.0f,  1.0f,		//
-	-1.0f,  1.0f,  1.0f,		//
-};
-
-template<>
-QVector<quint32> Cube::tBase::s_indices = {
+QList<quint32> Cube::tBase::s_indexBuffer = {
 	0,  1,  3,		// Face 1
 	3,  1,  2,		//
 	4,  5,  7,		// Face 2
@@ -89,57 +42,83 @@ QVector<quint32> Cube::tBase::s_indices = {
 };
 
 template<>
-QVector<GLfloat> Cube::tBase::s_colors = {
-	1.0f, 0.0f, 0.0f,		// Face 1
-	1.0f, 0.0f, 0.0f,		//
-	1.0f, 0.0f, 0.0f,		//
-	1.0f, 0.0f, 0.0f,		//
-	1.0f, 1.0f, 0.0f,		// Face 2
-	1.0f, 1.0f, 0.0f,		//
-	1.0f, 1.0f, 0.0f,		//
-	1.0f, 1.0f, 0.0f,		//
-	0.0f, 1.0f, 0.0f,		// Face 3
-	0.0f, 1.0f, 0.0f,		//
-	0.0f, 1.0f, 0.0f,		//
-	0.0f, 1.0f, 0.0f,		//
-	0.0f, 1.0f, 1.0f,		// Face 4
-	0.0f, 1.0f, 1.0f,		//
-	0.0f, 1.0f, 1.0f,		//
-	0.0f, 1.0f, 1.0f,		//
-	0.0f, 0.0f, 1.0f,		// Face 5
-	0.0f, 0.0f, 1.0f,		//
-	0.0f, 0.0f, 1.0f,		//
-	0.0f, 0.0f, 1.0f,		//
-	1.0f, 0.0f, 1.0f,		// Face 6
-	1.0f, 0.0f, 1.0f,		//
-	1.0f, 0.0f, 1.0f,		//
-	1.0f, 0.0f, 1.0f,		//
-};
-
-template<>
-QVector<GLfloat> Cube::tBase::s_uv = {
-	 0.0f,  0.0f,		// Face 1
-	 0.0f,  1.0f,		//
-	 1.0f,  1.0f,		//
-	 1.0f,  0.0f,		//
-	 0.0f,  0.0f,		// Face 2
-	 1.0f,  0.0f,		//
-	 1.0f,  1.0f,		//
-	 0.0f,  1.0f,		//
-	 0.0f,  0.0f,		// Face 3
-	 1.0f,  0.0f,		//
-	 1.0f,  1.0f,		//
-	 0.0f,  1.0f,		//
-	 0.0f,  0.0f,		// Face 4
-	 0.0f,  1.0f,		//
-	 1.0f,  1.0f,		//
-	 1.0f,  0.0f,		//
-	 0.0f,  0.0f,		// Face 5
-	 0.0f,  1.0f,		//
-	 1.0f,  1.0f,		//
-	 1.0f,  0.0f,		//
-	 0.0f,  0.0f,		// Face 6
-	 1.0f,  0.0f,		//
-	 1.0f,  1.0f,		//
-	 0.0f,  1.0f,		//
+QHash<QString, QList<GLfloat>> Cube::tBase::s_buffersData = {
+	{"Position", {
+		-1.0f, -1.0f, -1.0f,		// Face 1
+		-1.0f, -1.0f,  1.0f,		//
+		-1.0f,  1.0f,  1.0f,		//
+		-1.0f,  1.0f, -1.0f,		//
+		 1.0f, -1.0f, -1.0f,		// Face 2
+		 1.0f,  1.0f, -1.0f,		//
+		 1.0f,  1.0f,  1.0f,		//
+		 1.0f, -1.0f,  1.0f,		//
+		-1.0f, -1.0f, -1.0f,		// Face 3
+		 1.0f, -1.0f, -1.0f,		//
+		 1.0f, -1.0f,  1.0f,		//
+		-1.0f, -1.0f,  1.0f,		//
+		-1.0f,  1.0f, -1.0f,		// Face 4
+		-1.0f,  1.0f,  1.0f,		//
+		 1.0f,  1.0f,  1.0f,		//
+		 1.0f,  1.0f, -1.0f,		//
+		-1.0f, -1.0f, -1.0f,		// Face 5
+		-1.0f,  1.0f, -1.0f,		//
+		 1.0f,  1.0f, -1.0f,		//
+		 1.0f, -1.0f, -1.0f,		//
+		-1.0f, -1.0f,  1.0f,		// Face 6
+		 1.0f, -1.0f,  1.0f,		//
+		 1.0f,  1.0f,  1.0f,		//
+		-1.0f,  1.0f,  1.0f,		//
+	}},
+	{"Color", {
+		1.0f, 0.0f, 0.0f,		// Face 1
+		1.0f, 0.0f, 0.0f,		//
+		1.0f, 0.0f, 0.0f,		//
+		1.0f, 0.0f, 0.0f,		//
+		1.0f, 1.0f, 0.0f,		// Face 2
+		1.0f, 1.0f, 0.0f,		//
+		1.0f, 1.0f, 0.0f,		//
+		1.0f, 1.0f, 0.0f,		//
+		0.0f, 1.0f, 0.0f,		// Face 3
+		0.0f, 1.0f, 0.0f,		//
+		0.0f, 1.0f, 0.0f,		//
+		0.0f, 1.0f, 0.0f,		//
+		0.0f, 1.0f, 1.0f,		// Face 4
+		0.0f, 1.0f, 1.0f,		//
+		0.0f, 1.0f, 1.0f,		//
+		0.0f, 1.0f, 1.0f,		//
+		0.0f, 0.0f, 1.0f,		// Face 5
+		0.0f, 0.0f, 1.0f,		//
+		0.0f, 0.0f, 1.0f,		//
+		0.0f, 0.0f, 1.0f,		//
+		1.0f, 0.0f, 1.0f,		// Face 6
+		1.0f, 0.0f, 1.0f,		//
+		1.0f, 0.0f, 1.0f,		//
+		1.0f, 0.0f, 1.0f,		//
+	}},
+	{"UV", {
+		0.0f,  0.0f,		// Face 1
+		0.0f,  1.0f,		//
+		1.0f,  1.0f,		//
+		1.0f,  0.0f,		//
+		0.0f,  0.0f,		// Face 2
+		1.0f,  0.0f,		//
+		1.0f,  1.0f,		//
+		0.0f,  1.0f,		//
+		0.0f,  0.0f,		// Face 3
+		1.0f,  0.0f,		//
+		1.0f,  1.0f,		//
+		0.0f,  1.0f,		//
+		0.0f,  0.0f,		// Face 4
+		0.0f,  1.0f,		//
+		1.0f,  1.0f,		//
+		1.0f,  0.0f,		//
+		0.0f,  0.0f,		// Face 5
+		0.0f,  1.0f,		//
+		1.0f,  1.0f,		//
+		1.0f,  0.0f,		//
+		0.0f,  0.0f,		// Face 6
+		1.0f,  0.0f,		//
+		1.0f,  1.0f,		//
+		0.0f,  1.0f,		//
+	}}
 };
