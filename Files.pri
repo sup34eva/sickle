@@ -9,13 +9,6 @@ if(!isEmpty(ENV_CXX)) {
     QMAKE_LINK = $$(CXX)
 }
 
-VERSION = $$system(git rev-list --count HEAD $$PWD/include/fileloader.hpp $$PWD/src/fileloader.cpp)
-!isEmpty(VERSION){
-    VERSION = $${VERSION}
-}
-
-DEFINES += FILE_VERSION=\"$${VERSION}\"
-
 INCLUDEPATH += include
 
 CONFIG += c++14 rtti static

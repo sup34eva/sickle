@@ -136,27 +136,3 @@ void Viewport::clearLevel() {
 		delete obj;
 	}
 }
-
-QDataStream& operator<<(QDataStream& stream, const QObject& obj) {
-	auto metaObject = obj.metaObject();
-	for (int i = 0; i < metaObject->propertyCount(); ++i) {
-		auto prop = metaObject->property(i);
-		qDebug() << "Saving " << prop.name();
-		if (static_cast<QMetaType::Type>(prop.type()) != QMetaType::QObjectStar) stream << obj.property(prop.name());
-	}
-	return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, QObject& obj) {
-	auto metaObject = obj.metaObject();
-	for (int i = 0; i < metaObject->propertyCount(); ++i) {
-		auto prop = metaObject->property(i);
-		qDebug() << "Restoring " << prop.name();
-		if (static_cast<QMetaType::Type>(prop.type()) != QMetaType::QObjectStar) {
-			QVariant value;
-			stream >> value;
-			obj.setProperty(prop.name(), value);
-		}
-	}
-	return stream;
-}

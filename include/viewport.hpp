@@ -74,7 +74,4 @@ private:
 	QPoint m_cursor;
 };
 
-QDataStream& operator<<(QDataStream&, const QObject&);
-QDataStream& operator>>(QDataStream&, QObject&);
-
 #endif

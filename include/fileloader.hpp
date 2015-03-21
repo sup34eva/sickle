@@ -5,6 +5,7 @@
 
 #include <QString>
 #include <QFile>
+#include <QMetaObject>
 
 class Viewport;
 
@@ -29,8 +30,11 @@ class DefaultFileLoader : public QObject, public FileLoader {
 	Q_OBJECT
 	Q_INTERFACES(FileLoader)
 	public:
-		virtual void save(Viewport*, const QString&);
+		Q_REVISION(2) virtual void save(Viewport*, const QString&);
 		virtual void load(Viewport*, const QString&);
 };
+
+QDataStream& operator<<(QDataStream&, const QObject&);
+QDataStream& operator>>(QDataStream&, QObject&);
 
 #endif  // FILELOADER_HPP
