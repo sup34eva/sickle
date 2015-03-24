@@ -23,7 +23,7 @@
 struct Material : public QObject {
 	Q_OBJECT
 public:
-	Material() {
+	Material(QObject* parent = nullptr) : QObject(parent) {
 		specular(50);
 		roughness(50);
 		sheenTint(50);
@@ -55,7 +55,7 @@ class GeoBase : public Actor {
 
 public:
 	explicit GeoBase(QObject* parent = nullptr) : Actor(parent) {
-		material(new Material());
+		material(new Material(this));
 	}
 
 	/*! \var m_colors

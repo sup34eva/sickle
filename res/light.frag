@@ -135,6 +135,28 @@ vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y, vec3 C, Material material) {
             + Gs * Fs * Ds + .25 * material.clearcoat * Gr * Fr * Dr;
 }
 
+Material getMat() {
+    Material mat;
+    vec4 prop1 = texture(matProp1, UV);
+    vec4 prop2 = texture(matProp2, UV);
+    vec4 prop3 = texture(matProp3, UV);
+
+    mat.metallic = prop1.x;
+    mat.subsurface = prop1.y;
+    mat.specular = prop1.z;
+    mat.roughness = prop1.w;
+
+    mat.specularTint = prop2.x;
+    mat.anisotropic = prop2.y;
+    mat.sheen = prop2.z;
+    mat.sheenTint = prop2.w;
+
+    mat.clearcoat = prop3.x;
+    mat.clearcoatGloss = prop3.y;
+
+    return mat;
+}
+
 void main() {
     vec3 c = texture(color, UV).xyz;
     vec3 n = texture(normal, UV).xyz;
@@ -165,23 +187,7 @@ void main() {
         visibility += texture(shadowMap, tempS, bias) * 0.2;
     }
 
-    Material mat;
-    vec4 prop1 = texture(matProp1, UV);
-    vec4 prop2 = texture(matProp2, UV);
-    vec4 prop3 = texture(matProp3, UV);
-
-    mat.metallic = prop1.x;
-    mat.subsurface = prop1.y;
-    mat.specular = prop1.z;
-    mat.roughness = prop1.w;
-
-    mat.specularTint = prop2.x;
-    mat.anisotropic = prop2.y;
-    mat.sheen = prop2.z;
-    mat.sheenTint = prop2.w;
-
-    mat.clearcoat = prop3.x;
-    mat.clearcoatGloss = prop3.y;
+    Material mat = getMat();
 
     vec3 radiance = light.power * light.color * (NoL * visibility * falloff) * BRDF(lightD, eyeD, n, x, y, c, mat);
     outColor = vec4(radiance, 1);

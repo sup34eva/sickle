@@ -7,6 +7,7 @@
 
 Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent) {
 	m_camera = new Camera(this);
+	m_AO = new AmbientOcclusion(this);
 
 	setFocusPolicy(Qt::StrongFocus);
 
@@ -22,10 +23,6 @@ Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent) {
 	format.setSamples(16);
 	format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 	setFormat(format);
-}
-
-Viewport::~Viewport() {
-	delete m_camera;
 }
 
 void Viewport::initLight(Light& light) {
@@ -51,7 +48,7 @@ void Viewport::initScene() {
 	glGenFramebuffers(1, &m_sceneBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneBuffer);
 
-	const int kNum = 8;
+	const int kNum = 9;
 	GLuint tex[kNum];
 	glGenTextures(kNum, tex);
 	for(int i = 0; i < kNum; i++) {
@@ -64,8 +61,6 @@ void Viewport::initScene() {
 	}
 
 	glGenRenderbuffers(1, &m_sceneDepth);
-	glBindRenderbuffer(GL_RENDERBUFFER, m_sceneDepth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width(), height());
 }
 
 void Viewport::initQuad() {
@@ -166,13 +161,21 @@ void Viewport::renderScene() {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_sceneDepth);
 
 	auto len = m_sceneTextures.length();
-	auto buffers = new GLenum[len];
+	QList<GLenum> buffers;
 	for(int i = 0; i < len; i++) {
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, m_sceneTextures.at(i), 0);
-		buffers[i] = GL_COLOR_ATTACHMENT0 + i;
+		GLenum attachment = i > 7 ? GL_DEPTH_ATTACHMENT : GL_COLOR_ATTACHMENT0 + i;
+		glFramebufferTexture(GL_FRAMEBUFFER, attachment, m_sceneTextures.at(i), 0);
+		if(i <= 7) buffers.append(attachment);
 	}
 
-	glDrawBuffers(len, buffers);
+	glDrawBuffers(len - 1, &buffers.at(0));
+
+	auto error = glGetError();
+	if(error != 0) {
+		auto str = glGetString(glGetError());
+		qWarning() << "GL Errors:" << reinterpret_cast<const char*>(str);
+	}
+
 	glViewport(0, 0, width(), height());
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -195,8 +198,6 @@ void Viewport::renderScene() {
 		auto child = dynamic_cast<Actor*>(i);
 		if (child) child->draw(info);
 	}
-
-	delete[] buffers;
 }
 
 QVector3D toVector(const QColor& col) {
@@ -301,11 +302,13 @@ void Viewport::renderQuad() {
 			"matProp1",
 			"matProp2",
 			"matProp3",
+			"depth",
 			"shadowMap"
 		};
-		int texLen = 1;
 		int maxLen = m_sceneTextures.length();
-		if(isLight) texLen = maxLen + 1;
+		int texLen = 1;
+		if(isLit) texLen = maxLen;
+		if(isLight) texLen++;
 		for(int j = 0; j < texLen; j++) {
 			glActiveTexture(GL_TEXTURE0 + j);
 			auto tex = (isLight && j >= maxLen) ? light->texture() : m_sceneTextures.at(j);
@@ -314,14 +317,18 @@ void Viewport::renderQuad() {
 			auto loc = prog->uniformLocation(n);
 			if(loc > -1)
 				prog->setUniformValue(loc, j);
-			else
-				qWarning().noquote() << "Uniform" << n << "not found.";
+			/*else
+				qWarning().noquote() << "Uniform" << n << "not found.";*/
 		}
 
 
 		if(isLit) {
 			if(isAmbient) {
 				prog->setUniformValue("ambientColor", toVector(m_ambient));
+				auto occlusion = static_cast<AmbientOcclusion*>(m_AO);
+				prog->setUniformValue("AO.threshold", occlusion->threshold());
+				prog->setUniformValue("AO.kernelSize", QVector2D(occlusion->kernelSize() / width(), occlusion->kernelSize() / height()));
+				prog->setUniformValue("AO.maxDist", occlusion->maxDist());
 			} else {
 				auto type = light->type();
 				prog->setUniformValue("light.type", type);
@@ -369,10 +376,13 @@ void Viewport::resizeGL(int w, int h) {
 	m_projection.perspective(45.0f, static_cast<float>(w) / static_cast<float>(h), 0.1f, 1000.0f);
 	for(int i = 0; i < m_sceneTextures.length(); i++) {
 		glBindTexture(GL_TEXTURE_2D, m_sceneTextures.at(i));
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, w, h, 0, GL_RGBA, GL_FLOAT, 0);
+		GLint internal = i > 7 ? GL_DEPTH_COMPONENT32F : GL_RGBA32F_ARB;
+		GLenum format = i > 7 ? GL_DEPTH_COMPONENT : GL_RGBA;
+		GLenum type = i > 7 ? GL_UNSIGNED_BYTE : GL_FLOAT;
+		glTexImage2D(GL_TEXTURE_2D, 0, internal, w, h, 0, format, type, 0);
 	}
 	glBindRenderbuffer(GL_RENDERBUFFER, m_sceneDepth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width(), height());
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
 }
 
 void Viewport::wheelEvent(QWheelEvent* event) {
