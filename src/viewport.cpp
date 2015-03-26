@@ -378,8 +378,7 @@ void Viewport::resizeGL(int w, int h) {
 		glBindTexture(GL_TEXTURE_2D, m_sceneTextures.at(i));
 		GLint internal = i > 7 ? GL_DEPTH_COMPONENT32F : GL_RGBA32F_ARB;
 		GLenum format = i > 7 ? GL_DEPTH_COMPONENT : GL_RGBA;
-		GLenum type = i > 7 ? GL_UNSIGNED_BYTE : GL_FLOAT;
-		glTexImage2D(GL_TEXTURE_2D, 0, internal, w, h, 0, format, type, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, internal, w, h, 0, format, GL_FLOAT, 0);
 	}
 	glBindRenderbuffer(GL_RENDERBUFFER, m_sceneDepth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
