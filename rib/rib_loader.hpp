@@ -4,10 +4,10 @@
 #include <QtPlugin>
 #include <fileloader.hpp>
 
-class VMFFileLoader : public QObject, public FileLoader {
+class RIBFileLoader : public QObject, public FileLoader {
 	Q_OBJECT
 	Q_INTERFACES(FileLoader)
-	Q_PLUGIN_METADATA(IID "com.sup3asc2.sickle.VMFLoader" FILE "vmf_loader.json")
+	Q_PLUGIN_METADATA(IID "com.sup3asc2.sickle.RIBLoader" FILE "rib_loader.json")
 	public:
 		virtual void save(Viewport*, const QString&);
 		virtual void load(Viewport*, const QString&);

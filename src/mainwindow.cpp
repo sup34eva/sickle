@@ -55,6 +55,7 @@ void MainWindow::loadPlugins() {
 		pluginsDir.cdUp();
 		pluginsDir.cdUp();
 		pluginsDir.cdUp();
+		pluginsDir.cdUp();
 	}
 #elif defined(Q_OS_MAC)
 	if (pluginsDir.dirName() == "MacOS") {

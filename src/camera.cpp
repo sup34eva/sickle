@@ -25,18 +25,6 @@ QVector3D Camera::move(QVector3D val) {
 	return position(m_position + val);
 }
 
-QVector3D Camera::right() {
-	return QVector3D(sin(m_hAngle - 3.14f / 2.0f), 0, cos(m_hAngle - 3.14f / 2.0f));
-}
-
-QVector3D Camera::direction() {
-	return QVector3D(cos(m_vAngle) * sin(m_hAngle), sin(m_vAngle), cos(m_vAngle) * cos(m_hAngle));
-}
-
-QVector3D Camera::up() {
-	return QVector3D::crossProduct(right(), direction());
-}
-
 void Camera::velocity(QVector3D v, int dur) {
 	QPropertyAnimation *animation = new QPropertyAnimation(this, "position");
 	animation->setDuration(dur);
