@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 		modeList->setCurrentText(ui->viewport->program());
 		connect(modeList, &QComboBox::currentTextChanged, [=] (const QString& index) {
 			ui->viewport->program(index);
+			ui->viewport->update();
 		});
 
 		auto args = QCoreApplication::arguments();
@@ -71,9 +72,11 @@ void MainWindow::on_viewport_childAdded(QObject* obj) {
 	connect(obj, &QObject::destroyed, [=]() {
 		auto index = ui->actorList->indexOfTopLevelItem(item);
 		delete ui->actorList->takeTopLevelItem(index);
+		ui->viewport->update();
 	});
 
 	ui->actorList->addTopLevelItem(item);
+	ui->viewport->update();
 }
 
 QQuaternion fromEuler(const QVector3D& euler) {
@@ -258,6 +261,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 						void (QComboBox::*changeSignal)(int) = &QComboBox::currentIndexChanged;
 						connect(cb, changeSignal, [=] (int index) {
 							obj->setProperty(name, index);
+							ui->viewport->update();
 						});
 
 						widget = cb;
@@ -266,11 +270,14 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 							return obj->property(name);
 						}, [=](const QVariant& val) {
 							obj->setProperty(name, val);
+							ui->viewport->update();
 						});
 					}
 
 					line->treeWidget()->setItemWidget(item, 1, widget);
 				}
+
+				return new QLabel(obj->objectName());
 			}
 
 			break;
@@ -366,6 +373,7 @@ void MainWindow::showProperties(QObject* obj) {
 			void (QComboBox::*changeSignal)(int) = &QComboBox::currentIndexChanged;
 			connect(cb, changeSignal, [=] (int index) {
 				obj->setProperty(prop, index);
+				ui->viewport->update();
 			});
 
 			widget = cb;
@@ -374,6 +382,7 @@ void MainWindow::showProperties(QObject* obj) {
 				return obj->property(prop);
 			}, [=](const QVariant& val) {
 				obj->setProperty(prop, val);
+				ui->viewport->update();
 			});
 		}
 
@@ -410,6 +419,7 @@ void MainWindow::on_newSphere_triggered() {
 
 void MainWindow::on_actionBuffers_toggled(bool show) {
 	ui->viewport->showBuffers(show);
+	ui->viewport->update();
 }
 
 void MainWindow::on_actionSceneProp_triggered() {
@@ -420,8 +430,9 @@ void MainWindow::on_newLight_triggered() {
 	ui->viewport->addChild<Light>();
 }
 
-void MainWindow::on_showMaps_toggled(bool arg1) {
-	ui->viewport->showMaps(arg1);
+void MainWindow::on_showMaps_toggled(bool show) {
+	ui->viewport->showMaps(show);
+	ui->viewport->update();
 }
 
 void MainWindow::on_newSpot_triggered() {

@@ -31,7 +31,8 @@ SOURCES += \
     src/sphere.cpp \
     src/actor.cpp \
     src/light.cpp \
-    src/spotlight.cpp
+    src/spotlight.cpp \
+    src/material.cpp
 
 HEADERS  += \
     include/camera.hpp \
@@ -44,7 +45,8 @@ HEADERS  += \
     include/sphere.hpp \
     include/actor.hpp \
     include/light.hpp \
-    include/spotlight.hpp
+    include/spotlight.hpp \
+    include/material.hpp
 
 DISTFILES += \
     README.md \

@@ -26,7 +26,7 @@ template<>
 QHash<QString, QOpenGLBuffer*> Cube::tBase::s_buffers = {};
 
 template<>
-QList<quint32> Cube::tBase::s_indexBuffer = {
+QVector<quint32> Cube::tBase::s_indexBuffer = {
 	0,  1,  3,		// Face 1
 	3,  1,  2,		//
 	4,  5,  7,		// Face 2
@@ -42,7 +42,7 @@ QList<quint32> Cube::tBase::s_indexBuffer = {
 };
 
 template<>
-QHash<QString, QList<GLfloat>> Cube::tBase::s_buffersData = {
+QHash<QString, QVector<GLfloat>> Cube::tBase::s_buffersData = {
 	{"Position", {
 		-1.0f, -1.0f, -1.0f,		// Face 1
 		-1.0f, -1.0f,  1.0f,		//

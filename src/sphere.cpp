@@ -24,10 +24,10 @@ QHash<QString, QOpenGLBuffer*> Sphere::tBase::s_buffers = {};
 const quint32 rings = 24;
 const quint32 sectors = 48;
 
-QList<GLfloat> calcVertices() {
+QVector<GLfloat> calcVertices() {
 	const auto R = 1. / (qreal)(rings - 1);
 	const auto S = 1. / (qreal)(sectors - 1);
-	QList<GLfloat> vertices;
+	QVector<GLfloat> vertices;
 	vertices.reserve(rings * sectors * 3);
 
 	for (quint32 r = 0; r < rings; r++) for (quint32 s = 0; s < sectors; s++) {
@@ -38,8 +38,8 @@ QList<GLfloat> calcVertices() {
 	return vertices;
 }
 
-QList<quint32> calcIndices() {
-	QList<quint32> indices;
+QVector<quint32> calcIndices() {
+	QVector<quint32> indices;
 	auto size = rings * sectors * 3;
 	indices.reserve(size * 2);
 
@@ -58,8 +58,8 @@ QList<quint32> calcIndices() {
 	return indices;
 }
 
-QList<GLfloat> calcColors() {
-	QList<GLfloat> colors;
+QVector<GLfloat> calcColors() {
+	QVector<GLfloat> colors;
 	colors.reserve(rings * sectors * 3);
 
 	for (quint32 r = 0; r < rings; r++) for (quint32 s = 0; s < sectors; s++) {
@@ -70,10 +70,10 @@ QList<GLfloat> calcColors() {
 	return colors;
 }
 
-QList<GLfloat> calcUVs() {
+QVector<GLfloat> calcUVs() {
 	const auto R = 1. / (qreal)(rings - 1);
 	const auto S = 1. / (qreal)(sectors - 1);
-	QList<GLfloat> UVs;
+	QVector<GLfloat> UVs;
 	UVs.reserve(rings * sectors * 2);
 
 	for (quint32 r = 0; r < rings; r++) for (quint32 s = 0; s < sectors; s++) {
@@ -84,10 +84,10 @@ QList<GLfloat> calcUVs() {
 }
 
 template<>
-QList<quint32> Sphere::tBase::s_indexBuffer = calcIndices();
+QVector<quint32> Sphere::tBase::s_indexBuffer = calcIndices();
 
 template<>
-QHash<QString, QList<GLfloat>> Sphere::tBase::s_buffersData = {
+QHash<QString, QVector<GLfloat>> Sphere::tBase::s_buffersData = {
 	{"Position", calcVertices()},
 	{"Color", calcColors()},
 	{"UV", calcUVs()}

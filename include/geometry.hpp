@@ -14,32 +14,7 @@
 #include <memory>
 #include <vector>
 #include <tuple>
-
-/*! \brief Définit les propriétés d'un materiau
- *
- * Cette structure contient tous les paramètres passés au shader pour définir un materiau, basé sur le principe des
- * shaders Disney.
- */
-struct Material : public QObject {
-	Q_OBJECT
-public:
-	Material(QObject* parent = nullptr) : QObject(parent) {
-		specular(50);
-		roughness(50);
-		sheenTint(50);
-		clearcoatGloss(100);
-	}
-	prop(float, metallic);  //! Si la surface est refléchissante (ex: metal)
-	prop(float, subsurface);  //! Si la surface diffuse la lumière (ex: peau, bougie)
-	prop(float, specular);  //! Si la surface est brillante (ex: plastique)
-	prop(float, roughness);  //! Si la surface est rugeuse (ex: bois, tissu)
-	prop(float, specularTint);  //! Si la composante speculaire doit prendre la couleur de la surface
-	prop(float, anisotropic);  //! Si la reflection est anisotropique (ex: soie, cheveux)
-	prop(float, sheen);  //! Si la surface a un eclat supplémentaire (ex: tissu)
-	prop(float, sheenTint);  //! Si l'eclat doit prendre la teinte de la surface
-	prop(float, clearcoat);  //! Si la surface est vernie
-	prop(float, clearcoatGloss);  //! Si le vernis est brillant
-};
+#include <material.hpp>
 
 typedef std::tuple<RenderBuffer, QString, QString> ShaderInfo;
 typedef QVector<ShaderInfo> ShaderList;
@@ -236,12 +211,12 @@ protected:
 	static ProgramList s_programList;
 	static QOpenGLVertexArrayObject* s_vao;
 	static QHash<QString, QOpenGLBuffer*> s_buffers;
-	static QHash<QString, QList<GLfloat>> s_buffersData;
-	static QList<quint32> s_indexBuffer;
+	static QHash<QString, QVector<GLfloat>> s_buffersData;
+	static QVector<quint32> s_indexBuffer;
 
 private:
 	template <typename T>
-	noinline static QOpenGLBuffer* initBuffer(QOpenGLBuffer::Type type, const QList<T>& data) {
+	noinline static QOpenGLBuffer* initBuffer(QOpenGLBuffer::Type type, const QVector<T>& data) {
 		auto buffer = new QOpenGLBuffer(type);
 		buffer->create();
 		buffer->setUsagePattern(QOpenGLBuffer::StaticDraw);

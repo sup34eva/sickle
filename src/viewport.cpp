@@ -161,7 +161,7 @@ void Viewport::renderScene() {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_sceneDepth);
 
 	auto len = m_sceneTextures.length();
-	QList<GLenum> buffers;
+	QVector<GLenum> buffers;
 	for(int i = 0; i < len; i++) {
 		GLenum attachment = i > 7 ? GL_DEPTH_ATTACHMENT : GL_COLOR_ATTACHMENT0 + i;
 		glFramebufferTexture(GL_FRAMEBUFFER, attachment, m_sceneTextures.at(i), 0);
@@ -205,6 +205,7 @@ QVector3D toVector(const QColor& col) {
 }
 
 void Viewport::renderQuad() {
+	glBindVertexArray(m_quadVAO);
 	glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 	glDisable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT);

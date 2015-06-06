@@ -1,3 +1,5 @@
 build/
+docs/
+models/
 *.user
 Thumbs.db
