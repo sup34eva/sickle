@@ -20,7 +20,7 @@ class Light;
 struct AmbientOcclusion : public QObject {
 	Q_OBJECT
 public:
-	AmbientOcclusion(QObject* parent = nullptr) : QObject(parent) {
+	explicit AmbientOcclusion(QObject* parent = nullptr) : QObject(parent) {
 		kernelSize(30);
 		maxDist(1);
 		threshold(5);

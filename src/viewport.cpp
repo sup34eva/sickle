@@ -328,7 +328,10 @@ void Viewport::renderQuad() {
 				prog->setUniformValue("ambientColor", toVector(m_ambient));
 				auto occlusion = static_cast<AmbientOcclusion*>(m_AO);
 				prog->setUniformValue("AO.threshold", occlusion->threshold());
-				prog->setUniformValue("AO.kernelSize", QVector2D(occlusion->kernelSize() / width(), occlusion->kernelSize() / height()));
+				prog->setUniformValue("AO.kernelSize", QVector2D(
+										  occlusion->kernelSize() / width(),
+										  occlusion->kernelSize() / height()
+										));
 				prog->setUniformValue("AO.maxDist", occlusion->maxDist());
 			} else {
 				auto type = light->type();

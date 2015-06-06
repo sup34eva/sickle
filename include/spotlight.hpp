@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #ifndef SPOTLIGHT_HPP
 #define SPOTLIGHT_HPP
 
@@ -7,7 +9,7 @@ class Spotlight : public Light {
 	Q_OBJECT
 
 public:
-	Spotlight(QObject* parent = nullptr);
+	explicit Spotlight(QObject* parent = nullptr);
 
 	virtual int type() {
 		return 1;
@@ -23,4 +25,4 @@ public slots:
 
 Q_DECLARE_METATYPE(Spotlight)
 
-#endif // SPOTLIGHT_HPP
+#endif  // SPOTLIGHT_HPP

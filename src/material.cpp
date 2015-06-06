@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #include <material.hpp>
 
 Material::Material(QObject *parent) : QObject(parent) {

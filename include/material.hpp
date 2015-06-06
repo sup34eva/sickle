@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
 
@@ -13,7 +15,7 @@ class Material : public QObject {
 	Q_OBJECT
 
 	public:
-		Material(QObject* parent = nullptr);
+		explicit Material(QObject* parent = nullptr);
 
 		prop(float, metallic);  //! Si la surface est refléchissante (ex: metal)
 		prop(float, subsurface);  //! Si la surface diffuse la lumière (ex: peau, bougie)
@@ -27,4 +29,4 @@ class Material : public QObject {
 		prop(float, clearcoatGloss);  //! Si le vernis est brillant
 };
 
-#endif // MATERIAL_HPP
+#endif  // MATERIAL_HPP

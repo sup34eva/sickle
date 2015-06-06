@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #include <spotlight.hpp>
 #include <viewport.hpp>
 

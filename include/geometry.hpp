@@ -11,10 +11,10 @@
 #include <QOpenGLVertexArrayObject>
 #include <globals.hpp>
 #include <actor.hpp>
+#include <material.hpp>
 #include <memory>
 #include <vector>
 #include <tuple>
-#include <material.hpp>
 
 typedef std::tuple<RenderBuffer, QString, QString> ShaderInfo;
 typedef QVector<ShaderInfo> ShaderList;
