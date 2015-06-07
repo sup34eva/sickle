@@ -153,12 +153,22 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 		case QMetaType::QColor: {
 			auto colBtn = new QPushButton;
 
+			auto updateBtn = [=](const QColor& color) {
+				colBtn->setStyleSheet("border-image: none; border-radius: 5px; background-color: "
+									  + color.name() + ";");
+				colBtn->update();
+			};
+
 			connect(colBtn, &QPushButton::clicked, [=]() {
-				auto value = qvariant_cast<QColor>(get());
-				auto col = QColorDialog::getColor(value, nullptr, tr("Face color"));
-				set(col);
-				colBtn->setText(QString("rgb(%1, %2, %3)").arg(col.red()).arg(col.green()).arg(col.blue()));
+				auto currentValue = qvariant_cast<QColor>(get());
+				auto color = QColorDialog::getColor(currentValue, nullptr, tr("Face color"));
+				if(color.isValid()) {
+					set(color);
+					updateBtn(color);
+				}
 			});
+
+			updateBtn(qvariant_cast<QColor>(get()));
 
 			return colBtn;
 		}
@@ -174,7 +184,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 				auto widget = widgetForVariant(item, [=]() {
 					return list->at(i);
 				}, [=](const QVariant& val) {
-					list->operator[](i) = val;
+					list->replace(i, val);
 					set(*list);
 				});
 

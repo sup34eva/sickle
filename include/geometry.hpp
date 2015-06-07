@@ -86,6 +86,12 @@ public:
 			}
 		}
 
+		for(int i = 0; i < colors().size(); i++) {
+			auto loc = program->uniformLocation(QString("colors[%1]").arg(i));
+			auto val = qvariant_cast<QColor>(colors().at(i));
+			program->setUniformValue(loc, val);
+		}
+
 		auto Model = transform();
 		auto View = qvariant_cast<QMatrix4x4>(info.uniforms.value("view"));
 		auto Projection = qvariant_cast<QMatrix4x4>(info.uniforms.value("projection"));
@@ -188,7 +194,7 @@ protected:
 
 				for(auto it = Child::s_buffers.constBegin(); it != Child::s_buffers.constEnd(); ++it) {
 					if(it.key() != "Index") {
-						auto tupleSize = it.key() == "UV" ? 2 : 3;
+						auto tupleSize = it.key() == "Color" ? 1 : (it.key() == "UV" ? 2 : 3);
 						QString name = "vertex" + it.key();
 						auto attr = program->attributeLocation(name);
 						if(attr != -1) {

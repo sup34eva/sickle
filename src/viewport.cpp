@@ -330,8 +330,7 @@ void Viewport::renderQuad() {
 				prog->setUniformValue("AO.threshold", occlusion->threshold());
 				prog->setUniformValue("AO.kernelSize", QVector2D(
 										  occlusion->kernelSize() / width(),
-										  occlusion->kernelSize() / height()
-										));
+										  occlusion->kernelSize() / height()));
 				prog->setUniformValue("AO.maxDist", occlusion->maxDist());
 			} else {
 				auto type = light->type();

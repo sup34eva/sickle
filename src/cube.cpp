@@ -9,12 +9,12 @@ int Cube::tBase::s_instances = 0;
 Cube::Cube(QObject* parent) : Geometry(parent) {
 	setObjectName(QString(tr("Cube %1")).arg(Cube::tBase::s_instances));
 	colors({
-		QColor(1, 0, 0),
-		QColor(1, 1, 0),
-		QColor(0, 1, 0),
-		QColor(0, 1, 1),
-		QColor(0, 0, 1),
-		QColor(1, 0, 1)
+		QColor(255,	0,		0),
+		QColor(255,	255, 	0),
+		QColor(0,	255, 	0),
+		QColor(0,	255, 	255),
+		QColor(0,	0,		255),
+		QColor(255,	0,		255)
 	});
 }
 
@@ -70,30 +70,30 @@ QHash<QString, QVector<GLfloat>> Cube::tBase::s_buffersData = {
 		-1.0f,  1.0f,  1.0f,		//
 	}},
 	{"Color", {
-		1.0f, 0.0f, 0.0f,		// Face 1
-		1.0f, 0.0f, 0.0f,		//
-		1.0f, 0.0f, 0.0f,		//
-		1.0f, 0.0f, 0.0f,		//
-		1.0f, 1.0f, 0.0f,		// Face 2
-		1.0f, 1.0f, 0.0f,		//
-		1.0f, 1.0f, 0.0f,		//
-		1.0f, 1.0f, 0.0f,		//
-		0.0f, 1.0f, 0.0f,		// Face 3
-		0.0f, 1.0f, 0.0f,		//
-		0.0f, 1.0f, 0.0f,		//
-		0.0f, 1.0f, 0.0f,		//
-		0.0f, 1.0f, 1.0f,		// Face 4
-		0.0f, 1.0f, 1.0f,		//
-		0.0f, 1.0f, 1.0f,		//
-		0.0f, 1.0f, 1.0f,		//
-		0.0f, 0.0f, 1.0f,		// Face 5
-		0.0f, 0.0f, 1.0f,		//
-		0.0f, 0.0f, 1.0f,		//
-		0.0f, 0.0f, 1.0f,		//
-		1.0f, 0.0f, 1.0f,		// Face 6
-		1.0f, 0.0f, 1.0f,		//
-		1.0f, 0.0f, 1.0f,		//
-		1.0f, 0.0f, 1.0f,		//
+		0.0f,		// Face 1
+		0.0f,		//
+		0.0f,		//
+		0.0f,		//
+		1.0f,		// Face 2
+		1.0f,		//
+		1.0f,		//
+		1.0f,		//
+		2.0f,		// Face 3
+		2.0f,		//
+		2.0f,		//
+		2.0f,		//
+		3.0f,		// Face 4
+		3.0f,		//
+		3.0f,		//
+		3.0f,		//
+		4.0f,		// Face 5
+		4.0f,		//
+		4.0f,		//
+		4.0f,		//
+		5.0f,		// Face 6
+		5.0f,		//
+		5.0f,		//
+		5.0f,		//
 	}},
 	{"UV", {
 		0.0f,  0.0f,		// Face 1
