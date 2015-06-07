@@ -57,7 +57,8 @@ DISTFILES += \
     CPPLINT.cfg \
     res/sickle.rc
 
-RESOURCES += res/resources.qrc
+RESOURCES += res/resources.qrc \
+    res/qdarkstyle/style.qrc
 
 FORMS += res/mainwindow.ui
 
