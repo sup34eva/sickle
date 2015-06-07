@@ -120,18 +120,14 @@ void TestCase::paintFace() {
 
 	auto item = ui->infoWidget->topLevelItem(4)->child(0);
 	auto btn = static_cast<QPushButton*>(ui->infoWidget->itemWidget(item, 1));
+	btn->click();
 
 	auto color = QColor(2, 2, 2);
-	QTimer::singleShot(10, Qt::CoarseTimer, [=](){
-		foreach (auto widget, QApplication::topLevelWidgets()) {
-			if (auto dialog = qobject_cast<QColorDialog*>(widget)) {
-				dialog->setCurrentColor(color);
-				dialog->accept();
-			}
+	foreach (auto widget, QApplication::topLevelWidgets()) {
+		if (auto dialog = qobject_cast<QColorDialog*>(widget)) {
+			dialog->setCurrentColor(color);
 		}
-	});
-
-	btn->click();
+	}
 
 	QCOMPARE(qvariant_cast<QColor>(cube->colors().at(0)), color);
 }

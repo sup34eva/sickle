@@ -87,16 +87,15 @@ public:
 		}
 
 		for(int i = 0; i < colors().size(); i++) {
-			auto loc = program->uniformLocation(QString("colors[%1]").arg(i));
 			auto val = qvariant_cast<QColor>(colors().at(i));
-			program->setUniformValue(loc, val);
+			program->setUniformValue(i + 2, val);
 		}
 
 		auto Model = transform();
 		auto View = qvariant_cast<QMatrix4x4>(info.uniforms.value("view"));
 		auto Projection = qvariant_cast<QMatrix4x4>(info.uniforms.value("projection"));
-		program->setUniformValue("model", Model);
-		program->setUniformValue("MVP", Projection * View * Model);
+		program->setUniformValue(0, Model);
+		program->setUniformValue(1, Projection * View * Model);
 
 		if(info.buffer == RB_SCENE) {
 			auto Depth = qvariant_cast<QMatrix4x4>(info.uniforms.value("depth"));

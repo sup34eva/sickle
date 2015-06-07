@@ -151,24 +151,34 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			return textBox;
 		}
 		case QMetaType::QColor: {
+			static int btnCount = 0;
 			auto colBtn = new QPushButton;
+			colBtn->setObjectName(QString("colBtn-%1").arg(btnCount++));
 
+			auto initValue = qvariant_cast<QColor>(get());
+			auto dialog = new QColorDialog(initValue, colBtn);
+			dialog->setOptions(QColorDialog::NoButtons);
+
+			QString style("#%1 { border-image: none; border-radius: 5px; background-color: %2;}");
 			auto updateBtn = [=](const QColor& color) {
-				colBtn->setStyleSheet("border-image: none; border-radius: 5px; background-color: "
-									  + color.name() + ";");
+				colBtn->setStyleSheet(style.arg(colBtn->objectName(), color.name()));
 				colBtn->update();
 			};
 
-			connect(colBtn, &QPushButton::clicked, [=]() {
-				auto currentValue = qvariant_cast<QColor>(get());
-				auto color = QColorDialog::getColor(currentValue, nullptr, tr("Face color"));
+			connect(dialog, &QColorDialog::currentColorChanged, [=](const QColor& color) {
 				if(color.isValid()) {
 					set(color);
 					updateBtn(color);
 				}
 			});
 
-			updateBtn(qvariant_cast<QColor>(get()));
+			connect(colBtn, &QPushButton::clicked, [=]() {
+				auto currentValue = qvariant_cast<QColor>(get());
+				dialog->setCurrentColor(currentValue);
+				dialog->open();
+			});
+
+			updateBtn(initValue);
 
 			return colBtn;
 		}

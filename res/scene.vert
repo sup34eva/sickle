@@ -1,11 +1,11 @@
 #version 430 core
 
-layout(location = 0) in vec3 vertexPosition;
-layout(location = 1) in float vertexColor;
-layout(location = 2) in vec3 vertexNormal;
-layout(location = 3) in vec2 vertexUV;
-layout(location = 4) in vec3 vertexTangent;
-layout(location = 5) in vec3 vertexBitangent;
+in vec3 vertexPosition;
+in float vertexColor;
+in vec3 vertexNormal;
+in vec2 vertexUV;
+in vec3 vertexTangent;
+in vec3 vertexBitangent;
 
 layout(location = 0) uniform mat4 model;
 layout(location = 1) uniform mat4 MVP;
@@ -25,6 +25,6 @@ void main() {
     fragColor = colors[int(vertexColor)].rgb;
     normal = vec3(model * vec4(vertexNormal, 0));
     texCoord = vertexUV;
-    tangent = vertexTangent;
-    bitangent = vertexBitangent;
+    tangent = vec3(model * vec4(vertexTangent, 0));
+    bitangent = vec3(model * vec4(vertexBitangent, 0));
 }

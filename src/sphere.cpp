@@ -10,7 +10,7 @@ int Sphere::tBase::s_instances = 0;
 Sphere::Sphere(QObject* parent) : Geometry(parent) {
 	setObjectName(QString(tr("Sphere %1")).arg(Sphere::tBase::s_instances));
 	colors({
-		QColor(1, 0, 0)
+		QColor(255, 0, 0)
 	});
 }
 
@@ -60,11 +60,9 @@ QVector<quint32> calcIndices() {
 
 QVector<GLfloat> calcColors() {
 	QVector<GLfloat> colors;
-	colors.reserve(rings * sectors * 3);
+	colors.reserve(rings * sectors);
 
 	for (quint32 r = 0; r < rings; r++) for (quint32 s = 0; s < sectors; s++) {
-		colors.append(1.0f);
-		colors.append(0.0f);
 		colors.append(0.0f);
 	}
 	return colors;

@@ -108,10 +108,6 @@ void Viewport::initializeGL() {
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 
-#ifdef GL_MULTISAMPLE
-	glEnable(GL_MULTISAMPLE);
-#endif
-
 	initScene();
 	initQuad();
 
@@ -229,36 +225,37 @@ void Viewport::renderQuad() {
 			len = lights.length();
 		}
 
-		if(len <= 1)
-			return;
+		if(len < 1) {
+			glViewport(0, 0, width(), height());
+		} else {
+			int div = 1, w, h;
+			while(pow(div, 2) < len + 1) div++;
+			w = width() / div;
+			h = height() / div;
 
-		int div = 1, w, h;
-		while(pow(div, 2) < len + 1) div++;
-		w = width() / div;
-		h = height() / div;
-
-		for(int i = 0; i <= len; i++) {
-			int x = i % div,
-				y = (div - 1) - (i / div);
-			glViewport(x * w, y * h, w, h);
-			if(i < len) {
-				glActiveTexture(GL_TEXTURE0);
-				if(m_showBuffers) {
-					glBindTexture(GL_TEXTURE_2D, m_sceneTextures.at(i));
-				} else {
-					glBindTexture(GL_TEXTURE_2D, lights.at(i)->texture());
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+			for(int i = 0; i <= len; i++) {
+				int x = i % div,
+					y = (div - 1) - (i / div);
+				glViewport(x * w, y * h, w, h);
+				if(i < len) {
+					glActiveTexture(GL_TEXTURE0);
+					if(m_showBuffers) {
+						glBindTexture(GL_TEXTURE_2D, m_sceneTextures.at(i));
+					} else {
+						glBindTexture(GL_TEXTURE_2D, lights.at(i)->texture());
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+					}
+					glEnableVertexAttribArray(0);
+					glBindBuffer(GL_ARRAY_BUFFER, m_quadBuffer);
+					glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+					glDisableVertexAttribArray(0);
+					if(m_showMaps)
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 				}
-				glEnableVertexAttribArray(0);
-				glBindBuffer(GL_ARRAY_BUFFER, m_quadBuffer);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-				glDrawArrays(GL_TRIANGLES, 0, 6);
-				glDisableVertexAttribArray(0);
-				if(m_showMaps)
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 			}
+			prog->release();
 		}
-		prog->release();
 	} else {
 		glViewport(0, 0, width(), height());
 	}
