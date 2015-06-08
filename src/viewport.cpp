@@ -111,12 +111,11 @@ void Viewport::initializeGL() {
 	initScene();
 	initQuad();
 
-	/*auto bg = palette().color(QPalette::Background);
-	glClearColor(bg.redF(), bg.greenF(), bg.blueF(), bg.alphaF());*/
+	m_bgColor = palette().color(QPalette::Background);
 
 	auto error = glGetError();
 	if(error != 0)
-		qWarning() << "GL Errors:" << reinterpret_cast<const char*>(glGetString(glGetError()));
+		qWarning() << "GL Errors:" << reinterpret_cast<const char*>(glGetString(error));
 
 	isInitialized(true);
 
@@ -168,12 +167,13 @@ void Viewport::renderScene() {
 
 	auto error = glGetError();
 	if(error != 0) {
-		auto str = glGetString(glGetError());
+		auto str = glGetString(error);
 		qWarning() << "GL Errors:" << reinterpret_cast<const char*>(str);
 	}
 
 	glViewport(0, 0, width(), height());
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0, 0, 0, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if(status != GL_FRAMEBUFFER_COMPLETE) {
@@ -204,7 +204,12 @@ void Viewport::renderQuad() {
 	glBindVertexArray(m_quadVAO);
 	glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 	glDisable(GL_DEPTH_TEST);
+
+	glClearColor(m_bgColor.redF(), m_bgColor.greenF(), m_bgColor.blueF(), m_bgColor.alphaF());
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if(status != GL_FRAMEBUFFER_COMPLETE) {
@@ -259,10 +264,6 @@ void Viewport::renderQuad() {
 	} else {
 		glViewport(0, 0, width(), height());
 	}
-
-	glEnable(GL_BLEND);
-	glBlendEquation(GL_FUNC_ADD);
-	glBlendFunc(GL_ONE, GL_ONE);
 
 	int lightsLen = 1;
 	QList<Light*> lightList;
@@ -357,6 +358,11 @@ void Viewport::renderQuad() {
 		glDisableVertexAttribArray(0);
 
 		prog->release();
+
+		if(isAmbient) {
+			glBlendEquation(GL_FUNC_ADD);
+			glBlendFunc(GL_ONE, GL_ONE);
+		}
 	}
 
 	glDisable(GL_BLEND);

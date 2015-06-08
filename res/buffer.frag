@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec3 fragColor;
+in vec4 fragColor;
 in vec3 normal;
 in vec2 texCoord;
 in vec3 tangent;
@@ -34,7 +34,7 @@ layout(location = 6) out vec4 matP2;
 layout(location = 7) out vec4 matP3;
 
 void main() {
-    color = vec4(fragColor, 1);
+    color = fragColor;
     n = normalize(normal);
     x = normalize(tangent);
     y = normalize(bitangent);

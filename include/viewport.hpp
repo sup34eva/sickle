@@ -21,8 +21,8 @@ struct AmbientOcclusion : public QObject {
 	Q_OBJECT
 public:
 	explicit AmbientOcclusion(QObject* parent = nullptr) : QObject(parent) {
-		kernelSize(30);
-		maxDist(1);
+		kernelSize(10);
+		maxDist(0.5);
 		threshold(5);
 	}
 	prop(float, kernelSize);
@@ -73,6 +73,7 @@ public:
 	prop(QString, program);
 	prop(QColor, ambient);
 	prop(QObject*, AO);
+	prop(QColor, bgColor);
 
 #ifdef UNIT_TEST
 	void updateNow() {

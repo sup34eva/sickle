@@ -5,6 +5,7 @@ in vec2 UV;
 uniform sampler2D color;
 uniform sampler2D normal;
 uniform sampler2D vertPos;
+uniform sampler2D depth;
 
 struct AmbientOcclusion {
     vec2 kernelSize;
@@ -40,25 +41,31 @@ const vec2 poissonDisk[length] = {
 float OneMinus(float x) { return 1.0 - x; }
 
 void main() {
-    vec3 c = texture(color, UV).rgb;
-    vec3 n = texture(normal, UV).rgb;
-    vec3 pos = texture(vertPos, UV).xyz;
+    float stencil = texture(depth, UV).b;
+    outColor = vec4(stencil, 0, 0, 1);
+    if(stencil < 1) {
+        vec3 c = texture(color, UV).rgb;
+        vec3 n = texture(normal, UV).rgb;
+        vec3 pos = texture(vertPos, UV).xyz;
 
-    float occlusion = 0.0;
-    for(int i = 0; i < length; i++) {
-        vec2 offset = UV + (poissonDisk[i] * AO.kernelSize);
-        vec3 samplePos = texture(vertPos, offset).xyz;
-        vec3 sampleDir = normalize(samplePos - pos);
+        float occlusion = 0.0;
+        for(int i = 0; i < length; i++) {
+            vec2 offset = UV + (poissonDisk[i] * AO.kernelSize);
+            vec3 samplePos = texture(vertPos, offset).xyz;
+            vec3 sampleDir = normalize(samplePos - pos);
 
-        float NdotS = max(dot(n, sampleDir), 0);
-        float VPdistSP = distance(pos, samplePos);
+            float NdotS = max(dot(n, sampleDir), 0);
+            float VPdistSP = distance(pos, samplePos);
 
-        float a = OneMinus(smoothstep(AO.threshold, AO.threshold * 2, VPdistSP));
+            float a = OneMinus(smoothstep(AO.threshold, AO.threshold * 2, VPdistSP));
 
-        if(VPdistSP < AO.maxDist)
-            occlusion += a * NdotS;
+            if(VPdistSP < AO.maxDist)
+                occlusion += a * NdotS;
+        }
+
+        outColor.rgb = OneMinus(occlusion / length) * c * ambientColor;
+        outColor.a = 1;
+    } else {
+        outColor = vec4(0, 0, 0, 0);
     }
-
-    outColor.rgb = OneMinus(occlusion / length) * c * ambientColor;
-    outColor.a = 1;
 }
