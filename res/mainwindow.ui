@@ -81,11 +81,21 @@
      <string>&amp;File</string>
     </property>
     <addaction name="action_New"/>
+    <addaction name="actionOpen"/>
     <addaction name="action_Save"/>
     <addaction name="actionSave_as"/>
-    <addaction name="actionOpen"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionBuffers"/>
+    <addaction name="showMaps"/>
+    <addaction name="separator"/>
+    <addaction name="actionSceneProp"/>
    </widget>
    <addaction name="menu_File"/>
+   <addaction name="menuView"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
@@ -97,9 +107,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionBuffers"/>
-   <addaction name="showMaps"/>
-   <addaction name="actionSceneProp"/>
   </widget>
   <widget class="QDockWidget" name="listDock">
    <property name="windowTitle">
@@ -132,6 +139,12 @@
          <width>250</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
        <property name="uniformRowHeights">
         <bool>true</bool>
@@ -310,6 +323,11 @@
   <action name="newSpot">
    <property name="text">
     <string>New Spotlight</string>
+   </property>
+  </action>
+  <action name="actionGroup">
+   <property name="text">
+    <string>Grouper</string>
    </property>
   </action>
  </widget>

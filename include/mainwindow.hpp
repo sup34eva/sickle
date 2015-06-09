@@ -29,7 +29,6 @@ public:
 	Ui::MainWindow* getUI() { return ui; }
 
 private slots:
-	void on_actorList_currentItemChanged(QTreeWidgetItem *current);
 	void on_actionOpen_triggered();
 	void on_actionSave_as_triggered();
 	void on_action_Save_triggered();
@@ -42,8 +41,12 @@ private slots:
 	void on_newLight_triggered();
 	void on_showMaps_toggled(bool arg1);
 	void on_newSpot_triggered();
+	void on_actorList_customContextMenuRequested(const QPoint &pos);
+	void on_actorList_itemSelectionChanged();
+	void on_actionGroup_triggered();
 
 private:
+	QObject* getObject(QTreeWidgetItem* item);
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);
 	QString m_lastFile;
 	Ui::MainWindow* ui;

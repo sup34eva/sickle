@@ -4,6 +4,7 @@
 #include <sphere.hpp>
 #include <light.hpp>
 #include <spotlight.hpp>
+#include <group.hpp>
 #include <QVariant>
 #include <QFileDialog>
 #include <QSpinBox>
@@ -23,9 +24,6 @@ QString toString(const QVector3D& vector) {
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
 
-	auto modeList = new QComboBox;
-	ui->toolBar->addWidget(modeList);
-
 	QMenu* addMenu = new QMenu(tr("Add Geometry"));
 	addMenu->addAction(ui->newCube);
 	addMenu->addAction(ui->newSphere);
@@ -33,6 +31,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	addMenu->addAction(ui->newSpot);
 	addMenu->menuAction()->setIcon(QIcon(":/icons/add-geo.png"));
 	ui->toolBar->addAction(addMenu->menuAction());
+
+	auto modeList = new QComboBox;
+	ui->toolBar->addWidget(modeList);
+
+	ui->toolBar->addAction(ui->actionGroup);
 
 	ui->camPos->setText(toString(QVector3D(0, 0, 0)));
 	connect(ui->viewport->camera(), &Camera::moved,
@@ -76,6 +79,26 @@ void MainWindow::on_viewport_childAdded(QObject* obj) {
 	});
 
 	ui->actorList->addTopLevelItem(item);
+
+	auto group = qobject_cast<Group*>(obj);
+	if(group != nullptr) {
+		auto selection = ui->actorList->selectedItems();
+		foreach (auto itm, selection) {
+			auto obj = getObject(itm);
+			obj->setParent(group);
+
+			auto parent = itm->parent();
+			if(parent != nullptr) {
+				parent->removeChild(itm);
+			} else {
+				auto index = ui->actorList->indexOfTopLevelItem(itm);
+				ui->actorList->takeTopLevelItem(index);
+			}
+
+			item->addChild(itm);
+		}
+	}
+
 	ui->viewport->update();
 }
 
@@ -357,56 +380,46 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 	return nullptr;
 }
 
-void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
-	if (current != nullptr) {
-		auto ptr = current->data(0, Qt::UserRole);
-		if ((!ptr.isNull()) && ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
-			auto obj = qvariant_cast<QObject*>(ptr);
-			if (obj != nullptr) {
-				showProperties(obj);
-			}
-		}
-	}
-}
-
 void MainWindow::showProperties(QObject* obj) {
 	ui->infoWidget->clear();
-	auto metaObject = obj->metaObject();
-	auto count = metaObject->propertyCount();
-	for (int i = 0; i < count; i++) {
-		auto prop = metaObject->property(i).name();
-		auto line = new QTreeWidgetItem;
-		line->setText(0, prop);
-		ui->infoWidget->addTopLevelItem(line);
-		QWidget* widget;
+	if(obj != nullptr) {
+		auto metaObject = obj->metaObject();
+		auto count = metaObject->propertyCount();
+		for (int i = 0; i < count; i++) {
+			auto prop = metaObject->property(i).name();
+			auto line = new QTreeWidgetItem;
+			line->setText(0, prop);
+			ui->infoWidget->addTopLevelItem(line);
+			QWidget* widget;
 
-		if(metaObject->property(i).isEnumType()) {
-			auto enumerator = metaObject->property(i).enumerator();
-			auto cb = new QComboBox;
+			if(metaObject->property(i).isEnumType()) {
+				auto enumerator = metaObject->property(i).enumerator();
+				auto cb = new QComboBox;
 
-			for(int i = 0; i < enumerator.keyCount(); i++) {
-				cb->insertItem(i, enumerator.key(i));
+				for(int i = 0; i < enumerator.keyCount(); i++) {
+					cb->insertItem(i, enumerator.key(i));
+				}
+
+				cb->setCurrentIndex(obj->property(prop).toInt());
+
+				void (QComboBox::*changeSignal)(int) = &QComboBox::currentIndexChanged;
+				connect(cb, changeSignal, [=] (int index) {
+					obj->setProperty(prop, index);
+					ui->viewport->update();
+				});
+
+				widget = cb;
+			} else {
+				widget = widgetForVariant(line, [=]() {
+					return obj->property(prop);
+				}, [=](const QVariant& val) {
+					obj->setProperty(prop, val);
+					ui->viewport->update();
+				});
 			}
 
-			cb->setCurrentIndex(obj->property(prop).toInt());
-
-			void (QComboBox::*changeSignal)(int) = &QComboBox::currentIndexChanged;
-			connect(cb, changeSignal, [=] (int index) {
-				obj->setProperty(prop, index);
-				ui->viewport->update();
-			});
-
-			widget = cb;
-		} else {
-			widget = widgetForVariant(line, [=]() {
-				return obj->property(prop);
-			}, [=](const QVariant& val) {
-				obj->setProperty(prop, val);
-				ui->viewport->update();
-			});
+			ui->infoWidget->setItemWidget(line, 1, widget);
 		}
-
-		ui->infoWidget->setItemWidget(line, 1, widget);
 	}
 }
 
@@ -457,4 +470,50 @@ void MainWindow::on_showMaps_toggled(bool show) {
 
 void MainWindow::on_newSpot_triggered() {
 	ui->viewport->addChild<Spotlight>();
+}
+
+QObject* MainWindow::getObject(QTreeWidgetItem* item) {
+	if (item != nullptr) {
+		auto ptr = item->data(0, Qt::UserRole);
+		if ((!ptr.isNull()) && ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
+			return qvariant_cast<QObject*>(ptr);
+		}
+	}
+	return nullptr;
+}
+
+void MainWindow::on_actorList_customContextMenuRequested(const QPoint& pos) {
+	auto item = ui->actorList->itemAt(pos);
+	if(ui->actorList->selectedItems().indexOf(item) == -1)
+		ui->actorList->setCurrentItem(item);
+
+	QMenu menu(ui->actorList);
+
+	auto del = new QAction(tr("&Delete"), ui->actorList);
+	del->setStatusTip(tr("Delete this actor"));
+
+	connect(del, &QAction::triggered, [=]() {
+		auto selection = ui->actorList->selectedItems();
+		foreach (auto itm, selection) {
+			auto obj = getObject(itm);
+			if(ui->actorList->currentItem() == itm)
+				ui->infoWidget->clear();
+			obj->deleteLater();
+		}
+	});
+
+	menu.addAction(del);
+
+	menu.exec(ui->actorList->mapToGlobal(pos));
+}
+
+void MainWindow::on_actorList_itemSelectionChanged() {
+	if(ui->actorList->selectedItems().length() == 1)
+		showProperties(getObject(ui->actorList->currentItem()));
+	else
+		ui->infoWidget->clear();
+}
+
+void MainWindow::on_actionGroup_triggered() {
+	ui->viewport->addChild<Group>();
 }

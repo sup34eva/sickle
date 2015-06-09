@@ -4,6 +4,7 @@
 #include <QStyle>
 #include <light.hpp>
 #include <spotlight.hpp>
+#include <group.hpp>
 
 Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent) {
 	m_camera = new Camera(this);
@@ -15,6 +16,7 @@ Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent) {
 	qRegisterMetaType<Sphere>("Sphere");
 	qRegisterMetaType<Light>("Light");
 	qRegisterMetaType<Spotlight>("Spotlight");
+	qRegisterMetaType<Group>("Group");
 
 	QSurfaceFormat format;
 	format.setProfile(QSurfaceFormat::CoreProfile);
@@ -140,6 +142,7 @@ void Viewport::renderLight(Light* light) {
 	glCullFace(GL_FRONT);
 
 	QVariantHash uniforms;
+	uniforms.insert("model", QMatrix4x4());
 	uniforms.insert("projection", light->projection());
 	uniforms.insert("view", light->view());
 
@@ -184,6 +187,7 @@ void Viewport::renderScene() {
 	glCullFace(GL_BACK);
 
 	QVariantHash uniforms;
+	uniforms.insert("model", QMatrix4x4());
 	uniforms.insert("projection", m_projection);
 	uniforms.insert("view", m_camera->view());
 
@@ -493,9 +497,10 @@ void Viewport::save(QString name) {
 }
 
 void Viewport::clearLevel() {
-	auto childList = findChildren<Actor*>();
-	for (auto obj : childList) {
-		delete obj;
+	for (auto obj : findChildren<Actor*>()) {
+		if(obj != nullptr) {
+			obj->deleteLater();
+		}
 	}
 }
 

@@ -5,6 +5,7 @@
 #include <viewport.hpp>
 
 Actor::Actor(QObject* parent) : QObject(parent), m_scale(1, 1, 1) {
+	position(QVector3D(0, 0, 0));
 	setParent(parent);
 }
 

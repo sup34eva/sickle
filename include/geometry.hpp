@@ -91,7 +91,7 @@ public:
 			program->setUniformValue(i + 2, val);
 		}
 
-		auto Model = transform();
+		auto Model = qvariant_cast<QMatrix4x4>(info.uniforms.value("model")) * transform();
 		auto View = qvariant_cast<QMatrix4x4>(info.uniforms.value("view"));
 		auto Projection = qvariant_cast<QMatrix4x4>(info.uniforms.value("projection"));
 		program->setUniformValue(0, Model);

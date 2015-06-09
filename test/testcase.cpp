@@ -1,6 +1,7 @@
 #include "testcase.hpp"
 #include <cube.hpp>
 #include <sphere.hpp>
+#include <group.hpp>
 #include <mainwindow.hpp>
 #include <QDoubleSpinBox>
 #include <QPushButton>
@@ -67,7 +68,10 @@ void TestCase::scaleObject() {
 void TestCase::saveLoad() {
 	ui->viewport->addChild<Cube>();
 	ui->viewport->save("test.wld");
+
 	ui->viewport->clearLevel();
+	QTest::qWait(250);
+
 	ui->viewport->load("test.wld");
 	QCOMPARE(ui->viewport->findChildren<Cube>().length(), 1);
 }
@@ -107,9 +111,35 @@ void TestCase::newZone() {
 }
 
 void TestCase::createGroup() {
+	QList<Cube*> cubes;
+	for(int i = 0; i < 10; i++) {
+		cubes.append(ui->viewport->addChild<Cube>());
+	}
+
+	ui->actorList->selectAll();
+
+	auto group = ui->viewport->addChild<Group>();
+	foreach(auto cube, cubes) {
+		QCOMPARE(cube->parent(), group);
+	}
 }
 
 void TestCase::moveGroup() {
+	QList<Cube*> cubes;
+	for(int i = 0; i < 10; i++) {
+		cubes.append(ui->viewport->addChild<Cube>());
+	}
+
+	ui->actorList->selectAll();
+	auto group = ui->viewport->addChild<Group>();
+	ui->actorList->clearSelection();
+
+	auto index = ui->actorList->indexAt(QPoint(10, 10));
+	ui->actorList->setCurrentIndex(index);
+
+	moveVector(1);
+
+	QCOMPARE(group->position(), QVector3D(2, 2, 2));
 }
 
 void TestCase::paintFace() {
@@ -137,6 +167,7 @@ void TestCase::linkZones() {
 
 void TestCase::cleanup() {
 	ui->viewport->clearLevel();
+	QTest::qWait(250);
 }
 
 QTEST_MAIN(TestCase)
