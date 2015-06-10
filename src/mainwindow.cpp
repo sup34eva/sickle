@@ -24,6 +24,29 @@ QString toString(const QVector3D& vector) {
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
 
+	ui->tabBar->addTab("+");
+	connect(ui->tabBar, &QTabBar::currentChanged, [=] (int index) {
+		if(index == ui->tabBar->count() - 1) {
+			ui->viewport->world()->addZone();
+		} else {
+			ui->viewport->world()->setCurrentZone(index);
+
+			auto zone = ui->viewport->world()->currentZone();
+			ui->actorList->clear();
+			foreach (auto i, zone->children()) {
+				auto child = dynamic_cast<Actor*>(i);
+				if (child) addToTree(child);
+			}
+
+			ui->viewport->update();
+		}
+	});
+
+	connect(ui->viewport->world(), &World::zoneAdded, [&](int index) {
+		ui->tabBar->insertTab(index, tr("Zone %1").arg(index));
+		ui->tabBar->setCurrentIndex(index);
+	});
+
 	QMenu* addMenu = new QMenu(tr("Add Geometry"));
 	addMenu->addAction(ui->newCube);
 	addMenu->addAction(ui->newSphere);
@@ -59,11 +82,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	});
 }
 
-MainWindow::~MainWindow() {
-	delete ui;
-}
-
-void MainWindow::on_viewport_childAdded(QObject* obj) {
+QTreeWidgetItem* MainWindow::addToTree(QObject* obj, QTreeWidgetItem* parent) {
 	auto item = new QTreeWidgetItem;
 	item->setText(0, obj->objectName());
 
@@ -73,13 +92,36 @@ void MainWindow::on_viewport_childAdded(QObject* obj) {
 	connect(obj, &QObject::objectNameChanged, [=](QString newName) { item->setText(0, newName); });
 
 	connect(obj, &QObject::destroyed, [=]() {
-		auto index = ui->actorList->indexOfTopLevelItem(item);
-		delete ui->actorList->takeTopLevelItem(index);
+		if(parent == nullptr) {
+			auto index = ui->actorList->indexOfTopLevelItem(item);
+			delete ui->actorList->takeTopLevelItem(index);
+		} else {
+			auto index = parent->indexOfChild(item);
+			parent->takeChild(index);
+		}
+
 		ui->viewport->update();
 	});
 
-	ui->actorList->addTopLevelItem(item);
+	foreach (auto i, obj->children()) {
+		auto child = dynamic_cast<Actor*>(i);
+		if (child) addToTree(child, item);
+	}
 
+	if(parent == nullptr)
+		ui->actorList->addTopLevelItem(item);
+	else
+		parent->addChild(item);
+
+	return item;
+}
+
+MainWindow::~MainWindow() {
+	delete ui;
+}
+
+void MainWindow::on_viewport_childAdded(QObject* obj) {
+	auto item = addToTree(obj);
 	auto group = qobject_cast<Group*>(obj);
 	if(group != nullptr) {
 		auto selection = ui->actorList->selectedItems();

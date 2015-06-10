@@ -14,6 +14,7 @@
 #include <camera.hpp>
 #include <cube.hpp>
 #include <sphere.hpp>
+#include <world.hpp>
 
 class Light;
 
@@ -51,7 +52,7 @@ public:
 	template<typename T>
 	T* addChild() {
 		makeCurrent();
-		auto child = new T(this);
+		auto child = m_world->currentZone()->addChild<T>();
 		doneCurrent();
 		emit childAdded(child);
 		return child;
@@ -74,6 +75,7 @@ public:
 	prop(QColor, ambient);
 	prop(QObject*, AO);
 	prop(QColor, bgColor);
+	prop(World*, world);
 
 #ifdef UNIT_TEST
 	void updateNow() {
@@ -110,6 +112,7 @@ protected:
 	void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
 	int heightForWidth(int w) const { return w; }
 	bool hasHeightForWidth() const { return true; }
+	void catchErrors();
 
 private:
 	QMatrix4x4 m_projection;

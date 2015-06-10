@@ -9,6 +9,7 @@
 Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent) {
 	m_camera = new Camera(this);
 	m_AO = new AmbientOcclusion(this);
+	m_world = new World(this);
 
 	setFocusPolicy(Qt::StrongFocus);
 
@@ -115,13 +116,20 @@ void Viewport::initializeGL() {
 
 	m_bgColor = palette().color(QPalette::Background);
 
-	auto error = glGetError();
-	if(error != 0)
-		qWarning() << "GL Errors:" << reinterpret_cast<const char*>(glGetString(error));
+	catchErrors();
+
+	m_world->addZone();
 
 	isInitialized(true);
 
 	qDebug() << "OpenGL version:" << reinterpret_cast<const char*>(glGetString(GL_VERSION));
+}
+
+void Viewport::catchErrors() {
+	auto error = glGetError();
+	if(error != 0) {
+		qFatal("GL Errors: %s", reinterpret_cast<const char*>(glGetString(error)));
+	}
 }
 
 void Viewport::renderLight(Light* light) {
@@ -147,11 +155,7 @@ void Viewport::renderLight(Light* light) {
 	uniforms.insert("view", light->view());
 
 	DrawInfo info = {GL_TRIANGLES, context(), RB_DEPTH, uniforms};
-
-	for (auto i : children()) {
-		auto child = dynamic_cast<Actor*>(i);
-		if (child) child->draw(info);
-	}
+	m_world->currentZone()->draw(info);
 }
 
 void Viewport::renderScene() {
@@ -167,12 +171,6 @@ void Viewport::renderScene() {
 	}
 
 	glDrawBuffers(len - 1, &buffers.at(0));
-
-	auto error = glGetError();
-	if(error != 0) {
-		auto str = glGetString(error);
-		qWarning() << "GL Errors:" << reinterpret_cast<const char*>(str);
-	}
 
 	glViewport(0, 0, width(), height());
 	glClearColor(0, 0, 0, 0);
@@ -194,10 +192,7 @@ void Viewport::renderScene() {
 	GLenum mode = m_program == tr("Wireframe") ? GL_LINES : GL_TRIANGLES;
 	DrawInfo info = {mode, context(), RB_SCENE, uniforms};
 
-	for (auto i : children()) {
-		auto child = dynamic_cast<Actor*>(i);
-		if (child) child->draw(info);
-	}
+	m_world->currentZone()->draw(info);
 }
 
 QVector3D toVector(const QColor& col) {
@@ -230,7 +225,7 @@ void Viewport::renderQuad() {
 		if(m_showBuffers) {
 			len = m_sceneTextures.length();
 		} else {
-			lights = findChildren<Light*>();
+			lights = m_world->currentZone()->findChildren<Light*>();
 			len = lights.length();
 		}
 
@@ -273,7 +268,7 @@ void Viewport::renderQuad() {
 	QList<Light*> lightList;
 	bool isLit = m_program == tr("Light");
 	if(isLit) {
-		lightList = findChildren<Light*>();
+		lightList = m_world->currentZone()->findChildren<Light*>();
 		lightsLen = lightList.length() + 1;
 	}
 
@@ -376,8 +371,12 @@ void Viewport::renderQuad() {
 void Viewport::paintGL() {
 	for(auto i : m_dirtyLights)
 		renderLight(i);
+
 	renderScene();
 	renderQuad();
+
+	catchErrors();
+
 	m_dirtyLights.clear();
 }
 
@@ -392,6 +391,7 @@ void Viewport::resizeGL(int w, int h) {
 	}
 	glBindRenderbuffer(GL_RENDERBUFFER, m_sceneDepth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
+	catchErrors();
 }
 
 void Viewport::wheelEvent(QWheelEvent* event) {
@@ -401,7 +401,8 @@ void Viewport::wheelEvent(QWheelEvent* event) {
 }
 
 void Viewport::updateLights() {
-	m_dirtyLights.append(findChildren<Light*>());
+	auto zone = m_world->currentZone();
+	m_dirtyLights.append(zone->findChildren<Light*>());
 }
 
 void Viewport::updateLight(Light* light) {

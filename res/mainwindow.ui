@@ -36,7 +36,10 @@
    <property name="styleSheet">
     <string notr="true"/>
    </property>
-   <layout class="QGridLayout" name="centralLayout">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -49,10 +52,29 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <property name="spacing">
-     <number>0</number>
-    </property>
-    <item row="0" column="0">
+    <item>
+     <widget class="QTabBar" name="tabBar" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>50</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="Viewport" name="viewport">
       <property name="focusPolicy">
        <enum>Qt::StrongFocus</enum>
@@ -327,7 +349,7 @@
   </action>
   <action name="actionGroup">
    <property name="text">
-    <string>Grouper</string>
+    <string>Group</string>
    </property>
   </action>
  </widget>
@@ -340,6 +362,12 @@
     <signal>childAdded(QObject*)</signal>
     <slot>clearLevel()</slot>
    </slots>
+  </customwidget>
+  <customwidget>
+   <class>QTabBar</class>
+   <extends>QWidget</extends>
+   <header location="global">QTabBar</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

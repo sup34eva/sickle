@@ -46,6 +46,7 @@ private slots:
 	void on_actionGroup_triggered();
 
 private:
+	QTreeWidgetItem* addToTree(QObject* obj, QTreeWidgetItem* parent = nullptr);
 	QObject* getObject(QTreeWidgetItem* item);
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);
 	QString m_lastFile;

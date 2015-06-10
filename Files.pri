@@ -32,7 +32,8 @@ SOURCES += \
     src/actor.cpp \
     src/light.cpp \
     src/spotlight.cpp \
-    src/material.cpp
+    src/material.cpp \
+    src/world.cpp
 
 HEADERS  += \
     include/camera.hpp \
@@ -46,7 +47,8 @@ HEADERS  += \
     include/actor.hpp \
     include/light.hpp \
     include/spotlight.hpp \
-    include/material.hpp
+    include/material.hpp \
+    include/world.hpp
 
 DISTFILES += \
     README.md \

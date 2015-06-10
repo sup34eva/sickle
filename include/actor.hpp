@@ -64,8 +64,8 @@ class Actor : public QObject {
 			QObject* par = this;
 			do {
 				par = par->parent();
-			} while (par != nullptr && static_cast<T*>(par) == nullptr);
-			return static_cast<T*>(par);
+			} while (par != nullptr && dynamic_cast<T*>(par) == nullptr);
+			return dynamic_cast<T*>(par);
 		}
 
 		Viewport* viewport();
