@@ -40,4 +40,4 @@ class World : public QObject {
 		int m_currentZone;
 };
 
-#endif // WORLD_HPP
+#endif  // WORLD_HPP

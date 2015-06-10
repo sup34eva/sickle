@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 			auto zone = ui->viewport->world()->currentZone();
 			ui->actorList->clear();
-			foreach (auto i, zone->children()) {
+			foreach(auto i, zone->children()) {
 				auto child = dynamic_cast<Actor*>(i);
 				if (child) addToTree(child);
 			}
@@ -103,7 +103,7 @@ QTreeWidgetItem* MainWindow::addToTree(QObject* obj, QTreeWidgetItem* parent) {
 		ui->viewport->update();
 	});
 
-	foreach (auto i, obj->children()) {
+	foreach(auto i, obj->children()) {
 		auto child = dynamic_cast<Actor*>(i);
 		if (child) addToTree(child, item);
 	}
@@ -125,7 +125,7 @@ void MainWindow::on_viewport_childAdded(QObject* obj) {
 	auto group = qobject_cast<Group*>(obj);
 	if(group != nullptr) {
 		auto selection = ui->actorList->selectedItems();
-		foreach (auto itm, selection) {
+		foreach(auto itm, selection) {
 			auto obj = getObject(itm);
 			obj->setParent(group);
 
@@ -536,7 +536,7 @@ void MainWindow::on_actorList_customContextMenuRequested(const QPoint& pos) {
 
 	connect(del, &QAction::triggered, [=]() {
 		auto selection = ui->actorList->selectedItems();
-		foreach (auto itm, selection) {
+		foreach(auto itm, selection) {
 			auto obj = getObject(itm);
 			if(ui->actorList->currentItem() == itm)
 				ui->infoWidget->clear();
