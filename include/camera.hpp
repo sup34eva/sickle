@@ -55,8 +55,7 @@ public:
 			vRight.x(), vRight.y(), vRight.z(), 0.0f,
 			vUp.x(),    vUp.y(),    vUp.z(),    0.0f,
 			vDir.x(),   vDir.y(),   vDir.z(),   0.0f,
-			0.0f,       0.0f,       0.0f,       1.0f
-		);
+			0.0f,       0.0f,       0.0f,       1.0f);
 
 		qreal W = qSqrt(1.0f + basis(1, 1) + basis(2, 2) + basis(3, 3)) / 2.0f,
 			scale = W * 4.0;
@@ -64,8 +63,7 @@ public:
 			W,
 			(basis(3, 2) - basis(2, 3)) / scale,
 			(basis(1, 3) - basis(3, 1)) / scale,
-			(basis(2, 1) - basis(1, 2)) / scale
-		);
+			(basis(2, 1) - basis(1, 2)) / scale);
 	}
 
 	void velocity(QVector3D v, int dur = ANIM_DUR);

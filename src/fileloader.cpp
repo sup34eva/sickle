@@ -44,7 +44,7 @@ void DefaultFileLoader::load(Viewport* view, const QString& name) {
 	if(version < revision) {
 		qWarning() << "Older file format";
 		return;
-	} else if(version > revision) {
+	} else if (version > revision) {
 		qWarning() << "Newer file format";
 		return;
 	}
