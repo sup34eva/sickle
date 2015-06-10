@@ -3,9 +3,13 @@
 #ifndef TESTMAIN_H
 #define TESTMAIN_H
 
+#include <fileloader.hpp>
 #include <QMainWindow>
 #include <QTreeWidgetItem>
+#include <QPluginLoader>
+#include <QJsonArray>
 #include <functional>
+#include <tuple>
 
 typedef std::function<QVariant(void)> VarGetter;
 typedef std::function<void(const QVariant&)> VarSetter;
@@ -39,9 +43,14 @@ private slots:
 	void on_newSphere_triggered();
 
 private:
+	void loadPlugins();
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);
 	QString m_lastFile;
 	Ui::MainWindow* ui;
+	typedef std::tuple<QObject*, QJsonObject> Plugin;
+	QList<Plugin> plugins;
+	QStringList formats;
+	QMap<QString, FileLoader*> loaders;
 };
 
 #endif  // TESTMAIN_H

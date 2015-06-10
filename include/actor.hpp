@@ -50,5 +50,7 @@ class Actor : public QObject {
 		virtual QMatrix4x4 transform();
 };
 
+Q_DECLARE_INTERFACE(Actor, "com.sup3asc2.sickle.Actor/1.0")
+
 #endif  // ACTOR_HPP
 
