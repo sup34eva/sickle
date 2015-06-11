@@ -6,9 +6,8 @@
 #include <spotlight.hpp>
 #include <group.hpp>
 
-Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent) {
+Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_isInitialized(false) {
 	m_camera = new Camera(this);
-	m_AO = new AmbientOcclusion(this);
 	m_world = new World(this);
 
 	setFocusPolicy(Qt::StrongFocus);
@@ -323,7 +322,7 @@ void Viewport::renderQuad() {
 		if(isLit) {
 			if(isAmbient) {
 				prog->setUniformValue("ambientColor", toVector(m_ambient));
-				auto occlusion = static_cast<AmbientOcclusion*>(m_AO);
+				auto occlusion = qobject_cast<AmbientOcclusion*>(m_world->AO());
 				prog->setUniformValue("AO.threshold", occlusion->threshold());
 				prog->setUniformValue("AO.kernelSize", QVector2D(
 										  occlusion->kernelSize() / width(),
@@ -401,8 +400,13 @@ void Viewport::wheelEvent(QWheelEvent* event) {
 }
 
 void Viewport::updateLights() {
-	auto zone = m_world->currentZone();
-	m_dirtyLights.append(zone->findChildren<Light*>());
+	if(m_isInitialized) {
+		auto zone = m_world->currentZone();
+		auto lights = zone->findChildren<Light*>();
+		foreach(auto light, lights) updateLight(light);
+	} else {
+		qDebug() << "Not updating lights yet";
+	}
 }
 
 void Viewport::updateLight(Light* light) {

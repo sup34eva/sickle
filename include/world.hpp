@@ -21,6 +21,19 @@ class Zone : public QObject {
 		}
 };
 
+struct AmbientOcclusion : public QObject {
+	Q_OBJECT
+public:
+	explicit AmbientOcclusion(QObject* parent = nullptr) : QObject(parent) {
+		kernelSize(10);
+		maxDist(0.5);
+		threshold(5);
+	}
+	prop(float, kernelSize);
+	prop(float, maxDist);
+	prop(float, threshold);
+};
+
 class World : public QObject {
 	Q_OBJECT
 
@@ -28,6 +41,8 @@ class World : public QObject {
 		explicit World(QObject* parent = nullptr);
 		Zone* currentZone();
 		void setCurrentZone(int zone);
+
+		prop(QObject*, AO);
 
 	signals:
 		void zoneAdded(int index);

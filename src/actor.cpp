@@ -4,8 +4,7 @@
 #include <QEvent>
 #include <viewport.hpp>
 
-Actor::Actor(QObject* parent) : QObject(parent), m_scale(1, 1, 1) {
-	position(QVector3D(0, 0, 0));
+Actor::Actor(QObject* parent) : QObject(parent), m_position(0, 0, 0), m_orientation(1, 0, 0, 0), m_scale(1, 1, 1) {
 	setParent(parent);
 }
 
@@ -20,7 +19,7 @@ QMatrix4x4 Actor::transform() {
 void Actor::setParent(QObject *parent) {
 	QObject::setParent(parent);
 
-	auto actor = static_cast<Actor*>(parent);
+	auto actor = qobject_cast<Actor*>(parent);
 	if(actor != nullptr) {
 		position(m_position - actor->position());
 		orientation(m_orientation - actor->orientation());

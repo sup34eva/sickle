@@ -44,6 +44,7 @@ private slots:
 	void on_actorList_customContextMenuRequested(const QPoint &pos);
 	void on_actorList_itemSelectionChanged();
 	void on_actionGroup_triggered();
+	void on_newTrigger_triggered();
 
 private:
 	QTreeWidgetItem* addToTree(QObject* obj, QTreeWidgetItem* parent = nullptr);

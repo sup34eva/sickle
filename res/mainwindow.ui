@@ -352,6 +352,11 @@
     <string>Group</string>
    </property>
   </action>
+  <action name="newTrigger">
+   <property name="text">
+    <string>New Trigger</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

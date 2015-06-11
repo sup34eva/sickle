@@ -4,14 +4,12 @@
 #include <viewport.hpp>
 
 Light::Light(QObject* parent) : Actor(parent) {
-	nearZ(-10);
-	farZ(20);
+	nearZ(-63);
+	farZ(66);
 	power(1.0);
 	color(QColor(255, 255, 255));
-	mapSize(QSize(20, 20));
-	QVector3D up(1, 0, 0);
-	QVector3D dir(1, 1, 1);
-	orientation(QQuaternion(QVector3D::dotProduct(up, dir), QVector3D::crossProduct(up, dir)).normalized());
+	mapSize(QSize(140, 75));
+	orientation(fromEuler(QVector3D(-45, 0, -45)));
 	setObjectName(tr("New Light"));
 
 	connect(this, &Light::nearZChanged, this, &Light::update);

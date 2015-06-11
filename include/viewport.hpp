@@ -18,19 +18,6 @@
 
 class Light;
 
-struct AmbientOcclusion : public QObject {
-	Q_OBJECT
-public:
-	explicit AmbientOcclusion(QObject* parent = nullptr) : QObject(parent) {
-		kernelSize(10);
-		maxDist(0.5);
-		threshold(5);
-	}
-	prop(float, kernelSize);
-	prop(float, maxDist);
-	prop(float, threshold);
-};
-
 /*! \brief Cadre de vue 3D
  *
  * Ce widget affiche une scène en 3D composée de géometries a partir d'une caméra.
@@ -73,7 +60,6 @@ public:
 	prop(bool, showMaps);
 	prop(QString, program);
 	prop(QColor, ambient);
-	prop(QObject*, AO);
 	prop(QColor, bgColor);
 	prop(World*, world);
 

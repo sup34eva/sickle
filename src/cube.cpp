@@ -18,6 +18,48 @@ Cube::Cube(QObject* parent) : Geometry(parent) {
 	});
 }
 
+QVector<GLfloat> calcCubeUVs() {
+	QVector<GLfloat> UVs;
+	UVs.reserve(6 * 4 * 2);
+
+	for (int face = 0; face < 6; face++) {
+		UVs.append(0.0f); UVs.append(0.0f);
+		UVs.append(0.0f); UVs.append(1.0f);
+		UVs.append(1.0f); UVs.append(1.0f);
+		UVs.append(1.0f); UVs.append(0.0f);
+	}
+	return UVs;
+}
+
+QVector<GLfloat> calcCubeColors() {
+	QVector<GLfloat> colors;
+	colors.reserve(6 * 4);
+
+	for (GLfloat face = 0; face < 6; face++) for (int vert = 0; vert < 4; vert++) {
+		colors.append(face);
+	}
+
+	return colors;
+}
+
+QVector<quint32> calcCubeIndices() {
+	QVector<quint32> indices;
+	indices.reserve(6 * 2 * 3);
+
+	for (GLfloat face = 0; face < 6; face++) {
+		GLfloat f = face * 4;
+		indices.append(f + 0);
+		indices.append(f + 1);
+		indices.append(f + 3);
+
+		indices.append(f + 3);
+		indices.append(f + 1);
+		indices.append(f + 2);
+	}
+	return indices;
+}
+
+
 template<>
 QOpenGLVertexArrayObject* Cube::tBase::s_vao = nullptr;
 template<>
@@ -26,20 +68,7 @@ template<>
 QHash<QString, QOpenGLBuffer*> Cube::tBase::s_buffers = {};
 
 template<>
-QVector<quint32> Cube::tBase::s_indexBuffer = {
-	0,  1,  3,		// Face 1
-	3,  1,  2,		//
-	4,  5,  7,		// Face 2
-	7,  5,  6,		//
-	8,  9,  11,		// Face 3
-	11, 9,  10,		//
-	12, 13, 15,		// Face 4
-	15, 13, 14,		//
-	16, 17, 19,		// Face 5
-	19, 17, 18,		//
-	20, 21, 23,		// Face 6
-	23, 21, 22,		//
-};
+QVector<quint32> Cube::tBase::s_indexBuffer = calcCubeIndices();
 
 template<>
 QHash<QString, QVector<GLfloat>> Cube::tBase::s_buffersData = {
@@ -69,56 +98,6 @@ QHash<QString, QVector<GLfloat>> Cube::tBase::s_buffersData = {
 		 1.0f,  1.0f,  1.0f,		//
 		-1.0f,  1.0f,  1.0f,		//
 	}},
-	{"Color", {
-		0.0f,		// Face 1
-		0.0f,		//
-		0.0f,		//
-		0.0f,		//
-		1.0f,		// Face 2
-		1.0f,		//
-		1.0f,		//
-		1.0f,		//
-		2.0f,		// Face 3
-		2.0f,		//
-		2.0f,		//
-		2.0f,		//
-		3.0f,		// Face 4
-		3.0f,		//
-		3.0f,		//
-		3.0f,		//
-		4.0f,		// Face 5
-		4.0f,		//
-		4.0f,		//
-		4.0f,		//
-		5.0f,		// Face 6
-		5.0f,		//
-		5.0f,		//
-		5.0f,		//
-	}},
-	{"UV", {
-		0.0f,  0.0f,		// Face 1
-		0.0f,  1.0f,		//
-		1.0f,  1.0f,		//
-		1.0f,  0.0f,		//
-		0.0f,  0.0f,		// Face 2
-		1.0f,  0.0f,		//
-		1.0f,  1.0f,		//
-		0.0f,  1.0f,		//
-		0.0f,  0.0f,		// Face 3
-		1.0f,  0.0f,		//
-		1.0f,  1.0f,		//
-		0.0f,  1.0f,		//
-		0.0f,  0.0f,		// Face 4
-		0.0f,  1.0f,		//
-		1.0f,  1.0f,		//
-		1.0f,  0.0f,		//
-		0.0f,  0.0f,		// Face 5
-		0.0f,  1.0f,		//
-		1.0f,  1.0f,		//
-		1.0f,  0.0f,		//
-		0.0f,  0.0f,		// Face 6
-		1.0f,  0.0f,		//
-		1.0f,  1.0f,		//
-		0.0f,  1.0f,		//
-	}}
+	{"Color", calcCubeColors()},
+	{"UV", calcCubeUVs()}
 };

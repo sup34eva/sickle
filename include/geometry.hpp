@@ -9,6 +9,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
+#include <QColor>
 #include <globals.hpp>
 #include <actor.hpp>
 #include <material.hpp>
@@ -28,24 +29,28 @@ typedef QHash<RenderBuffer, QOpenGLShaderProgram*> ProgramList;
 class GeoBase : public Actor {
 	Q_OBJECT
 
-public:
-	explicit GeoBase(QObject* parent = nullptr) : Actor(parent) {
-		material(new Material(this));
-	}
+	public:
+		explicit GeoBase(QObject* parent = nullptr);
 
-	/*! \var m_colors
-	 * \brief Liste des couleurs
-	 *
-	 * Liste des couleurs utilisées pour les différentes faces de la géometrie
-	 */
-	prop(QVariantList, colors);
-	/*! \var m_material
-	 * \brief Materiau de la geometrie
-	 *
-	 * Propriétés de la surface de la geometrie
-	 */
-	prop(QObject*, material);
-	static ShaderList s_shaderList;
+		/*! \var m_colors
+		 * \brief Liste des couleurs
+		 *
+		 * Liste des couleurs utilisées pour les différentes faces de la géometrie
+		 */
+		prop(QVariantList, colors);
+		void setColor(int index, const QColor& color) {
+			m_colors.replace(index, color);
+		}
+
+		propSig(bool, castShadows, shadowChanged);
+
+		/*! \var m_material
+		 * \brief Materiau de la geometrie
+		 *
+		 * Propriétés de la surface de la geometrie
+		 */
+		prop(QObject*, material);
+		static ShaderList s_shaderList;
 };
 
 /*! \brief Base de toutes les géometries
@@ -62,7 +67,10 @@ public:
 	explicit Geometry(QObject* parent = nullptr) : GeoBase(parent) {
 		initProgram(parent);
 	}
-	noinline void draw(const DrawInfo& info) {
+	noinline virtual void draw(const DrawInfo& info) {
+		if(info.buffer == RB_DEPTH && !castShadows())
+			return;
+
 		auto func = info.context->functions();
 		auto program = Child::s_programList.value(info.buffer);
 		program->bind();
