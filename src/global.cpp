@@ -1,4 +1,7 @@
+// Copyright 2015 PsychoLama
+
 #include <globals.hpp>
+#include <limits>
 
 QQuaternion fromEuler(const QVector3D& euler) {
 	auto value =

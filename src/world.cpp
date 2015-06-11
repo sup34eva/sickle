@@ -4,21 +4,28 @@
 #include <sphere.hpp>
 #include <cube.hpp>
 #include <light.hpp>
+#include <group.hpp>
 
 Zone::Zone(QObject *parent) : QObject(parent) {
 	auto sky = addChild<Sphere>();
 	sky->setObjectName(tr("Sky"));
 	sky->setColor(0, QColor(0, 255, 255));
-	sky->position(QVector3D(0, -2, 0));
-	sky->scale(QVector3D(-50, -50, -50));
+	sky->scale(QVector3D(-1, -1, -1));
 	sky->castShadows(false);
 
 	auto ground = addChild<Cube>();
 	ground->setObjectName(tr("Ground"));
-	ground->position(QVector3D(0, -2, 0));
-	ground->scale(QVector3D(50, 1, 50));
+	ground->scale(QVector3D(1, 1.0f / 50, 1));
+	qobject_cast<Material*>(ground->material())->roughness(100);
 	for(int i = 0; i < 6; i++)
 		ground->setColor(i, QColor(185, 150, 110));
+
+	auto group = addChild<Group>();
+	group->setObjectName(tr("Scenery"));
+	group->position(QVector3D(0, -2, 0));
+	group->scale(QVector3D(50, 50, 50));
+	sky->setParent(group);
+	ground->setParent(group);
 
 	auto light = addChild<Light>();
 	light->setObjectName(tr("Sunlight"));

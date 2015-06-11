@@ -29,13 +29,13 @@ Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_isInitialized(fal
 
 void Viewport::initLight(Light& light) {
 	makeCurrent();
-	glGenFramebuffers(1, light.getBuffer());
-	glBindFramebuffer(GL_FRAMEBUFFER, light.buffer());
+	glGenFramebuffers(1, &light.getBuffer());
+	glBindFramebuffer(GL_FRAMEBUFFER, light.getBuffer());
 
 	static const GLfloat colors[] = {0, 0, 0};
 
-	glGenTextures(1, light.getTexture());
-	glBindTexture(GL_TEXTURE_2D, light.texture());
+	glGenTextures(1, &light.getTexture());
+	glBindTexture(GL_TEXTURE_2D, light.getTexture());
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -132,8 +132,8 @@ void Viewport::catchErrors() {
 }
 
 void Viewport::renderLight(Light* light) {
-	glBindFramebuffer(GL_FRAMEBUFFER, light->buffer());
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, light->texture(), 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, light->getBuffer());
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, light->getTexture(), 0);
 
 	glDrawBuffer(GL_NONE);
 
@@ -245,7 +245,7 @@ void Viewport::renderQuad() {
 					if(m_showBuffers) {
 						glBindTexture(GL_TEXTURE_2D, m_sceneTextures.at(i));
 					} else {
-						glBindTexture(GL_TEXTURE_2D, lights.at(i)->texture());
+						glBindTexture(GL_TEXTURE_2D, lights.at(i)->getTexture());
 						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 					}
 					glEnableVertexAttribArray(0);
@@ -308,14 +308,16 @@ void Viewport::renderQuad() {
 		if(isLight) texLen++;
 		for(int j = 0; j < texLen; j++) {
 			glActiveTexture(GL_TEXTURE0 + j);
-			auto tex = (isLight && j >= maxLen) ? light->texture() : m_sceneTextures.at(j);
+			auto tex = (isLight && j >= maxLen) ? light->getTexture() : m_sceneTextures.at(j);
 			glBindTexture(GL_TEXTURE_2D, tex);
 			auto n = names.at(j);
 			auto loc = prog->uniformLocation(n);
 			if(loc > -1)
 				prog->setUniformValue(loc, j);
-			/*else
-				qWarning().noquote() << "Uniform" << n << "not found.";*/
+#ifdef DEBUG_SHADERS  // Les uniforms sont souvent supprimés lors de l'optimisation des shaders durant leur compilation
+			else
+				qWarning().noquote() << "Uniform" << n << "not found.";
+#endif
 		}
 
 
@@ -404,8 +406,6 @@ void Viewport::updateLights() {
 		auto zone = m_world->currentZone();
 		auto lights = zone->findChildren<Light*>();
 		foreach(auto light, lights) updateLight(light);
-	} else {
-		qDebug() << "Not updating lights yet";
 	}
 }
 

@@ -19,12 +19,12 @@ QMatrix4x4 Actor::transform() {
 void Actor::setParent(QObject *parent) {
 	QObject::setParent(parent);
 
-	auto actor = qobject_cast<Actor*>(parent);
+	/*auto actor = qobject_cast<Actor*>(parent);
 	if(actor != nullptr) {
 		position(m_position - actor->position());
 		orientation(m_orientation - actor->orientation());
 		scale(m_scale - actor->scale());
-	}
+	}*/
 
 	m_viewport = findParent<Viewport>();
 	if(m_viewport != nullptr) {

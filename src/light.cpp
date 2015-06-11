@@ -8,7 +8,7 @@ Light::Light(QObject* parent) : Actor(parent) {
 	farZ(66);
 	power(1.0);
 	color(QColor(255, 255, 255));
-	mapSize(QSize(140, 75));
+	mapSize(QSize(140, 103));
 	orientation(fromEuler(QVector3D(-45, 0, -45)));
 	setObjectName(tr("New Light"));
 

@@ -208,9 +208,11 @@ protected:
 							it.value()->bind();
 							program->setAttributeBuffer(attr, GL_FLOAT, 0, tupleSize);
 							program->enableAttributeArray(attr);
-						} else {
-							qWarning().noquote() << "Attribute not found:" << name;
 						}
+#ifdef DEBUG_SHADERS  // Les attributs sont souvent supprimés lors de l'optimisation des shaders durant leur compilation
+						else
+							qWarning().noquote() << "Attribute not found:" << name;
+#endif
 					}
 				}
 

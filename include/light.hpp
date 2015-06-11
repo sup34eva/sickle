@@ -18,8 +18,6 @@ public:
 		Q_UNUSED(info)
 	}
 
-	prop(GLuint, buffer);
-	prop(GLuint, texture);
 	prop(float, power);
 	prop(QColor, color);
 	propSig(float, nearZ, nearZChanged);
@@ -29,12 +27,12 @@ public:
 	QVector3D direction();
 	QMatrix4x4 depth();
 
-	GLuint* getBuffer() {
-		return &m_buffer;
+	GLuint& getBuffer() {
+		return m_buffer;
 	}
 
-	GLuint* getTexture() {
-		return &m_texture;
+	GLuint& getTexture() {
+		return m_texture;
 	}
 
 	QMatrix4x4 projection() {
@@ -58,6 +56,8 @@ public slots:
 protected:
 	QMatrix4x4 m_projection;
 	QMatrix4x4 m_view;
+	GLuint m_buffer;
+	GLuint m_texture;
 };
 
 Q_DECLARE_METATYPE(Light)
