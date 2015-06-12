@@ -33,12 +33,65 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(ui->viewport->camera(), &Camera::moved,
 			[=](const QVector3D& position) { ui->camPos->setText(toString(position)); });
 
+	loadPlugins();
+
 	connect(ui->viewport, &Viewport::initialized, [=]() {
 		auto args = QCoreApplication::arguments();
 		if (args.length() > 1) {
-			ui->viewport->load(args.at(1));
+			auto fileName = args.at(1);
+			loaders[QFileInfo(fileName).suffix()]->load(ui->viewport, fileName);
 		}
 	});
+}
+
+void MainWindow::loadPlugins() {
+	// Plugins par defaut
+	QJsonObject data;
+	data["type"] = DefaultFileLoader::tr("Sickle World");
+	data["extensions"] = QJsonArray({"wld"});
+	plugins.append(Plugin(new DefaultFileLoader(), data));
+
+	auto pluginsDir = QDir(qApp->applicationDirPath());
+#if defined(Q_OS_WIN)
+	if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release") {
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+	}
+#elif defined(Q_OS_MAC)
+	if (pluginsDir.dirName() == "MacOS") {
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+	}
+#endif
+	pluginsDir.cd("plugins");
+
+	foreach(QString fileName, pluginsDir.entryList(QDir::Files)) {
+		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
+		auto plugin = loader.instance();
+		if (plugin)
+			plugins.append(Plugin(plugin, loader.metaData()["MetaData"].toObject()));
+		else
+			qWarning() << loader.errorString();
+	}
+
+	foreach(Plugin plugin, plugins) {
+		auto loader = qobject_cast<FileLoader*>(std::get<0>(plugin));
+		auto data = std::get<1>(plugin);
+		if(loader) {
+			QStringList extensions;
+			foreach(QJsonValue ext, data["extensions"].toArray())
+				extensions.append(ext.toString());
+
+			QString type = data["type"].toString();
+			qDebug() << "FileLoader" << data;
+			formats.append(QString("%1 (%2)").arg(type).arg(extensions.join(", *.").prepend("*.")));
+			foreach(QString suffix, extensions)
+				loaders[suffix] = loader;
+		}
+	}
 }
 
 MainWindow::~MainWindow() {
@@ -257,22 +310,27 @@ void MainWindow::on_actorList_currentItemChanged(QTreeWidgetItem* current) {
 }
 
 void MainWindow::on_actionOpen_triggered() {
-	auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), tr("Sickle World (*.wld)"));
-	ui->viewport->load(fileName);
-	m_lastFile = fileName;
+	auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), formats.join(";;"));
+	auto info = QFileInfo(fileName);
+	if(info.exists()) {
+		loaders[info.suffix()]->load(ui->viewport, fileName);
+		m_lastFile = fileName;
+	}
 }
 
 void MainWindow::on_actionSave_as_triggered() {
-	auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("Sickle World (*.wld)"));
-	ui->viewport->save(fileName);
-	m_lastFile = fileName;
+	auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), formats.join(";;"));
+	if(!fileName.isEmpty()) {
+		loaders[QFileInfo(fileName).suffix()]->save(ui->viewport, fileName);
+		m_lastFile = fileName;
+	}
 }
 
 void MainWindow::on_action_Save_triggered() {
 	if (m_lastFile.isEmpty())
 		on_actionSave_as_triggered();
 	else
-		ui->viewport->save(m_lastFile);
+		loaders[QFileInfo(m_lastFile).suffix()]->save(ui->viewport, m_lastFile);
 }
 
 void MainWindow::on_actionWireframe_toggled(bool checked) {

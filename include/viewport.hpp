@@ -52,8 +52,6 @@ public:
 #endif
 
 public slots:
-	void save(QString name);
-	void load(QString name);
 	void clearLevel();
 
 signals:
@@ -75,8 +73,5 @@ private:
 	QMatrix4x4 m_projection;
 	QPoint m_cursor;
 };
-
-QDataStream& operator<<(QDataStream&, const QObject&);
-QDataStream& operator>>(QDataStream&, QObject&);
 
 #endif

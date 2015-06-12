@@ -9,13 +9,6 @@ if(!isEmpty(ENV_CXX)) {
     QMAKE_LINK = $$(CXX)
 }
 
-VERSION = $$system(git rev-list HEAD --count)
-!isEmpty(VERSION){
-    VERSION = $${VERSION}
-}
-
-DEFINES += FILE_VERSION=\"$${VERSION}\"
-
 INCLUDEPATH += include
 
 CONFIG += c++14 rtti static
@@ -30,7 +23,8 @@ SOURCES += \
     src/cube.cpp \
     src/sphere.cpp \
     src/actor.cpp \
-    src/pyramide.cpp
+    src/pyramide.cpp \
+    src/fileloader.cpp
 
 HEADERS  += \
     include/camera.hpp \
@@ -42,7 +36,8 @@ HEADERS  += \
     include/viewport.hpp \
     include/sphere.hpp \
     include/actor.hpp \
-    include/pyramide.hpp
+    include/pyramide.hpp \
+    include/fileloader.hpp
 
 DISTFILES += \
     README.md \

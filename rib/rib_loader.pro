@@ -1,0 +1,12 @@
+TEMPLATE      = lib
+CONFIG       += plugin c++14
+QT           += core gui widgets
+INCLUDEPATH  += ../include
+INCLUDEPATH  += "C:/Program Files/Pixar/RenderManProServer-19.0/include"
+HEADERS       = rib_loader.hpp
+SOURCES       = rib_loader.cpp
+DISTFILES    += rib_loader.json
+TARGET        = $$qtLibraryTarget(scl_ribloader)
+DESTDIR       = $$PWD/../plugins
+QMAKE_LIBDIR += "C:\Program Files\Pixar\RenderManProServer-19.0\lib"
+QMAKE_LIBS   += libprman.lib
