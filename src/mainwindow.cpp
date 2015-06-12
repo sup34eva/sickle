@@ -2,6 +2,7 @@
 
 #include <mainwindow.hpp>
 #include <sphere.hpp>
+#include <line.hpp>
 #include <light.hpp>
 #include <spotlight.hpp>
 #include <group.hpp>
@@ -51,16 +52,17 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	QMenu* addMenu = new QMenu(tr("Add Geometry"));
 	addMenu->addAction(ui->newCube);
 	addMenu->addAction(ui->newSphere);
+	addMenu->addAction(ui->newLine);
+	addMenu->addSeparator();
 	addMenu->addAction(ui->newLight);
 	addMenu->addAction(ui->newSpot);
+	addMenu->addSeparator();
 	addMenu->addAction(ui->newTrigger);
 	addMenu->menuAction()->setIcon(QIcon(":/icons/add-geo.png"));
-	ui->toolBar->addAction(addMenu->menuAction());
+	ui->toolBar->insertAction(ui->actionGroup, addMenu->menuAction());
 
 	auto modeList = new QComboBox;
-	ui->toolBar->addWidget(modeList);
-
-	ui->toolBar->addAction(ui->actionGroup);
+	ui->toolBar->insertWidget(ui->actionGroup, modeList);
 
 	ui->camPos->setText(toString(QVector3D(0, 0, 0)));
 	connect(ui->viewport->camera(), &Camera::moved,
@@ -94,7 +96,13 @@ QTreeWidgetItem* MainWindow::addToTree(QObject* obj, QTreeWidgetItem* parent) {
 	connect(obj, &QObject::objectNameChanged, [=](QString newName) { item->setText(0, newName); });
 
 	connect(obj, &QObject::destroyed, [=]() {
-		delete item;
+		if(parent == nullptr) {
+			auto index = ui->actorList->indexOfTopLevelItem(item);
+			ui->actorList->takeTopLevelItem(index);
+		} else {
+			auto index = parent->indexOfChild(item);
+			parent->takeChild(index);
+		}
 	});
 
 	foreach(auto i, obj->children()) {
@@ -288,7 +296,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 					auto name = metaObject->property(i).name();
 
 					auto item = new QTreeWidgetItem;
-					item->setText(0, name);
+					item->setText(0, tr(name));
 					line->addChild(item);
 
 					QWidget* widget;
@@ -389,7 +397,7 @@ void MainWindow::showProperties(QObject* obj) {
 		for (int i = 0; i < count; i++) {
 			auto prop = metaObject->property(i).name();
 			auto line = new QTreeWidgetItem;
-			line->setText(0, prop);
+			line->setText(0, tr(prop));
 			ui->infoWidget->addTopLevelItem(line);
 			QWidget* widget;
 
@@ -430,15 +438,15 @@ void MainWindow::on_actionOpen_triggered() {
 	m_lastFile = fileName;
 }
 
-void MainWindow::on_actionSave_as_triggered() {
+void MainWindow::on_actionSaveAs_triggered() {
 	auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), tr("Sickle World (*.wld)"));
 	ui->viewport->save(fileName);
 	m_lastFile = fileName;
 }
 
-void MainWindow::on_action_Save_triggered() {
+void MainWindow::on_actionSave_triggered() {
 	if (m_lastFile.isEmpty())
-		on_actionSave_as_triggered();
+		on_actionSaveAs_triggered();
 	else
 		ui->viewport->save(m_lastFile);
 }
@@ -451,12 +459,12 @@ void MainWindow::on_newSphere_triggered() {
 	ui->viewport->addChild<Sphere>();
 }
 
-void MainWindow::on_actionBuffers_toggled(bool show) {
+void MainWindow::on_showBuffers_toggled(bool show) {
 	ui->viewport->showBuffers(show);
 	ui->viewport->update();
 }
 
-void MainWindow::on_actionSceneProp_triggered() {
+void MainWindow::on_actionWorldProp_triggered() {
 	showProperties(ui->viewport->world());
 }
 
@@ -523,4 +531,8 @@ void MainWindow::on_actionGroup_triggered() {
 
 void MainWindow::on_newTrigger_triggered() {
 	ui->viewport->addChild<Trigger>();
+}
+
+void MainWindow::on_newLine_triggered() {
+	ui->viewport->addChild<Line>();
 }

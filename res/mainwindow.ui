@@ -102,19 +102,19 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="action_New"/>
+    <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
-    <addaction name="action_Save"/>
-    <addaction name="actionSave_as"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSaveAs"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionBuffers"/>
+    <addaction name="showBuffers"/>
     <addaction name="showMaps"/>
     <addaction name="separator"/>
-    <addaction name="actionSceneProp"/>
+    <addaction name="actionWorldProp"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuView"/>
@@ -129,6 +129,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionGroup"/>
   </widget>
   <widget class="QDockWidget" name="listDock">
    <property name="windowTitle">
@@ -274,10 +275,6 @@
    </widget>
   </widget>
   <action name="newCube">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/add-geo.png</normaloff>:/icons/add-geo.png</iconset>
-   </property>
    <property name="text">
     <string>New Cube</string>
    </property>
@@ -285,17 +282,17 @@
     <string>Add a new cube to the scene</string>
    </property>
   </action>
-  <action name="action_New">
+  <action name="actionNew">
    <property name="text">
     <string>&amp;New</string>
    </property>
   </action>
-  <action name="action_Save">
+  <action name="actionSave">
    <property name="text">
     <string>&amp;Save</string>
    </property>
   </action>
-  <action name="actionSave_as">
+  <action name="actionSaveAs">
    <property name="text">
     <string>Save as ...</string>
    </property>
@@ -313,7 +310,7 @@
     <string>Add a new sphere to the scene</string>
    </property>
   </action>
-  <action name="actionBuffers">
+  <action name="showBuffers">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -321,9 +318,9 @@
     <string>Show the Buffers</string>
    </property>
   </action>
-  <action name="actionSceneProp">
+  <action name="actionWorldProp">
    <property name="text">
-    <string>Scene Properties</string>
+    <string>World Properties</string>
    </property>
   </action>
   <action name="newLight">
@@ -357,6 +354,11 @@
     <string>New Trigger</string>
    </property>
   </action>
+  <action name="newLine">
+   <property name="text">
+    <string>New Line</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -380,7 +382,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>action_New</sender>
+   <sender>actionNew</sender>
    <signal>triggered()</signal>
    <receiver>viewport</receiver>
    <slot>clearLevel()</slot>
