@@ -2,6 +2,7 @@
 
 #include <mainwindow.hpp>
 #include <sphere.hpp>
+#include <pyramide.hpp>
 #include <QVariant>
 #include <QFileDialog>
 #include <QSpinBox>
@@ -24,6 +25,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	QMenu* addMenu = new QMenu(tr("Add Geometry"));
 	addMenu->addAction(ui->newCube);
 	addMenu->addAction(ui->newSphere);
+    addMenu->addAction(ui->newPyramide);
 	addMenu->menuAction()->setIcon(QIcon(":/icons/add-geo.png"));
 	ui->toolBar->addAction(addMenu->menuAction());
 
@@ -287,4 +289,9 @@ void MainWindow::on_newCube_triggered() {
 
 void MainWindow::on_newSphere_triggered() {
 	ui->viewport->addChild<Sphere>();
+}
+
+void MainWindow::on_newPyramide_triggered()
+{
+    ui->viewport->addChild<Pyramide>();
 }

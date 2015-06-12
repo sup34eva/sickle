@@ -38,6 +38,8 @@ private slots:
 
 	void on_newSphere_triggered();
 
+    void on_newPyramide_triggered();
+
 private:
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);
 	QString m_lastFile;
