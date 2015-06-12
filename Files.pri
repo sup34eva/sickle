@@ -36,7 +36,8 @@ SOURCES += \
     src/world.cpp \
     src/trigger.cpp \
     src/global.cpp \
-    $$PWD/src/line.cpp
+    src/line.cpp \
+    src/cylinder.cpp
 
 HEADERS  += \
     include/camera.hpp \
@@ -53,7 +54,8 @@ HEADERS  += \
     include/material.hpp \
     include/world.hpp \
     include/trigger.hpp \
-    $$PWD/include/line.hpp
+    include/line.hpp \
+    include/cylinder.hpp
 
 DISTFILES += \
     README.md \

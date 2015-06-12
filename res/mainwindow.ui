@@ -359,6 +359,11 @@
     <string>New Line</string>
    </property>
   </action>
+  <action name="newCylinder">
+   <property name="text">
+    <string>New Cylinder</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

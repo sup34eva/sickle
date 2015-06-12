@@ -10,6 +10,14 @@
     </message>
 </context>
 <context>
+    <name>Cylinder</name>
+    <message>
+        <location filename="../src/cylinder.cpp" line="11"/>
+        <source>Cylinder %1</source>
+        <translation>Cylindre %1</translation>
+    </message>
+</context>
+<context>
     <name>Group</name>
     <message>
         <location filename="../src/group.cpp" line="7"/>
@@ -152,53 +160,58 @@
         <translation>Nouvelle Ligne</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="23"/>
+        <location filename="mainwindow.ui" line="364"/>
+        <source>New Cylinder</source>
+        <translation>Nouveau Cylindre</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="24"/>
         <source>X: %1, Y: %2, Z: %3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="48"/>
+        <location filename="../src/mainwindow.cpp" line="49"/>
         <source>Zone %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="52"/>
+        <location filename="../src/mainwindow.cpp" line="53"/>
         <source>Add Geometry</source>
         <translation>Ajouter une géométrie</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="347"/>
+        <location filename="../src/mainwindow.cpp" line="350"/>
         <source>Width</source>
         <translation>Largeur</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="348"/>
+        <location filename="../src/mainwindow.cpp" line="351"/>
         <source>Height</source>
         <translation>Hauteur</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="436"/>
+        <location filename="../src/mainwindow.cpp" line="439"/>
         <source>Open World</source>
         <translation>Ouvrir un monde</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="436"/>
-        <location filename="../src/mainwindow.cpp" line="442"/>
+        <location filename="../src/mainwindow.cpp" line="439"/>
+        <location filename="../src/mainwindow.cpp" line="445"/>
         <source>Sickle World (*.wld)</source>
         <translation>Monde Sickle (*.wld)</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="442"/>
+        <location filename="../src/mainwindow.cpp" line="445"/>
         <source>Save World</source>
         <translation>Enregister un monde</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="501"/>
+        <location filename="../src/mainwindow.cpp" line="504"/>
         <source>&amp;Delete</source>
         <translation>Supprime&amp;r</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="502"/>
+        <location filename="../src/mainwindow.cpp" line="505"/>
         <source>Delete this actor</source>
         <translation>Supprimer cet acteur</translation>
     </message>

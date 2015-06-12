@@ -3,6 +3,7 @@
 #include <mainwindow.hpp>
 #include <sphere.hpp>
 #include <line.hpp>
+#include <cylinder.hpp>
 #include <light.hpp>
 #include <spotlight.hpp>
 #include <group.hpp>
@@ -52,6 +53,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	QMenu* addMenu = new QMenu(tr("Add Geometry"));
 	addMenu->addAction(ui->newCube);
 	addMenu->addAction(ui->newSphere);
+	addMenu->addAction(ui->newCylinder);
+	addMenu->addSeparator();
 	addMenu->addAction(ui->newLine);
 	addMenu->addSeparator();
 	addMenu->addAction(ui->newLight);
@@ -535,4 +538,8 @@ void MainWindow::on_newTrigger_triggered() {
 
 void MainWindow::on_newLine_triggered() {
 	ui->viewport->addChild<Line>();
+}
+
+void MainWindow::on_newCylinder_triggered() {
+	ui->viewport->addChild<Cylinder>();
 }
