@@ -9,11 +9,12 @@
 class Rect : public Geometry<Rect> {
     Q_OBJECT
 
-public:
-    explicit Rect(QObject* parent = nullptr);
-    typedef Geometry<Rect> tBase;
+	public:
+		explicit Rect(QObject* parent = nullptr);
+		typedef Geometry<Rect> tBase;
+		virtual void draw(const DrawInfo &info);
 };
 
 Q_DECLARE_METATYPE(Rect)
 
-#endif // RECT_H
+#endif  // RECT_H

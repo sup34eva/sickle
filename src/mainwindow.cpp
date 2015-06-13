@@ -62,7 +62,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     addMenu->addAction(ui->newPyramide);
 	addMenu->addAction(ui->newCylinder);
 	addMenu->addSeparator();
-    addMenu->addAction(ui->newRectangle);
+	addMenu->addAction(ui->newRectangle);
 	addMenu->addAction(ui->newLine);
 	addMenu->addSeparator();
 	addMenu->addAction(ui->newLight);
@@ -647,7 +647,6 @@ void MainWindow::on_actionNew_triggered() {
 	ui->viewport->update();
 }
 
-void MainWindow::on_newRectangle_triggered()
-{
+void MainWindow::on_newRectangle_triggered() {
     ui->viewport->addChild<Rect>();
 }

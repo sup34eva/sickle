@@ -9,6 +9,7 @@
 #include <cylinder.hpp>
 #include <trigger.hpp>
 #include <line.hpp>
+#include <rectangle.hpp>
 
 Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_isInitialized(false) {
 	m_camera = new Camera(this);
@@ -23,6 +24,7 @@ Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_isInitialized(fal
 	qRegisterMetaType<Cylinder>("Cylinder");
 
 	qRegisterMetaType<Line>("Line");
+	qRegisterMetaType<Rect>("Rect");
 
 	qRegisterMetaType<Light>("Light");
 	qRegisterMetaType<Spotlight>("Spotlight");
