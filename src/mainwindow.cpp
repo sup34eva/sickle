@@ -496,7 +496,7 @@ void MainWindow::updateTabs() {
 		for(int i = count; i < zones.size(); i++) {
 			ui->tabBar->insertTab(i - 1, tr("Zone %1").arg(i));
 		}
-	} else if(count > zones.size()) {
+	} else if (count > zones.size()) {
 		for(int i = count; i > zones.size(); i--) {
 			ui->tabBar->removeTab(i - 1);
 		}

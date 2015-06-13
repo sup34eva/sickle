@@ -51,7 +51,7 @@ class World : public QObject {
 			return m_zones;
 		}
 
-		void setZoneList(QList<Zone*>& list) {
+		void setZoneList(const QList<Zone*>& list) {
 			foreach(auto zone, m_zones)
 				zone->deleteLater();
 			m_zones = list;

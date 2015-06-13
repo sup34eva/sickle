@@ -89,7 +89,7 @@ QVector<GLfloat> calcCylinderUVs() {
 
 	for (int j = 0; j < sides * 2; j++) {
 		UVs.append(j % 2);
-		UVs.append((float)j / (sides * 2.0f));
+		UVs.append(static_cast<float>(j) / (sides * 2.0f));
 	}
 
 	return UVs;

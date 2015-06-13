@@ -169,7 +169,6 @@ QDataStream& operator>>(QDataStream& stream, QObject& obj) {
 		if(child != nullptr) {
 			child->setParent(&obj);
 			stream >> *child;
-			//obj.childAdded(child);
 		} else {
 			qWarning() << "Error re-creating object of type " << type;
 		}
