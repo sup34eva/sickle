@@ -1,5 +1,5 @@
 build/
+plugins/
 docs/
-models/
 *.user
 Thumbs.db

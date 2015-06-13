@@ -9,7 +9,7 @@
 int main(int argc, char *argv[]) {
 	QApplication app(argc, argv);
 
-	QFile style(":/styles/valve.qss");
+	QFile style(":qdarkstyle/style.qss");
 	style.open(QFile::ReadOnly);
 	app.setStyleSheet(style.readAll());
 
