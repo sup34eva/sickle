@@ -36,7 +36,10 @@
    <property name="styleSheet">
     <string notr="true"/>
    </property>
-   <layout class="QGridLayout" name="centralLayout">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -49,10 +52,32 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <property name="spacing">
-     <number>0</number>
-    </property>
-    <item row="0" column="0">
+    <item>
+     <widget class="QTabBar" name="tabBar" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="tabsClosable" stdset="0">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="Viewport" name="viewport">
       <property name="focusPolicy">
        <enum>Qt::StrongFocus</enum>
@@ -73,19 +98,29 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="action_New"/>
-    <addaction name="action_Save"/>
-    <addaction name="actionSave_as"/>
+    <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSaveAs"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="showBuffers"/>
+    <addaction name="showMaps"/>
+    <addaction name="separator"/>
+    <addaction name="actionWorldProp"/>
    </widget>
    <addaction name="menu_File"/>
+   <addaction name="menuView"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
@@ -97,7 +132,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionWireframe"/>
+   <addaction name="actionGroup"/>
   </widget>
   <widget class="QDockWidget" name="listDock">
    <property name="windowTitle">
@@ -130,6 +165,12 @@
          <width>250</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
        <property name="uniformRowHeights">
         <bool>true</bool>
@@ -237,10 +278,6 @@
    </widget>
   </widget>
   <action name="newCube">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/add-geo.png</normaloff>:/icons/add-geo.png</iconset>
-   </property>
    <property name="text">
     <string>New Cube</string>
    </property>
@@ -248,17 +285,17 @@
     <string>Add a new cube to the scene</string>
    </property>
   </action>
-  <action name="action_New">
+  <action name="actionNew">
    <property name="text">
     <string>&amp;New</string>
    </property>
   </action>
-  <action name="action_Save">
+  <action name="actionSave">
    <property name="text">
     <string>&amp;Save</string>
    </property>
   </action>
-  <action name="actionSave_as">
+  <action name="actionSaveAs">
    <property name="text">
     <string>Save as ...</string>
    </property>
@@ -268,23 +305,66 @@
     <string>&amp;Open</string>
    </property>
   </action>
-  <action name="actionWireframe">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Wireframe</string>
-   </property>
-   <property name="toolTip">
-    <string>Show the scene in wireframe</string>
-   </property>
-  </action>
   <action name="newSphere">
    <property name="text">
     <string>New Sphere</string>
    </property>
    <property name="toolTip">
     <string>Add a new sphere to the scene</string>
+   </property>
+  </action>
+  <action name="showBuffers">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show the Buffers</string>
+   </property>
+  </action>
+  <action name="actionWorldProp">
+   <property name="text">
+    <string>World Properties</string>
+   </property>
+  </action>
+  <action name="newLight">
+   <property name="text">
+    <string>New Light</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a new directional light to the scene</string>
+   </property>
+  </action>
+  <action name="showMaps">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Shadow Maps</string>
+   </property>
+  </action>
+  <action name="newSpot">
+   <property name="text">
+    <string>New Spotlight</string>
+   </property>
+  </action>
+  <action name="actionGroup">
+   <property name="text">
+    <string>Group</string>
+   </property>
+  </action>
+  <action name="newTrigger">
+   <property name="text">
+    <string>New Trigger</string>
+   </property>
+  </action>
+  <action name="newLine">
+   <property name="text">
+    <string>New Line</string>
+   </property>
+  </action>
+  <action name="newCylinder">
+   <property name="text">
+    <string>New Cylinder</string>
    </property>
   </action>
   <action name="newPyramide">
@@ -303,13 +383,19 @@
     <slot>clearLevel()</slot>
    </slots>
   </customwidget>
+  <customwidget>
+   <class>QTabBar</class>
+   <extends>QWidget</extends>
+   <header location="global">QTabBar</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>
  <connections>
   <connection>
-   <sender>action_New</sender>
+   <sender>actionNew</sender>
    <signal>triggered()</signal>
    <receiver>viewport</receiver>
    <slot>clearLevel()</slot>

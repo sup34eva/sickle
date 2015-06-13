@@ -24,7 +24,15 @@ SOURCES += \
     src/sphere.cpp \
     src/actor.cpp \
     src/pyramide.cpp \
-    src/fileloader.cpp
+    src/fileloader.cpp \
+    src/light.cpp \
+    src/spotlight.cpp \
+    src/material.cpp \
+    src/world.cpp \
+    src/trigger.cpp \
+    src/global.cpp \
+    src/line.cpp \
+    src/cylinder.cpp
 
 HEADERS  += \
     include/camera.hpp \
@@ -37,7 +45,14 @@ HEADERS  += \
     include/sphere.hpp \
     include/actor.hpp \
     include/pyramide.hpp \
-    include/fileloader.hpp
+    include/fileloader.hpp \
+    include/light.hpp \
+    include/spotlight.hpp \
+    include/material.hpp \
+    include/world.hpp \
+    include/trigger.hpp \
+    include/line.hpp \
+    include/cylinder.hpp
 
 DISTFILES += \
     README.md \

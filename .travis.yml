@@ -11,19 +11,21 @@ before_install:
   - sudo add-apt-repository --yes ppa:beineri/opt-qt541
   - sudo apt-add-repository --yes ppa:libreoffice/libreoffice-4-2
   - sudo apt-get update -qq
-  - export DISPLAY=:99.0
-  - export TRAVIS_COMMIT_MSG="$(git log --format=%B --no-merges -n 1)"
-  - sh -e /etc/init.d/xvfb start
 install:
   - sudo pip install PyYAML cpp-coveralls cpplint
-  - sudo apt-get install qt54base qt54tools qt54declarative doxygen graphviz
-  - chmod ugo+x scripts/build-docs.sh
-before_script: /opt/qt54/bin/qmake -unix SickleTest.pro
+  - sudo apt-get install qt54base qt54tools qt54declarative doxygen graphviz mesa-utils xvfb
+before_script:
+  - export TRAVIS_COMMIT_MSG="$(git log --format=%B --no-merges -n 1)"
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - glxinfo
+  - /opt/qt54/bin/qmake -unix SickleTest.pro
 script:
   - make lint
   - make
   - make check
 after_success:
+  - chmod ugo+x scripts/build-docs.sh
   - ./scripts/build-docs.sh
   - coveralls --exclude-pattern moc_
 deploy:

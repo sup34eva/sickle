@@ -30,7 +30,7 @@ class DefaultFileLoader : public QObject, public FileLoader {
 	Q_OBJECT
 	Q_INTERFACES(FileLoader)
 	public:
-		Q_REVISION(2) virtual void save(Viewport*, const QString&);
+		Q_REVISION(3) virtual void save(Viewport*, const QString&);
 		virtual void load(Viewport*, const QString&);
 };
 

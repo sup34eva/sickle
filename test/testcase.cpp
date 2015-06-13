@@ -1,8 +1,11 @@
 #include "testcase.hpp"
 #include <cube.hpp>
 #include <sphere.hpp>
+#include <group.hpp>
 #include <mainwindow.hpp>
 #include <QDoubleSpinBox>
+#include <QPushButton>
+#include <QColorDialog>
 #include <QSignalSpy>
 #include "./ui_mainwindow.h"
 
@@ -65,9 +68,14 @@ void TestCase::scaleObject() {
 void TestCase::saveLoad() {
 	DefaultFileLoader loader;
 	ui->viewport->addChild<Cube>();
+
 	loader.save(ui->viewport, "test.wld");
+
 	ui->viewport->clearLevel();
+	QTest::qWait(250);
+
 	loader.load(ui->viewport, "test.wld");
+
 	QCOMPARE(ui->viewport->findChildren<Cube>().length(), 1);
 }
 
@@ -106,12 +114,55 @@ void TestCase::newZone() {
 }
 
 void TestCase::createGroup() {
+	QList<Cube*> cubes;
+	for(int i = 0; i < 10; i++) {
+		cubes.append(ui->viewport->addChild<Cube>());
+	}
+
+	ui->actorList->selectAll();
+
+	auto group = ui->viewport->addChild<Group>();
+	foreach(auto cube, cubes) {
+		QCOMPARE(cube->parent(), group);
+	}
 }
 
 void TestCase::moveGroup() {
+	QList<Cube*> cubes;
+	for(int i = 0; i < 10; i++) {
+		cubes.append(ui->viewport->addChild<Cube>());
+	}
+
+	ui->actorList->selectAll();
+	auto group = ui->viewport->addChild<Group>();
+	ui->actorList->clearSelection();
+
+	auto index = ui->actorList->indexAt(QPoint(10, 10));
+	ui->actorList->setCurrentIndex(index);
+
+	moveVector(1);
+
+	QCOMPARE(group->position(), QVector3D(2, 2, 2));
 }
 
 void TestCase::paintFace() {
+	auto cube = ui->viewport->addChild<Cube>();
+
+	auto index = ui->actorList->indexAt(QPoint(5, 5));
+	ui->actorList->setCurrentIndex(index);
+
+	auto item = ui->infoWidget->topLevelItem(4)->child(0);
+	auto btn = static_cast<QPushButton*>(ui->infoWidget->itemWidget(item, 1));
+	btn->click();
+
+	auto color = QColor(2, 2, 2);
+	foreach (auto widget, QApplication::topLevelWidgets()) {
+		if (auto dialog = qobject_cast<QColorDialog*>(widget)) {
+			dialog->setCurrentColor(color);
+		}
+	}
+
+	QCOMPARE(qvariant_cast<QColor>(cube->colors().at(0)), color);
 }
 
 void TestCase::linkZones() {
@@ -119,6 +170,7 @@ void TestCase::linkZones() {
 
 void TestCase::cleanup() {
 	ui->viewport->clearLevel();
+	QTest::qWait(250);
 }
 
 QTEST_MAIN(TestCase)

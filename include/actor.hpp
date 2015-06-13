@@ -8,6 +8,13 @@
 #include <QOpenGLFunctions>
 #include <QMetaProperty>
 
+class Viewport;
+
+enum RenderBuffer {
+	RB_DEPTH,
+	RB_SCENE
+};
+
 /*! \brief Structure contenant les infos sur la frame courante
  *
  * Cette structure contient toutes les informations utiles pour les acteurs a propos de l'image en cours de rendu:
@@ -17,10 +24,10 @@
  * nouvelles informations sans impacter les classes existantes.
  */
 typedef struct DrawInfo {
-	QMatrix4x4 View;
-	QMatrix4x4 Projection;
 	GLenum mode;
 	QOpenGLContext* context;
+	RenderBuffer buffer;
+	QVariantHash uniforms;
 } DrawInfo;
 
 /*! \brief Base de tous les objets de la scène
@@ -42,12 +49,29 @@ class Actor : public QObject {
 			}
 		}
 		virtual void draw(const DrawInfo& info) = 0;
+		virtual void setParent(QObject* parent);
+		virtual bool event(QEvent* event);
 
 		propSig(QVector3D, position, moved);
 		propSig(QQuaternion, orientation, rotated);
 		propSig(QVector3D, scale, scaled);
+
 	protected:
 		virtual QMatrix4x4 transform();
+
+		template<typename T>
+		T* findParent() {
+			QObject* par = this;
+			do {
+				par = par->parent();
+			} while (par != nullptr && dynamic_cast<T*>(par) == nullptr);
+			return dynamic_cast<T*>(par);
+		}
+
+		Viewport* viewport();
+
+private:
+		Viewport* m_viewport;
 };
 
 Q_DECLARE_INTERFACE(Actor, "com.sup3asc2.sickle.Actor/1.0")

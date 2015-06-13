@@ -9,137 +9,95 @@ int Cube::tBase::s_instances = 0;
 Cube::Cube(QObject* parent) : Geometry(parent) {
 	setObjectName(QString(tr("Cube %1")).arg(Cube::tBase::s_instances));
 	colors({
-		QColor(1, 0, 0),
-		QColor(1, 1, 0),
-		QColor(0, 1, 0),
-		QColor(0, 1, 1),
-		QColor(0, 0, 1),
-		QColor(1, 0, 1)
+		QColor(255,	0,		0),
+		QColor(255,	255, 	0),
+		QColor(0,	255, 	0),
+		QColor(0,	255, 	255),
+		QColor(0,	0,		255),
+		QColor(255,	0,		255)
 	});
 }
+
+QVector<GLfloat> calcCubeUVs() {
+	QVector<GLfloat> UVs;
+	UVs.reserve(6 * 4 * 2);
+
+	for (int face = 0; face < 6; face++) {
+		UVs.append(0.0f); UVs.append(0.0f);
+		UVs.append(0.0f); UVs.append(1.0f);
+		UVs.append(1.0f); UVs.append(1.0f);
+		UVs.append(1.0f); UVs.append(0.0f);
+	}
+	return UVs;
+}
+
+QVector<GLfloat> calcCubeColors() {
+	QVector<GLfloat> colors;
+	colors.reserve(6 * 4);
+
+	for (GLfloat face = 0; face < 6; face++) for (int vert = 0; vert < 4; vert++) {
+		colors.append(face);
+	}
+
+	return colors;
+}
+
+QVector<quint32> calcCubeIndices() {
+	QVector<quint32> indices;
+	indices.reserve(6 * 2 * 3);
+
+	for (GLfloat face = 0; face < 6; face++) {
+		GLfloat f = face * 4;
+		indices.append(f + 0);
+		indices.append(f + 1);
+		indices.append(f + 3);
+
+		indices.append(f + 3);
+		indices.append(f + 1);
+		indices.append(f + 2);
+	}
+	return indices;
+}
+
 
 template<>
 QOpenGLVertexArrayObject* Cube::tBase::s_vao = nullptr;
 template<>
-QOpenGLShaderProgram* Cube::tBase::s_program = nullptr;
+ProgramList Cube::tBase::s_programList = {};
 template<>
-QOpenGLBuffer* Cube::tBase::s_vertexBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_colorBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_normalBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_UVBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_tangentBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_bitangentBuffer = nullptr;
-template<>
-QOpenGLBuffer* Cube::tBase::s_indexBuffer = nullptr;
+QHash<QString, QOpenGLBuffer*> Cube::tBase::s_buffers = {};
 
 template<>
-QVector<GLfloat> Cube::tBase::s_normals = {};
-template<>
-QVector<GLfloat> Cube::tBase::s_tangents = {};
-template<>
-QVector<GLfloat> Cube::tBase::s_bitangents = {};
+QVector<quint32> Cube::tBase::s_indexBuffer = calcCubeIndices();
 
 template<>
-QVector<GLfloat> Cube::tBase::s_vertices = {
-	-1.0f, -1.0f, -1.0f,		// Face 1
-	-1.0f, -1.0f,  1.0f,		//
-	-1.0f,  1.0f,  1.0f,		//
-	-1.0f,  1.0f, -1.0f,		//
-	 1.0f, -1.0f, -1.0f,		// Face 2
-	 1.0f,  1.0f, -1.0f,		//
-	 1.0f,  1.0f,  1.0f,		//
-	 1.0f, -1.0f,  1.0f,		//
-	-1.0f, -1.0f, -1.0f,		// Face 3
-	 1.0f, -1.0f, -1.0f,		//
-	 1.0f, -1.0f,  1.0f,		//
-	-1.0f, -1.0f,  1.0f,		//
-	-1.0f,  1.0f, -1.0f,		// Face 4
-	-1.0f,  1.0f,  1.0f,		//
-	 1.0f,  1.0f,  1.0f,		//
-	 1.0f,  1.0f, -1.0f,		//
-	-1.0f, -1.0f, -1.0f,		// Face 5
-	-1.0f,  1.0f, -1.0f,		//
-	 1.0f,  1.0f, -1.0f,		//
-	 1.0f, -1.0f, -1.0f,		//
-	-1.0f, -1.0f,  1.0f,		// Face 6
-	 1.0f, -1.0f,  1.0f,		//
-	 1.0f,  1.0f,  1.0f,		//
-	-1.0f,  1.0f,  1.0f,		//
-};
-
-template<>
-QVector<quint32> Cube::tBase::s_indices = {
-	0,  1,  3,		// Face 1
-	3,  1,  2,		//
-	4,  5,  7,		// Face 2
-	7,  5,  6,		//
-	8,  9,  11,		// Face 3
-	11, 9,  10,		//
-	12, 13, 15,		// Face 4
-	15, 13, 14,		//
-	16, 17, 19,		// Face 5
-	19, 17, 18,		//
-	20, 21, 23,		// Face 6
-	23, 21, 22,		//
-};
-
-template<>
-QVector<GLfloat> Cube::tBase::s_colors = {
-	1.0f, 0.0f, 0.0f,		// Face 1
-	1.0f, 0.0f, 0.0f,		//
-	1.0f, 0.0f, 0.0f,		//
-	1.0f, 0.0f, 0.0f,		//
-	1.0f, 1.0f, 0.0f,		// Face 2
-	1.0f, 1.0f, 0.0f,		//
-	1.0f, 1.0f, 0.0f,		//
-	1.0f, 1.0f, 0.0f,		//
-	0.0f, 1.0f, 0.0f,		// Face 3
-	0.0f, 1.0f, 0.0f,		//
-	0.0f, 1.0f, 0.0f,		//
-	0.0f, 1.0f, 0.0f,		//
-	0.0f, 1.0f, 1.0f,		// Face 4
-	0.0f, 1.0f, 1.0f,		//
-	0.0f, 1.0f, 1.0f,		//
-	0.0f, 1.0f, 1.0f,		//
-	0.0f, 0.0f, 1.0f,		// Face 5
-	0.0f, 0.0f, 1.0f,		//
-	0.0f, 0.0f, 1.0f,		//
-	0.0f, 0.0f, 1.0f,		//
-	1.0f, 0.0f, 1.0f,		// Face 6
-	1.0f, 0.0f, 1.0f,		//
-	1.0f, 0.0f, 1.0f,		//
-	1.0f, 0.0f, 1.0f,		//
-};
-
-template<>
-QVector<GLfloat> Cube::tBase::s_uv = {
-	 0.0f,  0.0f,		// Face 1
-	 0.0f,  1.0f,		//
-	 1.0f,  1.0f,		//
-	 1.0f,  0.0f,		//
-	 0.0f,  0.0f,		// Face 2
-	 1.0f,  0.0f,		//
-	 1.0f,  1.0f,		//
-	 0.0f,  1.0f,		//
-	 0.0f,  0.0f,		// Face 3
-	 1.0f,  0.0f,		//
-	 1.0f,  1.0f,		//
-	 0.0f,  1.0f,		//
-	 0.0f,  0.0f,		// Face 4
-	 0.0f,  1.0f,		//
-	 1.0f,  1.0f,		//
-	 1.0f,  0.0f,		//
-	 0.0f,  0.0f,		// Face 5
-	 0.0f,  1.0f,		//
-	 1.0f,  1.0f,		//
-	 1.0f,  0.0f,		//
-	 0.0f,  0.0f,		// Face 6
-	 1.0f,  0.0f,		//
-	 1.0f,  1.0f,		//
-	 0.0f,  1.0f,		//
+QHash<QString, QVector<GLfloat>> Cube::tBase::s_buffersData = {
+	{"Position", {
+		-1.0f, -1.0f, -1.0f,		// Face 1
+		-1.0f, -1.0f,  1.0f,		//
+		-1.0f,  1.0f,  1.0f,		//
+		-1.0f,  1.0f, -1.0f,		//
+		 1.0f, -1.0f, -1.0f,		// Face 2
+		 1.0f,  1.0f, -1.0f,		//
+		 1.0f,  1.0f,  1.0f,		//
+		 1.0f, -1.0f,  1.0f,		//
+		-1.0f, -1.0f, -1.0f,		// Face 3
+		 1.0f, -1.0f, -1.0f,		//
+		 1.0f, -1.0f,  1.0f,		//
+		-1.0f, -1.0f,  1.0f,		//
+		-1.0f,  1.0f, -1.0f,		// Face 4
+		-1.0f,  1.0f,  1.0f,		//
+		 1.0f,  1.0f,  1.0f,		//
+		 1.0f,  1.0f, -1.0f,		//
+		-1.0f, -1.0f, -1.0f,		// Face 5
+		-1.0f,  1.0f, -1.0f,		//
+		 1.0f,  1.0f, -1.0f,		//
+		 1.0f, -1.0f, -1.0f,		//
+		-1.0f, -1.0f,  1.0f,		// Face 6
+		 1.0f, -1.0f,  1.0f,		//
+		 1.0f,  1.0f,  1.0f,		//
+		-1.0f,  1.0f,  1.0f,		//
+	}},
+	{"Color", calcCubeColors()},
+	{"UV", calcCubeUVs()}
 };

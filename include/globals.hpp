@@ -3,6 +3,11 @@
 #ifndef GLOBALS
 #define GLOBALS
 
+#include <QObject>
+#include <QQuaternion>
+#include <QVector3D>
+#include <QtMath>
+
 /*! \file globals.hpp
  * \brief Definitions globales
  *
@@ -76,6 +81,9 @@ public:
 private:                             \
 	Q_PROPERTY(TYPE NAME READ NAME); \
 	propBase(TYPE, NAME)
+
+QQuaternion fromEuler(const QVector3D& euler);
+QVector3D* toEuler(const QQuaternion& quat);
 
 /*! \def noinline
  * \brief Empeche une fonction d'être inlinée

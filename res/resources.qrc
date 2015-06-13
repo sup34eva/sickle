@@ -1,11 +1,11 @@
 <RCC>
     <qresource prefix="/shaders">
-        <file>lit.frag</file>
-        <file>lit.vert</file>
+        <file>ambient.frag</file>
+        <file>scene.vert</file>
         <file>unlit.frag</file>
-        <file>unlit.vert</file>
-        <file>brdf.frag</file>
-        <file>disney.frag</file>
+        <file>light.frag</file>
+        <file>deferred.vert</file>
+        <file>buffer.frag</file>
     </qresource>
     <qresource prefix="/icons">
         <file>add-geo.png</file>

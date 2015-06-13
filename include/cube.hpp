@@ -9,6 +9,9 @@
 #include <QMetaProperty>
 #include <vector>
 
+QVector<GLfloat> calcCubeUVs();
+QVector<quint32> calcCubeIndices();
+
 /*! \brief Un simple cube
  *
  * Une classe gérant la géometrie simple d'un cube.
