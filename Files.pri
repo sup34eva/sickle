@@ -24,6 +24,7 @@ SOURCES += \
     src/sphere.cpp \
     src/actor.cpp \
     src/pyramide.cpp \
+    src/rectangle.cpp \
     src/fileloader.cpp \
     src/light.cpp \
     src/spotlight.cpp \
@@ -45,6 +46,7 @@ HEADERS  += \
     include/sphere.hpp \
     include/actor.hpp \
     include/pyramide.hpp \
+    include/rectangle.hpp \
     include/fileloader.hpp \
     include/light.hpp \
     include/spotlight.hpp \

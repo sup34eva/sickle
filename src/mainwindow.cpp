@@ -3,6 +3,7 @@
 #include <mainwindow.hpp>
 #include <sphere.hpp>
 #include <pyramide.hpp>
+#include <rectangle.hpp>
 #include <line.hpp>
 #include <cylinder.hpp>
 #include <light.hpp>
@@ -61,6 +62,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     addMenu->addAction(ui->newPyramide);
 	addMenu->addAction(ui->newCylinder);
 	addMenu->addSeparator();
+    addMenu->addAction(ui->newRectangle);
 	addMenu->addAction(ui->newLine);
 	addMenu->addSeparator();
 	addMenu->addAction(ui->newLight);
@@ -643,4 +645,9 @@ void MainWindow::on_actionNew_triggered() {
 	updateTree();
 	ui->viewport->updateLights();
 	ui->viewport->update();
+}
+
+void MainWindow::on_newRectangle_triggered()
+{
+    ui->viewport->addChild<Rect>();
 }

@@ -98,7 +98,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -370,6 +370,11 @@
   <action name="newPyramide">
    <property name="text">
     <string>New Pyramide</string>
+   </property>
+  </action>
+  <action name="newRectangle">
+   <property name="text">
+    <string>New Rectangle</string>
    </property>
   </action>
  </widget>

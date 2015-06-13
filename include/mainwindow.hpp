@@ -58,6 +58,8 @@ private slots:
 	void updateTabs();
 	void updateTree();
 
+    void on_newRectangle_triggered();
+
 private:
 	QTreeWidgetItem* addToTree(QObject* obj, QTreeWidgetItem* parent = nullptr);
 	QObject* getObject(QTreeWidgetItem* item);
