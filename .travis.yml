@@ -23,7 +23,6 @@ before_script:
 script:
   - make lint
   - make
-  - make check
 after_success:
   - chmod ugo+x scripts/build-docs.sh
   - ./scripts/build-docs.sh
