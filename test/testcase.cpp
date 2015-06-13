@@ -2,6 +2,7 @@
 #include <cube.hpp>
 #include <sphere.hpp>
 #include <group.hpp>
+#include <trigger.hpp>
 #include <mainwindow.hpp>
 #include <QDoubleSpinBox>
 #include <QPushButton>
@@ -16,10 +17,10 @@ void TestCase::initTestCase() {
 }
 
 void TestCase::addCube() {
-	auto before = ui->viewport->findChildren<Cube>().length();
+	auto before = ui->viewport->findChildren<Cube>().length() + 1;
 	ui->newCube->trigger();
 	auto after = ui->viewport->findChildren<Cube>().length();
-	QCOMPARE(after, before + 1);
+	QCOMPARE(after, before);
 }
 
 void TestCase::renderBenchmark() {
@@ -46,7 +47,7 @@ void TestCase::moveVector(int row) {
 void TestCase::moveObject() {
 	auto cube = ui->viewport->addChild<Cube>();
 
-	auto index = ui->actorList->indexAt(QPoint(5, 5));
+	auto index = ui->actorList->indexAt(QPoint(15, 15));
 	ui->actorList->setCurrentIndex(index);
 
 	moveVector(1);
@@ -57,7 +58,7 @@ void TestCase::moveObject() {
 void TestCase::scaleObject() {
 	auto cube = ui->viewport->addChild<Cube>();
 
-	auto index = ui->actorList->indexAt(QPoint(5, 5));
+	auto index = ui->actorList->indexAt(QPoint(15, 15));
 	ui->actorList->setCurrentIndex(index);
 
 	moveVector(3);
@@ -69,14 +70,14 @@ void TestCase::saveLoad() {
 	DefaultFileLoader loader;
 	ui->viewport->addChild<Cube>();
 
+	auto before = ui->viewport->findChildren<Cube>().length();
 	loader.save(ui->viewport, "test.wld");
 
-	ui->viewport->clearLevel();
-	QTest::qWait(250);
+	cleanup();
 
 	loader.load(ui->viewport, "test.wld");
 
-	QCOMPARE(ui->viewport->findChildren<Cube>().length(), 1);
+	QCOMPARE(ui->viewport->findChildren<Cube>().length(), before);
 }
 
 Q_DECLARE_METATYPE(Qt::Key)
@@ -111,6 +112,9 @@ void TestCase::infobox() {
 }
 
 void TestCase::newZone() {
+	auto count = ui->viewport->world()->zoneList().size() + 1;
+	ui->tabBar->setCurrentIndex(ui->tabBar->count() - 1);
+	QCOMPARE(ui->viewport->world()->zoneList().size(), count);
 }
 
 void TestCase::createGroup() {
@@ -166,11 +170,14 @@ void TestCase::paintFace() {
 }
 
 void TestCase::linkZones() {
+	auto count = ui->viewport->findChildren<Trigger>().size() + 1;
+	ui->newTrigger->trigger();
+	QCOMPARE(ui->viewport->findChildren<Trigger>().size(), count);
 }
 
 void TestCase::cleanup() {
-	ui->viewport->clearLevel();
-	QTest::qWait(250);
+	ui->actionNew->trigger();
+	QTest::waitForEvents();
 }
 
 QTEST_MAIN(TestCase)

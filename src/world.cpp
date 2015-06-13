@@ -48,15 +48,11 @@ World::World(QObject* parent) : QObject(parent), m_currentZone(0) {
 }
 
 void World::setCurrentZoneId(int zone) {
-	m_currentZone = zone;
+	m_currentZone = qMax(0, qMin(zone, m_zones.size() - 1));
 }
 
 Zone* World::currentZone() {
-	if(m_currentZone >= 0 && m_currentZone < m_zones.size()) {
-		return m_zones.at(m_currentZone);
-	} else {
-		qFatal("OOB: %d", m_currentZone);
-	}
+	return m_zones.at(m_currentZone);
 }
 
 int World::addZone() {
@@ -64,6 +60,7 @@ int World::addZone() {
 	zone->addBaseProps();
 	m_zones.append(zone);
 	auto index = m_zones.size() - 1;
+	setCurrentZoneId(index);
 	zoneAdded(index);
 	return index;
 }

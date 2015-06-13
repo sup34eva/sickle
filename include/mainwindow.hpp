@@ -52,6 +52,7 @@ private slots:
 	void on_newLine_triggered();
 	void on_newCylinder_triggered();
     void on_newPyramide_triggered();
+	void on_actionNew_triggered();
 
 	void loadPlugins();
 	void updateTabs();

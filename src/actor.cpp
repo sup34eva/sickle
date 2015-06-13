@@ -31,8 +31,6 @@ void Actor::setParent(QObject *parent) {
 		connect(this, &Actor::moved, m_viewport, &Viewport::updateLights);
 		connect(this, &Actor::rotated, m_viewport, &Viewport::updateLights);
 		connect(this, &Actor::scaled, m_viewport, &Viewport::updateLights);
-	} else {
-		qWarning() << "Viewport not found for Actor";
 	}
 }
 

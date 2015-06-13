@@ -84,7 +84,6 @@ void DefaultFileLoader::load(Viewport* view, const QString& name) {
 
 			auto obj = static_cast<Actor*>(QMetaType::create(QMetaType::type(type.toLatin1().data())));
 			if(obj != nullptr) {
-				qDebug() << "Restoring object of type" << type;
 				obj->setParent(zone);
 				in >> *obj;
 				view->childAdded(obj);
@@ -109,7 +108,6 @@ QDataStream& operator<<(QDataStream& stream, const QObject& obj) {
 
 	for (quint32 i = 0; i < count; ++i) {
 		auto prop = metaObject->property(i);
-		qDebug() << "Saving " << prop.name();
 		stream << QString(prop.name());
 		auto value = obj.property(prop.name());
 		bool isObj = static_cast<QMetaType::Type>(prop.type()) == QMetaType::QObjectStar;
@@ -141,7 +139,6 @@ QDataStream& operator>>(QDataStream& stream, QObject& obj) {
 	for (quint32 i = 0; i < propCount; ++i) {
 		QString name;
 		stream >> name;
-		qDebug() << "\tRestoring " << name;
 		bool isObj;
 		stream >> isObj;
 		QVariant value;
@@ -152,7 +149,6 @@ QDataStream& operator>>(QDataStream& stream, QObject& obj) {
 			stream >> type;
 			auto child = static_cast<QObject*>(QMetaType::create(QMetaType::type(type.toLatin1().data())));
 			if(child != nullptr) {
-				qDebug() << "\tRestoring object of type" << type;
 				child->setParent(&obj);
 				stream >> *child;
 				value = QVariant::fromValue(child);
@@ -171,7 +167,6 @@ QDataStream& operator>>(QDataStream& stream, QObject& obj) {
 		stream >> type;
 		auto child = static_cast<Actor*>(QMetaType::create(QMetaType::type(type.toLatin1().data())));
 		if(child != nullptr) {
-			qDebug() << "\tRestoring object of type" << type;
 			child->setParent(&obj);
 			stream >> *child;
 			//obj.childAdded(child);

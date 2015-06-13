@@ -13,6 +13,7 @@
 Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_isInitialized(false) {
 	m_camera = new Camera(this);
 	m_world = new World(this);
+	m_relay = connect(m_world, &World::zoneAdded, this, &Viewport::zoneAdded);
 
 	setFocusPolicy(Qt::StrongFocus);
 
@@ -423,7 +424,7 @@ void Viewport::wheelEvent(QWheelEvent* event) {
 }
 
 void Viewport::updateLights() {
-	if(m_isInitialized) {
+	if(m_isInitialized && m_world->zoneList().size() > 0) {
 		auto zone = m_world->currentZone();
 		auto lights = zone->findChildren<Light*>();
 		foreach(auto light, lights) updateLight(light);
@@ -504,9 +505,13 @@ void Viewport::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void Viewport::clearLevel() {
-	for (auto obj : findChildren<Actor*>()) {
-		if(obj != nullptr) {
-			obj->deleteLater();
-		}
-	}
+	auto oldWorld = m_world;
+	disconnect(m_relay);
+
+	m_world = new World(this);
+	m_relay = connect(m_world, &World::zoneAdded, this, &Viewport::zoneAdded);
+
+	m_world->addZone();
+
+	oldWorld->deleteLater();
 }

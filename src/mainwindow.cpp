@@ -33,7 +33,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	ui->tabBar->setSelectionBehaviorOnRemove(QTabBar::SelectLeftTab);
 
 	connect(ui->tabBar, &QTabBar::currentChanged, [=] (int index) {
-		if(index == ui->tabBar->count() - 1) {
+		auto zones = ui->viewport->world()->zoneList().size();
+		if(index > zones - 1) {
 			ui->viewport->world()->addZone();
 		} else {
 			ui->viewport->world()->setCurrentZoneId(index);
@@ -49,7 +50,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 		}
 	});
 
-	connect(ui->viewport->world(), &World::zoneAdded, [&](int index) {
+	connect(ui->viewport, &Viewport::zoneAdded, [&](int index) {
 		ui->tabBar->insertTab(index, tr("Zone %1").arg(index));
 		ui->tabBar->setCurrentIndex(index);
 	});
@@ -489,13 +490,15 @@ void MainWindow::updateTabs() {
 	auto zones = ui->viewport->world()->zoneList();
 	auto count = ui->tabBar->count() - 1;
 
+	ui->tabBar->setCurrentIndex(0);
+
 	if(count < zones.size()) {
 		for(int i = count; i < zones.size(); i++) {
-			ui->tabBar->insertTab(i, tr("Zone %1").arg(i));
+			ui->tabBar->insertTab(i - 1, tr("Zone %1").arg(i));
 		}
 	} else if(count > zones.size()) {
 		for(int i = count; i > zones.size(); i--) {
-			ui->tabBar->removeTab(i);
+			ui->tabBar->removeTab(i - 1);
 		}
 	}
 
@@ -632,4 +635,12 @@ void MainWindow::on_newLine_triggered() {
 
 void MainWindow::on_newCylinder_triggered() {
 	ui->viewport->addChild<Cylinder>();
+}
+
+void MainWindow::on_actionNew_triggered() {
+	ui->viewport->clearLevel();
+	updateTabs();
+	updateTree();
+	ui->viewport->updateLights();
+	ui->viewport->update();
 }

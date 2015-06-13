@@ -10,6 +10,7 @@
 #include <QWheelEvent>
 #include <QKeyEvent>
 #include <QColor>
+#include <QMetaObject>
 #include <QtMath>
 #include <camera.hpp>
 #include <cube.hpp>
@@ -80,6 +81,7 @@ public slots:
 
 signals:
 	void childAdded(QObject* child);
+	void zoneAdded(int index);
 
 protected:
 	void initializeGL() Q_DECL_OVERRIDE;
@@ -102,6 +104,7 @@ protected:
 private:
 	QMatrix4x4 m_projection;
 	QPoint m_cursor;
+	QMetaObject::Connection m_relay;
 
 	// Deferred shading
 	GLuint m_sceneBuffer;
