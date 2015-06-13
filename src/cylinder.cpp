@@ -27,17 +27,19 @@ int sides = 30;
 
 QVector<GLfloat> calcCylinderVertices() {
 	QVector<GLfloat> vertices;
-	vertices.reserve(sides* 2 * 3);
+	vertices.reserve(sides* 4 * 3);
 
 	qreal theta = 0;
-	for (int j = 0; j < sides * 6; j += 6) {
-		vertices.insert(j, qCos(theta));
-		vertices.insert(j + 1, 1.0f);
-		vertices.insert(j + 2, qSin(theta));
+	for (int j = 0; j < sides; j++) {
+		for(int i = 0; i < 2; i++) {
+			vertices.append(qCos(theta));
+			vertices.append(1.0f);
+			vertices.append(qSin(theta));
 
-		vertices.insert(j + 3, qCos(theta));
-		vertices.insert(j + 4, -1.0f);
-		vertices.insert(j + 5, qSin(theta));
+			vertices.append(qCos(theta));
+			vertices.append(-1.0f);
+			vertices.append(qSin(theta));
+		}
 
 		theta += (2 * M_PI) / sides;
 	}
@@ -48,24 +50,24 @@ QVector<GLfloat> calcCylinderVertices() {
 QVector<quint32> calcCylinderIndices() {
 	QVector<quint32> indices;
 
-	for (int j = 0; j < sides * 2; j += 2) {
-		int mod = sides * 2;
-		indices.append(j % mod);
-		indices.append((j + 2) % mod);
+	for (int j = 0; j < sides * 4; j += 4) {
+		int mod = sides * 4;
+		indices.append((j + 0) % mod);
+		indices.append((j + 5) % mod);
 		indices.append((j + 1) % mod);
 
-		indices.append((j + 2) % mod);
-		indices.append((j + 3) % mod);
-		indices.append((j + 1) % mod);
+		indices.append((j + 0) % mod);
+		indices.append((j + 4) % mod);
+		indices.append((j + 5) % mod);
 
 		if(j > 0) {
-			indices.append(j % mod);
-			indices.append(0);
 			indices.append((j + 2) % mod);
+			indices.append(2);
+			indices.append((j + 6) % mod);
 
+			indices.append((j + 7) % mod);
+			indices.append(3);
 			indices.append((j + 3) % mod);
-			indices.append(1);
-			indices.append((j + 1) % mod);
 		}
 	}
 
@@ -74,10 +76,10 @@ QVector<quint32> calcCylinderIndices() {
 
 QVector<GLfloat> calcCylinderColors() {
 	QVector<GLfloat> colors;
-	colors.reserve(sides);
+	colors.reserve(sides * 4);
 
-	for (int j = 0; j < sides; j++) {
-		colors.append(0.0f);
+	for (int j = 0; j < sides * 4; j++) {
+		colors.append(qMax(0, (j % 4) - 1));
 	}
 
 	return colors;
@@ -85,11 +87,22 @@ QVector<GLfloat> calcCylinderColors() {
 
 QVector<GLfloat> calcCylinderUVs() {
 	QVector<GLfloat> UVs;
-	UVs.reserve(sides * 2);
+	UVs.reserve(sides * 4 * 2);
 
-	for (int j = 0; j < sides * 2; j++) {
-		UVs.append(j % 2);
-		UVs.append(static_cast<float>(j) / (sides * 2.0f));
+	qreal theta = 0;
+	for (int j = 0; j < sides; j++) {
+		for(int i = 0; i < 2; i++) {
+			UVs.append(i);
+			UVs.append(static_cast<float>(j) / sides);
+		}
+
+		UVs.append(qCos(theta));
+		UVs.append(qSin(theta));
+
+		UVs.append(qCos(theta));
+		UVs.append(qSin(theta));
+
+		theta += (2 * M_PI) / sides;
 	}
 
 	return UVs;
