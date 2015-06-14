@@ -66,11 +66,11 @@ private:                    \
 
 #define propBase(TYPE, NAME) declare(TYPE, NAME) public : getter(TYPE, NAME)
 #define prop(TYPE, NAME)                        \
-	Q_PROPERTY(TYPE NAME WRITE NAME READ NAME); \
+	Q_PROPERTY(TYPE QT_TR_NOOP(NAME) WRITE NAME READ NAME); \
 	propBase(TYPE, NAME);                       \
 	setter(TYPE, NAME)
 #define propSig(TYPE, NAME, SIG)                                                \
-	Q_PROPERTY(TYPE NAME WRITE NAME READ NAME NOTIFY SIG) propBase(TYPE, NAME); \
+	Q_PROPERTY(TYPE QT_TR_NOOP(NAME) WRITE NAME READ NAME NOTIFY SIG) propBase(TYPE, NAME); \
 	setterSig(TYPE, NAME, SIG);                                                 \
 	Q_SIGNALS:                                                                  \
 	void SIG(const TYPE&);                                                             \

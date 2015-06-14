@@ -18,9 +18,57 @@
     </message>
 </context>
 <context>
+    <name>DefaultActorBuilder</name>
+    <message>
+        <location filename="../src/actorbuilder.cpp" line="19"/>
+        <source>Cube</source>
+        <translation>Cube</translation>
+    </message>
+    <message>
+        <location filename="../src/actorbuilder.cpp" line="20"/>
+        <source>Sphere</source>
+        <translation>Sphère</translation>
+    </message>
+    <message>
+        <location filename="../src/actorbuilder.cpp" line="21"/>
+        <source>Pyramid</source>
+        <translation>Pyramide</translation>
+    </message>
+    <message>
+        <location filename="../src/actorbuilder.cpp" line="22"/>
+        <source>Cylinder</source>
+        <translation>Cylindre</translation>
+    </message>
+    <message>
+        <location filename="../src/actorbuilder.cpp" line="24"/>
+        <source>Line</source>
+        <translation>Ligne</translation>
+    </message>
+    <message>
+        <location filename="../src/actorbuilder.cpp" line="25"/>
+        <source>Rectangle</source>
+        <translation>Rectangle</translation>
+    </message>
+    <message>
+        <location filename="../src/actorbuilder.cpp" line="27"/>
+        <source>Light</source>
+        <translation>Lumière</translation>
+    </message>
+    <message>
+        <location filename="../src/actorbuilder.cpp" line="28"/>
+        <source>Spotlight</source>
+        <translation>Projecteur</translation>
+    </message>
+    <message>
+        <location filename="../src/actorbuilder.cpp" line="30"/>
+        <source>Trigger</source>
+        <translation>Déclencheur</translation>
+    </message>
+</context>
+<context>
     <name>DefaultFileLoader</name>
     <message>
-        <location filename="../src/mainwindow.cpp" line="100"/>
+        <location filename="../src/mainwindow.cpp" line="91"/>
         <source>Sickle World</source>
         <translation>Monde Sickle</translation>
     </message>
@@ -62,27 +110,27 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="103"/>
+        <location filename="mainwindow.ui" line="106"/>
         <source>&amp;File</source>
         <translation>&amp;Fichier</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="124"/>
+        <location filename="mainwindow.ui" line="127"/>
         <source>Toolbar</source>
         <translation>Barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="136"/>
+        <location filename="mainwindow.ui" line="139"/>
         <source>Actor List</source>
         <translation>Liste d&apos;acteurs</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="112"/>
+        <location filename="mainwindow.ui" line="115"/>
         <source>View</source>
         <translation>Affichage</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="190"/>
+        <location filename="mainwindow.ui" line="193"/>
         <source>Actor info</source>
         <translation>Informations sur l&apos;acteur</translation>
     </message>
@@ -91,44 +139,40 @@
         <translation type="vanished">X: 0, Y: 0, Z: 0</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="279"/>
         <source>New Cube</source>
         <oldsource>Nouveau Cube</oldsource>
-        <translation>Nouveau Cube</translation>
+        <translation type="vanished">Nouveau Cube</translation>
+    </message>
+    <message>
+        <source>Add a new cube to the scene</source>
+        <translation type="vanished">Ajoute un nouveau cube a la scene</translation>
+    </message>
+    <message>
+        <source>New Sphere</source>
+        <oldsource>Nouvelle Sphere</oldsource>
+        <translation type="vanished">Nouvelle Sphere</translation>
+    </message>
+    <message>
+        <source>Add a new sphere to the scene</source>
+        <translation type="vanished">Ajoute une nouvelle sphere a la scene</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="282"/>
-        <source>Add a new cube to the scene</source>
-        <translation>Ajoute un nouveau cube a la scene</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="307"/>
-        <source>New Sphere</source>
-        <oldsource>Nouvelle Sphere</oldsource>
-        <translation>Nouvelle Sphere</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="310"/>
-        <source>Add a new sphere to the scene</source>
-        <translation>Ajoute une nouvelle sphere a la scene</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="287"/>
         <source>&amp;New</source>
         <translation>&amp;Nouveau</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="292"/>
+        <location filename="mainwindow.ui" line="287"/>
         <source>&amp;Save</source>
         <translation>Enregi&amp;strer</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="297"/>
+        <location filename="mainwindow.ui" line="292"/>
         <source>Save as ...</source>
         <translation>Enregister sous ...</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="302"/>
+        <location filename="mainwindow.ui" line="297"/>
         <source>&amp;Open</source>
         <translation>&amp;Ouvrir</translation>
     </message>
@@ -141,68 +185,61 @@
         <translation type="vanished">Affiche la scene en mode fil de fer</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="318"/>
+        <location filename="mainwindow.ui" line="305"/>
         <source>Show the Buffers</source>
         <translation>Afficher les buffers</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="323"/>
+        <location filename="mainwindow.ui" line="310"/>
         <source>World Properties</source>
         <translation>Propriétés du monde</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="328"/>
         <source>New Light</source>
-        <translation>Nouvelle Lumière</translation>
+        <translation type="vanished">Nouvelle Lumière</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="331"/>
         <source>Add a new directional light to the scene</source>
-        <translation>Ajoute une lumière directionnelle a la scène</translation>
+        <translation type="vanished">Ajoute une lumière directionnelle a la scène</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="339"/>
+        <location filename="mainwindow.ui" line="318"/>
         <source>Show Shadow Maps</source>
         <translation>Afficher les buffers d&apos;ombres</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="344"/>
         <source>New Spotlight</source>
-        <translation>Nouveau Projecteur</translation>
+        <translation type="vanished">Nouveau Projecteur</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="349"/>
+        <location filename="mainwindow.ui" line="323"/>
         <source>Group</source>
         <translation>Grouper</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="354"/>
         <source>New Trigger</source>
-        <translation>Nouveau Déclencheur</translation>
+        <translation type="vanished">Nouveau Déclencheur</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="359"/>
         <source>New Line</source>
         <oldsource>Add Line</oldsource>
-        <translation>Nouvelle Ligne</translation>
+        <translation type="vanished">Nouvelle Ligne</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="364"/>
         <source>New Cylinder</source>
-        <translation>Nouveau Cylindre</translation>
+        <translation type="vanished">Nouveau Cylindre</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="369"/>
         <source>New Pyramide</source>
-        <translation>Nouvelle Pyramide</translation>
+        <translation type="vanished">Nouvelle Pyramide</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="25"/>
+        <location filename="../src/mainwindow.cpp" line="27"/>
         <source>X: %1, Y: %2, Z: %3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="54"/>
+        <location filename="../src/mainwindow.cpp" line="123"/>
         <source>Add Geometry</source>
         <translation>Ajouter un geometrie</translation>
     </message>
@@ -211,22 +248,28 @@
         <translation type="vanished">Couleur de la face</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="494"/>
+        <location filename="../src/mainwindow.cpp" line="543"/>
         <source>Open World</source>
         <translation>Ouverture d&apos;un monde</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="50"/>
+        <location filename="../src/mainwindow.cpp" line="56"/>
+        <location filename="../src/mainwindow.cpp" line="522"/>
         <source>Zone %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="405"/>
+        <location filename="../src/mainwindow.cpp" line="149"/>
+        <source>New %1</source>
+        <translation>Nouveau %1</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="426"/>
         <source>Width</source>
         <translation>Largeur</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="406"/>
+        <location filename="../src/mainwindow.cpp" line="427"/>
         <source>Height</source>
         <translation>Hauteur</translation>
     </message>
@@ -235,17 +278,17 @@
         <translation type="vanished">Monde Sickle (*.wld)</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="503"/>
+        <location filename="../src/mainwindow.cpp" line="557"/>
         <source>Save World</source>
         <translation>Enregister un monde</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="568"/>
+        <location filename="../src/mainwindow.cpp" line="602"/>
         <source>&amp;Delete</source>
         <translation>Supprime&amp;r</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="569"/>
+        <location filename="../src/mainwindow.cpp" line="603"/>
         <source>Delete this actor</source>
         <translation>Supprimer cet acteur</translation>
     </message>
@@ -256,6 +299,14 @@
         <location filename="../src/pyramide.cpp" line="10"/>
         <source>Pyramide %1</source>
         <translation>Pyramide %1</translation>
+    </message>
+</context>
+<context>
+    <name>Rect</name>
+    <message>
+        <location filename="../src/rectangle.cpp" line="10"/>
+        <source>Rectangle %1</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -285,20 +336,20 @@
 <context>
     <name>Viewport</name>
     <message>
-        <location filename="../include/viewport.hpp" line="50"/>
-        <location filename="../src/viewport.cpp" line="191"/>
+        <location filename="../include/viewport.hpp" line="51"/>
+        <location filename="../src/viewport.cpp" line="211"/>
         <source>Wireframe</source>
         <translation>Fil de fer</translation>
     </message>
     <message>
-        <location filename="../include/viewport.hpp" line="51"/>
+        <location filename="../include/viewport.hpp" line="52"/>
         <source>Unlit</source>
         <translation>Non éclairé</translation>
     </message>
     <message>
-        <location filename="../include/viewport.hpp" line="52"/>
-        <location filename="../src/viewport.cpp" line="106"/>
-        <location filename="../src/viewport.cpp" line="268"/>
+        <location filename="../include/viewport.hpp" line="53"/>
+        <location filename="../src/viewport.cpp" line="120"/>
+        <location filename="../src/viewport.cpp" line="288"/>
         <source>Light</source>
         <translation>Eclairé</translation>
     </message>
@@ -306,22 +357,22 @@
 <context>
     <name>Zone</name>
     <message>
-        <location filename="../src/world.cpp" line="11"/>
+        <location filename="../src/world.cpp" line="15"/>
         <source>Sky</source>
         <translation>Ciel</translation>
     </message>
     <message>
-        <location filename="../src/world.cpp" line="17"/>
+        <location filename="../src/world.cpp" line="21"/>
         <source>Ground</source>
         <translation>Sol</translation>
     </message>
     <message>
-        <location filename="../src/world.cpp" line="24"/>
+        <location filename="../src/world.cpp" line="28"/>
         <source>Scenery</source>
         <translation>Décor</translation>
     </message>
     <message>
-        <location filename="../src/world.cpp" line="31"/>
+        <location filename="../src/world.cpp" line="35"/>
         <source>Sunlight</source>
         <translation>Soleil</translation>
     </message>

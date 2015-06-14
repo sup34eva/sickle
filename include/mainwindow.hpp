@@ -37,28 +37,18 @@ private slots:
 	void on_actionSaveAs_triggered();
 	void on_actionSave_triggered();
 	void on_viewport_childAdded(QObject *obj);
-	void on_newCube_triggered();
-	void on_newSphere_triggered();
 	void on_showBuffers_toggled(bool arg1);
 	void showProperties(QObject* obj);
 	void on_actionWorldProp_triggered();
-	void on_newLight_triggered();
 	void on_showMaps_toggled(bool arg1);
-	void on_newSpot_triggered();
 	void on_actorList_customContextMenuRequested(const QPoint &pos);
 	void on_actorList_itemSelectionChanged();
 	void on_actionGroup_triggered();
-	void on_newTrigger_triggered();
-	void on_newLine_triggered();
-	void on_newCylinder_triggered();
-    void on_newPyramide_triggered();
 	void on_actionNew_triggered();
 
 	void loadPlugins();
 	void updateTabs();
 	void updateTree();
-
-    void on_newRectangle_triggered();
 
 private:
 	QTreeWidgetItem* addToTree(QObject* obj, QTreeWidgetItem* parent = nullptr);

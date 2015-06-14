@@ -33,7 +33,8 @@ SOURCES += \
     src/trigger.cpp \
     src/global.cpp \
     src/line.cpp \
-    src/cylinder.cpp
+    src/cylinder.cpp \
+    src/actorbuilder.cpp
 
 HEADERS  += \
     include/camera.hpp \
@@ -54,7 +55,8 @@ HEADERS  += \
     include/world.hpp \
     include/trigger.hpp \
     include/line.hpp \
-    include/cylinder.hpp
+    include/cylinder.hpp \
+    include/actorbuilder.hpp
 
 DISTFILES += \
     README.md \

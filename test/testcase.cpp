@@ -18,7 +18,7 @@ void TestCase::initTestCase() {
 
 void TestCase::addCube() {
 	auto before = ui->viewport->findChildren<Cube>().length() + 1;
-	ui->newCube->trigger();
+	ui->viewport->addChild<Cube>();
 	auto after = ui->viewport->findChildren<Cube>().length();
 	QCOMPARE(after, before);
 }
@@ -171,7 +171,7 @@ void TestCase::paintFace() {
 
 void TestCase::linkZones() {
 	auto count = ui->viewport->findChildren<Trigger>().size() + 1;
-	ui->newTrigger->trigger();
+	ui->viewport->addChild<Trigger>();
 	QCOMPARE(ui->viewport->findChildren<Trigger>().size(), count);
 }
 

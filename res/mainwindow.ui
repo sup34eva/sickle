@@ -277,14 +277,6 @@
     </layout>
    </widget>
   </widget>
-  <action name="newCube">
-   <property name="text">
-    <string>New Cube</string>
-   </property>
-   <property name="toolTip">
-    <string>Add a new cube to the scene</string>
-   </property>
-  </action>
   <action name="actionNew">
    <property name="text">
     <string>&amp;New</string>
@@ -305,14 +297,6 @@
     <string>&amp;Open</string>
    </property>
   </action>
-  <action name="newSphere">
-   <property name="text">
-    <string>New Sphere</string>
-   </property>
-   <property name="toolTip">
-    <string>Add a new sphere to the scene</string>
-   </property>
-  </action>
   <action name="showBuffers">
    <property name="checkable">
     <bool>true</bool>
@@ -326,14 +310,6 @@
     <string>World Properties</string>
    </property>
   </action>
-  <action name="newLight">
-   <property name="text">
-    <string>New Light</string>
-   </property>
-   <property name="toolTip">
-    <string>Add a new directional light to the scene</string>
-   </property>
-  </action>
   <action name="showMaps">
    <property name="checkable">
     <bool>true</bool>
@@ -342,39 +318,9 @@
     <string>Show Shadow Maps</string>
    </property>
   </action>
-  <action name="newSpot">
-   <property name="text">
-    <string>New Spotlight</string>
-   </property>
-  </action>
   <action name="actionGroup">
    <property name="text">
     <string>Group</string>
-   </property>
-  </action>
-  <action name="newTrigger">
-   <property name="text">
-    <string>New Trigger</string>
-   </property>
-  </action>
-  <action name="newLine">
-   <property name="text">
-    <string>New Line</string>
-   </property>
-  </action>
-  <action name="newCylinder">
-   <property name="text">
-    <string>New Cylinder</string>
-   </property>
-  </action>
-  <action name="newPyramide">
-   <property name="text">
-    <string>New Pyramide</string>
-   </property>
-  </action>
-  <action name="newRectangle">
-   <property name="text">
-    <string>New Rectangle</string>
    </property>
   </action>
  </widget>

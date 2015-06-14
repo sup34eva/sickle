@@ -1,6 +1,7 @@
 // Copyright 2015 PsychoLama
 
 #include <mainwindow.hpp>
+#include <actorbuilder.hpp>
 #include <sphere.hpp>
 #include <pyramide.hpp>
 #include <rectangle.hpp>
@@ -56,21 +57,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 		ui->tabBar->setCurrentIndex(index);
 	});
 
-	QMenu* addMenu = new QMenu(tr("Add Geometry"));
-	addMenu->addAction(ui->newCube);
-	addMenu->addAction(ui->newSphere);
-    addMenu->addAction(ui->newPyramide);
-	addMenu->addAction(ui->newCylinder);
-	addMenu->addSeparator();
-	addMenu->addAction(ui->newRectangle);
-	addMenu->addAction(ui->newLine);
-	addMenu->addSeparator();
-	addMenu->addAction(ui->newLight);
-	addMenu->addAction(ui->newSpot);
-	addMenu->addSeparator();
-	addMenu->addAction(ui->newTrigger);
-	addMenu->menuAction()->setIcon(QIcon(":/icons/add-geo.png"));
-	ui->toolBar->insertAction(ui->actionGroup, addMenu->menuAction());
+	loadPlugins();
 
 	auto modeList = new QComboBox;
 	ui->toolBar->insertWidget(ui->actionGroup, modeList);
@@ -78,8 +65,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	ui->camPos->setText(toString(QVector3D(0, 0, 0)));
 	connect(ui->viewport->camera(), &Camera::moved,
 			[=](const QVector3D& position) { ui->camPos->setText(toString(position)); });
-
-	loadPlugins();
 
 	connect(ui->viewport, &Viewport::initialized, [=]() {
 		auto list = ui->viewport->programList();
@@ -102,10 +87,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 void MainWindow::loadPlugins() {
 	// Plugins par defaut
-	QJsonObject data;
-	data["type"] = DefaultFileLoader::tr("Sickle World");
-	data["extensions"] = QJsonArray({"wld"});
-	plugins.append(Plugin(new DefaultFileLoader(), data));
+	QJsonObject fsData, abData;
+	fsData["type"] = DefaultFileLoader::tr("Sickle World");
+	fsData["extensions"] = QJsonArray({"wld"});
+
+	plugins.append(Plugin(new DefaultFileLoader(), fsData));
+	plugins.append(Plugin(new DefaultActorBuilder(), abData));
 
 	auto pluginsDir = QDir(qApp->applicationDirPath());
 #if defined(Q_OS_WIN)
@@ -133,9 +120,17 @@ void MainWindow::loadPlugins() {
 			qWarning() << loader.errorString();
 	}
 
+	QMenu* addMenu = new QMenu(tr("Add Geometry"));
+	QAction* geo3D = addMenu->addSeparator(),
+			*geo2D = addMenu->addSeparator(),
+			*lights = addMenu->addSeparator();
+
 	foreach(Plugin plugin, plugins) {
-		auto loader = qobject_cast<FileLoader*>(std::get<0>(plugin));
 		auto data = std::get<1>(plugin);
+
+		auto loader = qobject_cast<FileLoader*>(std::get<0>(plugin));
+		auto builder = qobject_cast<ActorBuilder*>(std::get<0>(plugin));
+
 		if(loader) {
 			QStringList extensions;
 			foreach(QJsonValue ext, data["extensions"].toArray())
@@ -146,8 +141,36 @@ void MainWindow::loadPlugins() {
 			formats.append(QString("%1 (%2)").arg(type).arg(extensions.join(", *.").prepend("*.")));
 			foreach(QString suffix, extensions)
 				loaders[suffix] = loader;
+		} else if (builder) {
+			auto classes = builder->getClasses();
+			for(int i = 0; i < classes.size(); i++) {
+				auto aClass = classes.at(i);
+
+				auto action = new QAction(tr("New %1").arg(std::get<0>(aClass)), addMenu);
+				connect(action, &QAction::triggered, [=]() {
+					builder->build(ui->viewport, i);
+				});
+
+				switch(std::get<1>(aClass)) {
+					case ActorBuilder::GEOMETRY_3D:
+						addMenu->insertAction(geo3D, action);
+						break;
+					case ActorBuilder::GEOMETRY_2D:
+						addMenu->insertAction(geo2D, action);
+						break;
+					case ActorBuilder::LIGHT:
+						addMenu->insertAction(lights, action);
+						break;
+					default:
+						addMenu->addAction(action);
+						break;
+				}
+			}
 		}
 	}
+
+	addMenu->menuAction()->setIcon(QIcon(":/icons/add-geo.png"));
+	ui->toolBar->insertAction(ui->actionGroup, addMenu->menuAction());
 }
 
 MainWindow::~MainWindow() {
@@ -545,18 +568,6 @@ void MainWindow::on_actionSave_triggered() {
 		loaders[QFileInfo(m_lastFile).suffix()]->save(ui->viewport, m_lastFile);
 }
 
-void MainWindow::on_newCube_triggered() {
-	ui->viewport->addChild<Cube>();
-}
-
-void MainWindow::on_newSphere_triggered() {
-	ui->viewport->addChild<Sphere>();
-}
-
-void MainWindow::on_newPyramide_triggered() {
-    ui->viewport->addChild<Pyramide>();
-}
-
 void MainWindow::on_showBuffers_toggled(bool show) {
 	ui->viewport->showBuffers(show);
 	ui->viewport->update();
@@ -566,17 +577,9 @@ void MainWindow::on_actionWorldProp_triggered() {
 	showProperties(ui->viewport->world());
 }
 
-void MainWindow::on_newLight_triggered() {
-	ui->viewport->addChild<Light>();
-}
-
 void MainWindow::on_showMaps_toggled(bool show) {
 	ui->viewport->showMaps(show);
 	ui->viewport->update();
-}
-
-void MainWindow::on_newSpot_triggered() {
-	ui->viewport->addChild<Spotlight>();
 }
 
 QObject* MainWindow::getObject(QTreeWidgetItem* item) {
@@ -627,26 +630,10 @@ void MainWindow::on_actionGroup_triggered() {
 	ui->viewport->addChild<Group>();
 }
 
-void MainWindow::on_newTrigger_triggered() {
-	ui->viewport->addChild<Trigger>();
-}
-
-void MainWindow::on_newLine_triggered() {
-	ui->viewport->addChild<Line>();
-}
-
-void MainWindow::on_newCylinder_triggered() {
-	ui->viewport->addChild<Cylinder>();
-}
-
 void MainWindow::on_actionNew_triggered() {
 	ui->viewport->clearLevel();
 	updateTabs();
 	updateTree();
 	ui->viewport->updateLights();
 	ui->viewport->update();
-}
-
-void MainWindow::on_newRectangle_triggered() {
-    ui->viewport->addChild<Rect>();
 }
