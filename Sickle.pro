@@ -10,4 +10,8 @@ RC_FILE = res/sickle.rc
 include(Files.pri)
 
 SOURCES += \
-    src/main.cpp
+    src/main.cpp \
+
+
+HEADERS += \
+

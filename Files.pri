@@ -25,7 +25,6 @@ SOURCES += \
     src/actor.cpp \
     src/pyramide.cpp \
     src/rectangle.cpp \
-    src/trapeze.cpp \
     src/fileloader.cpp \
     src/light.cpp \
     src/spotlight.cpp \
@@ -49,7 +48,6 @@ HEADERS  += \
     include/actor.hpp \
     include/pyramide.hpp \
     include/rectangle.hpp \
-    include/trapeze.hpp \
     include/fileloader.hpp \
     include/light.hpp \
     include/spotlight.hpp \

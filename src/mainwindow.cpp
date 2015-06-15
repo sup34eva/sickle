@@ -5,7 +5,6 @@
 #include <sphere.hpp>
 #include <pyramide.hpp>
 #include <rectangle.hpp>
-#include <trapeze.hpp>
 #include <line.hpp>
 #include <cylinder.hpp>
 #include <light.hpp>
