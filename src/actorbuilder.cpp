@@ -18,6 +18,8 @@
 #include <cercle.hpp>
 
 DefaultActorBuilder::DefaultActorBuilder(QObject *parent) : QObject(parent) {
+	// Déclare les classes d'acteurs dans le système de méta-objet de Qt (utilisé pour les sauvegardes)
+
 	qRegisterMetaType<Cube>("Cube");
 	qRegisterMetaType<Sphere>("Sphere");
 	qRegisterMetaType<Pyramide>("Pyramide");

@@ -5,6 +5,11 @@
 
 #include <light.hpp>
 
+/*! \brief Un projecteur
+ *
+ * Représente une source de lumière ponctuelle mais dirigée.
+ * Utile pour modeliser un projecteur éclairant une zone donnée.
+ */
 class Spotlight : public Light {
 	Q_OBJECT
 

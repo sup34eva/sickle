@@ -82,7 +82,10 @@ private:                             \
 	Q_PROPERTY(TYPE NAME READ NAME); \
 	propBase(TYPE, NAME)
 
+//! Convertit un angle d'euler en quaternion
 QQuaternion fromEuler(const QVector3D& euler);
+
+//! Convertit un quaternion en angle d'euler
 QVector3D* toEuler(const QQuaternion& quat);
 
 /*! \def noinline

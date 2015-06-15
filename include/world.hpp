@@ -10,6 +10,10 @@
 
 class Viewport;
 
+/*! \brief Une zone du monde
+ *
+ * Une classe contenant des acteurs.
+ */
 class Zone : public QObject {
 	Q_OBJECT
 
@@ -24,6 +28,10 @@ class Zone : public QObject {
 		}
 };
 
+/*! \brief Gestionnaire d'Abmient Occlusion
+ *
+ * Une classe contenant les différentes porpriétés utilisées pour configurer le rendu de l'occlusion ambiante.
+ */
 struct AmbientOcclusion : public QObject {
 	Q_OBJECT
 public:
@@ -37,6 +45,10 @@ public:
 	prop(float, threshold);
 };
 
+/*! \brief Un monde
+ *
+ * Une classe contenant des zones.
+ */
 class World : public QObject {
 	Q_OBJECT
 

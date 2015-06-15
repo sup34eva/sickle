@@ -8,6 +8,14 @@
 
 class Viewport;
 
+/*! \brief Une lumière directionnelle
+ *
+ * Cette lumière est représentée uniquement par sa direction, elle est considérée comme étant infiniment loins.
+ * Elle convient donc pour représenter le soleil, ou toute source de lumière globale.
+ *
+ * Il est possible de modifier la taille de la shadowmap et les valeurs de profondeur pour n'éclairer que les zones
+ * faisant partie du monde (plus la shadowmap est petité et meilleure sera la qualité des ombres).
+ */
 class Light : public Actor {
 	Q_OBJECT
 

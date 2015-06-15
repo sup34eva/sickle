@@ -5,6 +5,10 @@
 
 #include <geometry.hpp>
 
+/*! \brief Un simple cylindre
+ *
+ * Les vertices sont générés par un algorithme (similaire a celui de génération de cercle)
+ */
 class Cylinder : public Geometry<Cylinder> {
 	Q_OBJECT
 

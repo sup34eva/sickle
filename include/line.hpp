@@ -5,6 +5,10 @@
 
 #include <geometry.hpp>
 
+/*! \brief Une ligne
+ *
+ * Affiche une simple ligne en 2D, reliant 2 points de controle
+ */
 class Line : public Geometry<Line> {
 	Q_OBJECT
 

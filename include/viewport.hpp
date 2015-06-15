@@ -37,6 +37,7 @@ public:
 		return QSize(500, 500);
 	}
 
+	//! Ajoute un enfant a la scène
 	template<typename T>
 	T* addChild() {
 		makeCurrent();
@@ -46,6 +47,7 @@ public:
 		return child;
 	}
 
+	//! Liste les modes de rendus
 	QStringList programList() {
 		static const QStringList list = {
 			tr("Wireframe"),
@@ -73,31 +75,71 @@ public:
 #endif
 
 public slots:
+	//! Vide le niveau
 	void clearLevel();
+
+	//! Initialise une lumière
 	void initLight(Light&);
+
+	//! Mets a jour toutes les lumières
 	void updateLights();
+
+	//! Mets a jour une lumière
 	void updateLight(Light* light);
+
+	//! Supprimer une lumière de la liste de mise a jours
 	void removeLight(Light* light);
+
+	//! Attrape une eventuelle erreur OpenGL
 	void catchErrors();
 
 signals:
+	//! Lors de l'ajout d'un nouvel enfant
 	void childAdded(QObject* child);
+
+	//! Lors de l'ajout d'une nouvelle zone
 	void zoneAdded(int index);
 
 protected:
+	//! Appelé a l'initialisation du contexte
 	void initializeGL() Q_DECL_OVERRIDE;
+
+	//! Appelé a chaque mise a jour du viewport
 	void paintGL() Q_DECL_OVERRIDE;
+
+	//! Initialise la scène
 	void initScene();
+
+	//! Initialise le quad fullscreen
 	void initQuad();
+
+	//! Rends une shadowmap
 	void renderLight(Light* light);
+
+	//! Rends une scène
 	void renderScene();
+
+	//! Affiche le quad
 	void renderQuad();
+
+	//! Appelé lorsque le widget est redimensionné
 	void resizeGL(int w, int h) Q_DECL_OVERRIDE;
+
+	//! Appelé lorsque la route de la souris est tournée
 	void wheelEvent(QWheelEvent* event) Q_DECL_OVERRIDE;
+
+	//! Appelé a l'appui d'une touche
 	void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
+
+	//! Appelé lorsque la souris est appuyée
 	void mousePressEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+
+	//! Appelée lorsque la souris est relachée
 	void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+
+	//! Appelé lorsque la souris est déplacée
 	void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+
 	int heightForWidth(int w) const { return w; }
 	bool hasHeightForWidth() const { return true; }
 

@@ -24,63 +24,101 @@
 #include <limits>
 #include "./ui_mainwindow.h"
 
+//! Convertit un vecteur en string
 QString toString(const QVector3D& vector) {
 	return QString(MainWindow::tr("X: %1, Y: %2, Z: %3")).arg(vector.x()).arg(vector.y()).arg(vector.z());
 }
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+	// Charge l'interface depuis le designer
 	ui->setupUi(this);
 
+	// Ajoute un onglet special permettant d'ajouter des zones
 	auto addTab = ui->tabBar->addTab("+");
+
+	// Supprime le bouton de fermeture de l'onglet
 	ui->tabBar->setTabButton(addTab, QTabBar::RightSide, nullptr);
+
+	// Lorsque l'utilisateur ferme un onglet, passe sur l'onglet de gauche
 	ui->tabBar->setSelectionBehaviorOnRemove(QTabBar::SelectLeftTab);
 
+	// Evenement appelé lorsque l'utilisateur change d'onglet
 	connect(ui->tabBar, &QTabBar::currentChanged, [=] (int index) {
 		auto zones = ui->viewport->world()->zoneList().size();
 		if(index > zones - 1) {
+			// Si le dernier onglet a été ouvert, ajoute une zone
 			ui->viewport->world()->addZone();
 		} else {
+			// Sinon, change de zone
 			ui->viewport->world()->setCurrentZoneId(index);
+
+			// Met a jour l'arborescence de la scène
 			updateTree();
+
+			// Et met a jour l'image du viewport
 			ui->viewport->update();
 		}
 	});
 
+	// Lorsque l'utilisateur ferme un onglet
 	connect(ui->tabBar, &QTabBar::tabCloseRequested, [=] (int index) {
+		// Si il y a au moins 2 zones
 		if(ui->tabBar->count() > 2) {
+			// Supprimer l'onglet
 			ui->tabBar->removeTab(index);
+
+			// Et supprime la zone correspondante
 			ui->viewport->world()->removeZone(index);
 		}
 	});
 
+	// Lors de l'ajout d'un zone
 	connect(ui->viewport, &Viewport::zoneAdded, [&](int index) {
+		// Insère un nouvel onglet
 		ui->tabBar->insertTab(index, tr("Zone %1").arg(index));
+
+		// Passe sur l'onglet novellement créé
 		ui->tabBar->setCurrentIndex(index);
 	});
 
+	// Charge les plugins
 	loadPlugins();
 
+	// ajoute la liste des modes de rendus a la toolbar
 	auto modeList = new QComboBox;
 	ui->toolBar->insertWidget(ui->actionGroup, modeList);
 
+	// Initialise la statusbar et enregistre un evenement lorsque la caméra bouge
 	ui->camPos->setText(toString(QVector3D(0, 0, 0)));
 	connect(ui->viewport->camera(), &Camera::moved,
 			[=](const QVector3D& position) { ui->camPos->setText(toString(position)); });
 
+	// Lorsque le viewport s'initialise
 	connect(ui->viewport, &Viewport::initialized, [=]() {
+		// Liste les modes de rendu
 		auto list = ui->viewport->programList();
 		for(auto i = list.constBegin(); i != list.constEnd(); ++i) {
+			// Pour chacun d'eux, ajoute une ligne au menu
 			modeList->insertItem(i - list.constBegin(), *i);
 		}
+
+		// Change la valeur du menu pour le mode courant
 		modeList->setCurrentText(ui->viewport->program());
+
+		// Lorsque l'utilisateur change de mode
 		connect(modeList, &QComboBox::currentTextChanged, [=] (const QString& index) {
+			// Change de programme
 			ui->viewport->program(index);
+
+			// Et met a jour le viewport
 			ui->viewport->update();
 		});
 
+		// Lit les arguments de l'application pour charger les fichiers ouverts avec celle-ci
 		auto args = QCoreApplication::arguments();
 		if (args.length() > 1) {
 			auto fileName = args.at(1);
+			// Extrait l'extension du fichier et le charge avec le FileLoader approprié
 			loaders[QFileInfo(fileName).suffix()]->load(ui->viewport, fileName);
 		}
 	});
@@ -95,63 +133,66 @@ void MainWindow::loadPlugins() {
 	plugins.append(Plugin(new DefaultFileLoader(), fsData));
 	plugins.append(Plugin(new DefaultActorBuilder(), abData));
 
+	// Charge le dossier des plugins
 	auto pluginsDir = QDir(qApp->applicationDirPath());
-#if defined(Q_OS_WIN)
-	if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release") {
+	while(pluginsDir.entryList(QDir::AllDirs).indexOf("plugins") == -1)
 		pluginsDir.cdUp();
-		pluginsDir.cdUp();
-		pluginsDir.cdUp();
-		pluginsDir.cdUp();
-	}
-#elif defined(Q_OS_MAC)
-	if (pluginsDir.dirName() == "MacOS") {
-		pluginsDir.cdUp();
-		pluginsDir.cdUp();
-		pluginsDir.cdUp();
-	}
-#endif
 	pluginsDir.cd("plugins");
 
+	// Pour chaque fichier du dossier plugins
 	foreach(QString fileName, pluginsDir.entryList(QDir::Files)) {
+		// Essaie de le charger en tant que plugin
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		auto plugin = loader.instance();
-		if (plugin)
+		if (plugin)  // Si il n'y a pas eu d'erreurs, le plugins et ses métadonnées sont ajoutés a la liste
 			plugins.append(Plugin(plugin, loader.metaData()["MetaData"].toObject()));
 		else
 			qWarning() << loader.errorString();
 	}
 
+	// Crée le menu des géométries et ses séparateurs
 	QMenu* addMenu = new QMenu(tr("Add Geometry"));
 	QAction* geo3D = addMenu->addSeparator(),
 			*geo2D = addMenu->addSeparator(),
 			*lights = addMenu->addSeparator();
 
+	// Pour chaque plugin
 	foreach(Plugin plugin, plugins) {
 		auto data = std::get<1>(plugin);
 
+		// Caste le plugin dans toutes les interfaces existantes
 		auto loader = qobject_cast<FileLoader*>(std::get<0>(plugin));
 		auto builder = qobject_cast<ActorBuilder*>(std::get<0>(plugin));
 
+		// Si le plugin est un FileLoader
 		if(loader) {
+			// Liste les extensions prises en charge par ce plugin
 			QStringList extensions;
 			foreach(QJsonValue ext, data["extensions"].toArray())
 				extensions.append(ext.toString());
 
+			// Crée le format de ce chargeur
 			QString type = data["type"].toString();
-			qDebug() << "FileLoader" << data;
 			formats.append(QString("%1 (%2)").arg(type).arg(extensions.join(", *.").prepend("*.")));
+
+			// Ajoute le FileLoader a la liste des chargeurs
 			foreach(QString suffix, extensions)
 				loaders[suffix] = loader;
-		} else if (builder) {
+		} else if (builder) {  // Si le plugin est un ActorBuilder
+			// Lit la liste des classes de ce builder
 			auto classes = builder->getClasses();
+
+			// Pour chaque classe
 			for(int i = 0; i < classes.size(); i++) {
 				auto aClass = classes.at(i);
 
+				// Crée une action permettant de créér l'acteur correspondant
 				auto action = new QAction(tr("New %1").arg(std::get<0>(aClass)), addMenu);
 				connect(action, &QAction::triggered, [=]() {
 					builder->build(ui->viewport, i);
 				});
 
+				// Insère l'action dans le menu en fonction de sa catégorie
 				switch(std::get<1>(aClass)) {
 					case ActorBuilder::GEOMETRY_3D:
 						addMenu->insertAction(geo3D, action);
@@ -170,6 +211,7 @@ void MainWindow::loadPlugins() {
 		}
 	}
 
+	// Ajoute le menu a la toolbar
 	addMenu->menuAction()->setIcon(QIcon(":/icons/add-geo.png"));
 	ui->toolBar->insertAction(ui->actionGroup, addMenu->menuAction());
 }
@@ -179,60 +221,84 @@ MainWindow::~MainWindow() {
 }
 
 QTreeWidgetItem* MainWindow::addToTree(QObject* obj, QTreeWidgetItem* parent) {
+	// Crée une ligne pour l'objet
 	auto item = new QTreeWidgetItem;
 	item->setText(0, obj->objectName());
 
+	// Enregistre le pointeur de l'objet dans la ligne
 	auto ptr = QVariant::fromValue(obj);
 	item->setData(0, Qt::UserRole, ptr);
 
+	// Change le texte de la ligne lorsque le nom de l'objet change
 	connect(obj, &QObject::objectNameChanged, [=](QString newName) { item->setText(0, newName); });
 
+	// Met a jour l'arbre lorsque l'objet est supprimé
 	connect(obj, &QObject::destroyed, this, &MainWindow::updateTree);
 
+	// Pour chaque enfant de l'acteur
 	foreach(auto i, obj->children()) {
+		// Le cast en acteur
 		auto child = dynamic_cast<Actor*>(i);
+
+		// Et l'ajoute a l'arbre
 		if (child) addToTree(child, item);
 	}
 
+	// Si l'objet n'a pas de parent, l'ajoute a la liste des acteurs
 	if(parent == nullptr)
 		ui->actorList->addTopLevelItem(item);
-	else
+	else  // Sinon, l'ajoute a la ligne de l'acteur parent
 		parent->addChild(item);
 
 	return item;
 }
 
 void MainWindow::on_viewport_childAdded(QObject* obj) {
+	// Ajoute le nouvel item a l'arbre
 	auto item = addToTree(obj);
+
+	// Si l'objet est un groupe
 	auto group = qobject_cast<Group*>(obj);
 	if(group != nullptr) {
+		//Liste les acteurs séléctionnés
 		auto selection = ui->actorList->selectedItems();
+
+		// Pour chaque element de la séléction
 		foreach(auto itm, selection) {
+			// Récupère l'objet depuis sa ligne
 			auto obj = getObject(itm);
+
+			// Change son objet parent pour le groupe
 			obj->setParent(group);
 
+			// Si la ligne avait un parent
 			auto parent = itm->parent();
 			if(parent != nullptr) {
+				// Retire la ligne a son parent
 				parent->removeChild(itm);
-			} else {
+			} else {  // Sinon, retire l'objet du widget
 				auto index = ui->actorList->indexOfTopLevelItem(itm);
 				ui->actorList->takeTopLevelItem(index);
 			}
 
+			// Ajoute le ligne a celle du groupe
 			item->addChild(itm);
 		}
 	}
 
+	// Met a jour le viewport
 	ui->viewport->updateLights();
 	ui->viewport->update();
 }
 
 QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set) {
+	// Récupère la valeurs
 	auto prop = get();
 	if(!prop.isValid())
 		return nullptr;
 	switch (static_cast<QMetaType::Type>(prop.type())) {
 		case QMetaType::QVector3D: {
+			// Pour un vecteur, affiche 3 sous-champs spinner piour entrer les composantes du vecteur
 			auto value = qvariant_cast<QVector3D>(prop);
 			auto vector = new QVector3D(value);
 			auto label = new QLabel(toString(*vector));
@@ -257,12 +323,15 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			return label;
 		}
 		case QMetaType::QString: {
+			// Pour un string, affiche simplement un champ de texte
 			auto textBox = new QLineEdit;
 			textBox->setText(prop.toString());
 			connect(textBox, &QLineEdit::textEdited, set);
 			return textBox;
 		}
 		case QMetaType::QColor: {
+			// Pour une couleur, affiche un bouton customisé pour afficher la couleur
+			// Lorsqu'il est activé, le bouton affiche une boite de dialogue permettant de choisir une couleur
 			static int btnCount = 0;
 			auto colBtn = new QPushButton;
 			colBtn->setObjectName(QString("colBtn-%1").arg(btnCount++));
@@ -295,6 +364,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			return colBtn;
 		}
 		case QMetaType::QVariantList: {
+			// Pour une liste, affiche une sous-ligne pour chaque valeur
 			auto value = prop.toList();
 			auto list = new QVariantList(value);
 
@@ -316,6 +386,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			break;
 		}
 		case QMetaType::QQuaternion: {
+			// Pour un quaternion, le principe est le même que pour un vecteur mais le nom des champs est différent
 			auto value = qvariant_cast<QQuaternion>(prop);
 			auto quat = new QQuaternion(value);
 			auto vector = toEuler(*quat);
@@ -341,6 +412,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			return label;
 		}
 		case QMetaType::Float: {
+			// Pour un float, affiche un doubleSpinner re-casté en float
 			void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
 			auto spinner = new QDoubleSpinBox;
 			auto limit = std::numeric_limits<float>::max();
@@ -350,6 +422,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			return spinner;
 		}
 		case QMetaType::Double: {
+			// Pour un double, utilise simplement un doubleSpinner
 			void (QDoubleSpinBox::*changeSignal)(double) = &QDoubleSpinBox::valueChanged;
 			auto spinner = new QDoubleSpinBox;
 			auto limit = std::numeric_limits<double>::max();
@@ -359,6 +432,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			return spinner;
 		}
 		case QMetaType::Int: {
+			// Pour un int, utilise une SpinBox
 			void (QSpinBox::*changeSignal)(int) = &QSpinBox::valueChanged;
 			auto spinner = new QSpinBox;
 			auto limit = std::numeric_limits<int>::max();
@@ -368,6 +442,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			return spinner;
 		}
 		case QMetaType::QObjectStar: {
+			// Pour un pointeur vers un qobject, affiche une sous ligne pour chaque propriété
 			auto obj = qvariant_cast<QObject*>(prop);
 			if (obj != nullptr) {
 				auto metaObject = obj->metaObject();
@@ -381,6 +456,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 
 					QWidget* widget;
 					if(metaObject->property(i).isEnumType()) {
+						// Pour les propriétés de type enum, affiche une QComboBox
 						auto enumerator = metaObject->property(i).enumerator();
 						auto cb = new QComboBox;
 
@@ -415,12 +491,14 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 			break;
 		}
 		case QMetaType::Bool: {
+			// Pour les valeur booléennes, affiche une checkbox
 			auto checkbox = new QCheckBox;
 			checkbox->setChecked(prop.toBool());
 			connect(checkbox, &QCheckBox::toggled, [=] (bool checked) { set(checked); });
 			return checkbox;
 		}
 		case QMetaType::QSize: {
+			// Pour une taille, le principe est le même que pour un vecteur mais en 2 dimensions
 			QSize* value = new QSize(prop.toSize());
 			auto label = new QLabel(prop.toString());
 			const QString axis[] = {
@@ -451,6 +529,7 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 
 			return label;
 		}
+		// Sinon, affiche un label et tente de convertir la valeur en string
 		default:
 			qDebug() << "Unknown property type:" << prop.type();
 		case QMetaType::QRect:
@@ -470,18 +549,24 @@ QWidget* MainWindow::widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarS
 }
 
 void MainWindow::showProperties(QObject* obj) {
+	// Vide la fenetre d'informations
 	ui->infoWidget->clear();
+
 	if(obj != nullptr) {
+		// Récupère le meta-objet de l'objet pour lister les propriétés
 		auto metaObject = obj->metaObject();
 		auto count = metaObject->propertyCount();
 		for (int i = 0; i < count; i++) {
+			// Crée une ligne par propriété
 			auto prop = metaObject->property(i).name();
 			auto line = new QTreeWidgetItem;
 			line->setText(0, tr(prop));
 			ui->infoWidget->addTopLevelItem(line);
 			QWidget* widget;
 
+			// Si la valeur est un type enum
 			if(metaObject->property(i).isEnumType()) {
+				// Affiche une comboBox
 				auto enumerator = metaObject->property(i).enumerator();
 				auto cb = new QComboBox;
 
@@ -499,6 +584,7 @@ void MainWindow::showProperties(QObject* obj) {
 
 				widget = cb;
 			} else {
+				// Sinon utilise widgetForVariant
 				widget = widgetForVariant(line, [=]() {
 					return obj->property(prop);
 				}, [=](const QVariant& val) {
@@ -507,17 +593,21 @@ void MainWindow::showProperties(QObject* obj) {
 				});
 			}
 
+			// Ajout le widget a la ligne
 			ui->infoWidget->setItemWidget(line, 1, widget);
 		}
 	}
 }
 
 void MainWindow::updateTabs() {
+	// Liste les zones
 	auto zones = ui->viewport->world()->zoneList();
 	auto count = ui->tabBar->count() - 1;
 
+	// Passe sur l'onglet 0
 	ui->tabBar->setCurrentIndex(0);
 
+	// Supprime ou ajoute des onglets selon la nécéssité
 	if(count < zones.size()) {
 		for(int i = count; i < zones.size(); i++) {
 			ui->tabBar->insertTab(i - 1, tr("Zone %1").arg(i));
@@ -528,12 +618,18 @@ void MainWindow::updateTabs() {
 		}
 	}
 
+	// Repasse sur l'onglet de la zone courante
 	ui->tabBar->setCurrentIndex(ui->viewport->world()->currentZoneId());
 }
 
 void MainWindow::updateTree() {
+	// Vide l'arbre des acteurs
 	ui->actorList->clear();
+
+	// Recupère la zone courante
 	auto zone = ui->viewport->world()->currentZone();
+
+	//Ajoute tous les enfant directs a l'arbre
 	foreach(auto i, zone->children()) {
 		auto child = dynamic_cast<Actor*>(i);
 		if (child) addToTree(child);
@@ -541,12 +637,16 @@ void MainWindow::updateTree() {
 }
 
 void MainWindow::on_actionOpen_triggered() {
+	// Affiche une boite de dialogue pour l'ouverture d'un fichier
 	auto fileName = QFileDialog::getOpenFileName(this, tr("Open World"), QString(), formats.join(";;"));
+
+	// Séléctionne le chargeur a utiliser en fonction de l'extension du fichier choisi
 	auto info = QFileInfo(fileName);
 	if(info.exists()) {
 		loaders[info.suffix()]->load(ui->viewport, fileName);
 		m_lastFile = fileName;
 
+		// Après le chargement, met a jour toute la fenetre
 		updateTabs();
 		updateTree();
 		ui->viewport->updateLights();
@@ -555,38 +655,57 @@ void MainWindow::on_actionOpen_triggered() {
 }
 
 void MainWindow::on_actionSaveAs_triggered() {
+	// Affiche une boite de dialogue pour la sauvegarde d'un fichier
 	auto fileName = QFileDialog::getSaveFileName(this, tr("Save World"), QString(), formats.join(";;"));
+
+	// Si un fichier a été séléctionné
 	if(!fileName.isEmpty()) {
+		// L'enregistre
 		loaders[QFileInfo(fileName).suffix()]->save(ui->viewport, fileName);
+
+		// Et mémorise son nom
 		m_lastFile = fileName;
 	}
 }
 
 void MainWindow::on_actionSave_triggered() {
+	// Si aucun fichier n'est en mémoire, ouvre l'action "Enregistrer sous"
 	if (m_lastFile.isEmpty())
 		on_actionSaveAs_triggered();
-	else
+	else  // Sinon, ecrase le fichier en mémoire
 		loaders[QFileInfo(m_lastFile).suffix()]->save(ui->viewport, m_lastFile);
 }
 
 void MainWindow::on_showBuffers_toggled(bool show) {
+	// Affiche les buffers
 	ui->viewport->showBuffers(show);
+
+	// Et met a jour le viewport
 	ui->viewport->update();
 }
 
 void MainWindow::on_actionWorldProp_triggered() {
+	// Affiche les propriétés du monde
 	showProperties(ui->viewport->world());
 }
 
 void MainWindow::on_showMaps_toggled(bool show) {
+	// Affiche les shadowmaps
 	ui->viewport->showMaps(show);
+
+	// Et met a jour le viewport
 	ui->viewport->update();
 }
 
 QObject* MainWindow::getObject(QTreeWidgetItem* item) {
+	// Si l'item existe
 	if (item != nullptr) {
+		// Récupère les données
 		auto ptr = item->data(0, Qt::UserRole);
+
+		// Vérifie leur validité
 		if ((!ptr.isNull()) && ptr.isValid() && static_cast<QMetaType::Type>(ptr.type()) == QMetaType::QObjectStar) {
+			// Récupère le pointeur
 			return qvariant_cast<QObject*>(ptr);
 		}
 	}
@@ -594,15 +713,21 @@ QObject* MainWindow::getObject(QTreeWidgetItem* item) {
 }
 
 void MainWindow::on_actorList_customContextMenuRequested(const QPoint& pos) {
+	// Trouve la ligne cliquée
 	auto item = ui->actorList->itemAt(pos);
+
+	// La séléctionne si elle ne l'est pas
 	if(ui->actorList->selectedItems().indexOf(item) == -1)
 		ui->actorList->setCurrentItem(item);
 
+	// Crée le menu
 	QMenu menu(ui->actorList);
 
+	// Crée l'action de suppression
 	auto del = new QAction(tr("&Delete"), ui->actorList);
 	del->setStatusTip(tr("Delete this actor"));
 
+	// Supprime la selection lorsque l'action est activée
 	connect(del, &QAction::triggered, [=]() {
 		auto selection = ui->actorList->selectedItems();
 		foreach(auto itm, selection) {
@@ -611,16 +736,20 @@ void MainWindow::on_actorList_customContextMenuRequested(const QPoint& pos) {
 				ui->infoWidget->clear();
 			obj->deleteLater();
 		}
+
 		ui->viewport->updateLights();
 		ui->viewport->update();
 	});
 
+	// Ajoute l'action au menu
 	menu.addAction(del);
 
+	// Affiche le menu
 	menu.exec(ui->actorList->mapToGlobal(pos));
 }
 
 void MainWindow::on_actorList_itemSelectionChanged() {
+	// N'affiche des informations sur l'acteur séléctionné que si une seule ligne est surlignée
 	if(ui->actorList->selectedItems().length() == 1)
 		showProperties(getObject(ui->actorList->currentItem()));
 	else
@@ -628,13 +757,19 @@ void MainWindow::on_actorList_itemSelectionChanged() {
 }
 
 void MainWindow::on_actionGroup_triggered() {
+	// Ajoute un groupe
 	ui->viewport->addChild<Group>();
 }
 
 void MainWindow::on_actionNew_triggered() {
+	// Vide le niveau
 	ui->viewport->clearLevel();
+
+	// Met a jour l'interface
 	updateTabs();
 	updateTree();
+
+	// Met a jour le viewport
 	ui->viewport->updateLights();
 	ui->viewport->update();
 }

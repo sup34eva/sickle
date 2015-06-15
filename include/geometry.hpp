@@ -68,15 +68,21 @@ public:
 	explicit Geometry(QObject* parent = nullptr) : GeoBase(parent) {
 		initProgram(nullptr);
 	}
+	//! Appelée a l'affichage de la Geometry
 	noinline virtual void draw(const DrawInfo& info) {
+		// Si on se trouve dans une passe de shadowmap et que l'objet n'a pas d'ombre, il ne s'affiche pas
 		if(info.buffer == RB_DEPTH && !castShadows())
 			return;
 
+		// Recupère les fonctions OpenGL depuis le contexte courant
 		auto func = info.context->functions();
+
+		// Charge le shader et le VAO
 		auto program = Child::s_programList.value(info.buffer);
 		program->bind();
 		Child::s_vao->bind();
 
+		// Envoie les uniforms au shader
 		for(auto i = info.uniforms.constBegin(); i != info.uniforms.constEnd(); ++i) {
 			auto loc = program->uniformLocation(i.key());
 			switch(static_cast<QMetaType::Type>(i.value().type())) {
@@ -95,11 +101,13 @@ public:
 			}
 		}
 
+		// envoie la liste des couleurs au shader
 		for(int i = 0; i < colors().size(); i++) {
 			auto val = qvariant_cast<QColor>(colors().at(i));
 			program->setUniformValue(i + 2, val);
 		}
 
+		// Envoie les matrices de transformation au shader
 		auto Model = qvariant_cast<QMatrix4x4>(info.uniforms.value("model")) * transform();
 		auto View = qvariant_cast<QMatrix4x4>(info.uniforms.value("view"));
 		auto Projection = qvariant_cast<QMatrix4x4>(info.uniforms.value("projection"));
@@ -107,10 +115,12 @@ public:
 		program->setUniformValue(1, Projection * View * Model);
 
 		if(info.buffer == RB_SCENE) {
+			// Envoie la matrice de projection des shadowmap
 			auto Depth = qvariant_cast<QMatrix4x4>(info.uniforms.value("depth"));
 			program->setUniformValue("depth", Depth * Model);
 		}
 
+		// Envoie les informations du matériau au shader
 		auto mat = material()->metaObject();
 		for(int i = mat->propertyOffset(); i < mat->propertyCount(); i++) {
 			auto name = mat->property(i).name();
@@ -118,13 +128,16 @@ public:
 			program->setUniformValue(loc, material()->property(name).toFloat() / 100.0f);
 		}
 
+		// Affiche la géométrie
 		func->glDrawElements(info.mode, Child::s_indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
 
+		// Libère le VAO et le shader
 		Child::s_vao->release();
 		program->release();
 	}
 
 protected:
+	//! Fonction utilitaire retournant un triangle depuis l'indexbuffer
 	static QVector3D triangle(int id) {
 		return QVector3D(
 					Child::s_indexBuffer.at(id),
@@ -132,6 +145,7 @@ protected:
 					Child::s_indexBuffer.at(id + 2));
 	}
 
+	//! Retourne un vertex depuis le buffer de position
 	static QVector3D vertex(int id) {
 		auto pos = Child::s_buffersData.value("Position");
 		return QVector3D(
@@ -140,6 +154,7 @@ protected:
 					pos.at(id + 2));
 	}
 
+	//! Retourne les UV depuis le buffer du même nom
 	static QVector2D UV(int id) {
 		auto uv = Child::s_buffersData.value("UV");
 		return QVector2D(
@@ -231,6 +246,7 @@ protected:
 	static QVector<quint32> s_indexBuffer;
 
 private:
+	//! Initialise un buffer
 	template <typename T>
 	noinline static QOpenGLBuffer* initBuffer(QOpenGLBuffer::Type type, const QVector<T>& data) {
 		auto buffer = new QOpenGLBuffer(type);
@@ -244,6 +260,7 @@ private:
 		return buffer;
 	}
 
+	//! Calcule le buffer des normales
 	static void calcNormals() {
 		auto normals = Child::s_buffersData.value("Position");
 		auto tangents = normals;
@@ -267,6 +284,7 @@ private:
 		Child::s_buffersData.insert("Bitangent", bitangents);
 	}
 
+	//! Calcule la normale d'un triangle
 	static QVector3D calcTriNormal(QVector3D tri) {
 		auto t = tri * 3;
 		auto V = vertex(t.y()) - vertex(t.x());
@@ -279,6 +297,7 @@ private:
 		return normal;
 	}
 
+	//! Calcule la tangente d'un triangle
 	static QVector3D calcTriTangent(QVector3D tri) {
 		auto verT = tri * 3;
 		auto V = vertex(verT.y()) - vertex(verT.x());
@@ -290,6 +309,7 @@ private:
 		return (V * UV2.y() - W * UV1.y()) * r;
 	}
 
+	//! Calcule la bitangente d'un triangle
 	static QVector3D calcTriBitangent(QVector3D tri) {
 		auto verT = tri * 3;
 		auto V = vertex(verT.y()) - vertex(verT.x());

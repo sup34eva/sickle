@@ -26,6 +26,7 @@ QVector3D Camera::move(QVector3D val) {
 }
 
 void Camera::velocity(QVector3D v, int dur) {
+	// Anime le déplacement de la caméra pour le rendre plus fluide
 	QPropertyAnimation *animation = new QPropertyAnimation(this, "position");
 	animation->setDuration(dur);
 	animation->setStartValue(position());

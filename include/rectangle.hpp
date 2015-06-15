@@ -5,7 +5,10 @@
 
 #include <geometry.hpp>
 
-
+/*! \brief Un rectangle 2D
+ *
+ * Une classe gérant la géometrie d'un rectangle.
+ */
 class Rect : public Geometry<Rect> {
     Q_OBJECT
 

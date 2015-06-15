@@ -5,6 +5,10 @@
 
 #include <geometry.hpp>
 
+/*! \brief Un trapèze
+ *
+ * Une classe gérant la géometrie simple d'un trapèze.
+ */
 class Trapeze : public Geometry<Trapeze> {
     Q_OBJECT
 

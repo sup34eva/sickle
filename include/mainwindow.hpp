@@ -51,10 +51,16 @@ private slots:
 	void updateTree();
 
 private:
+	//! Ajoute un objet a l'arbre des acteurs
 	QTreeWidgetItem* addToTree(QObject* obj, QTreeWidgetItem* parent = nullptr);
+
+	//! Recupère un objet depuis une ligne de l'arbre
 	QObject* getObject(QTreeWidgetItem* item);
+
+	//! Crée un widget a partir d'une QVariant
 	QWidget* widgetForVariant(QTreeWidgetItem* line, VarGetter get, VarSetter set);
 
+	//! Tuple réprésentant un Plugin, contenant un pointeur vers le plugin ainsi que ses méta-données
 	typedef std::tuple<QObject*, QJsonObject> Plugin;
 
 	QString m_lastFile;

@@ -4,11 +4,15 @@
 #include <QtMath>
 #include <vector>
 
+// Compteur d'instances
 template<>
 int Cylinder::tBase::s_instances = 0;
 
 Cylinder::Cylinder(QObject* parent) : Geometry(parent) {
+	// Initialisation du nom de l'objet
 	setObjectName(QString(tr("Cylinder %1")).arg(Cylinder::tBase::s_instances));
+
+	// Couleurs du cylindre
 	colors({
 		QColor(255, 0, 0),
 		QColor(0, 255, 0),
@@ -16,6 +20,7 @@ Cylinder::Cylinder(QObject* parent) : Geometry(parent) {
 	});
 }
 
+// VAO, shaders et buffers
 template<>
 QOpenGLVertexArrayObject* Cylinder::tBase::s_vao = nullptr;
 template<>
@@ -23,14 +28,17 @@ ProgramList Cylinder::tBase::s_programList = ProgramList();
 template<>
 QHash<QString, QOpenGLBuffer*> Cylinder::tBase::s_buffers = {};
 
+// Nombres de cotés du cylindre
 int sides = 48;
 
 QVector<GLfloat> calcCylinderVertices() {
 	QVector<GLfloat> vertices;
 	vertices.reserve(sides* 4 * 3);
 
+	// Le cylindre est généré a partir d'un angle incrémenté a chaque face
 	qreal theta = 0;
 	for (int j = 0; j < sides; j++) {
+		// Tous les vertices sont en double pour créér les cercles du dessus et du dessous du cylindre
 		for(int i = 0; i < 2; i++) {
 			vertices.append(qCos(theta));
 			vertices.append(1.0f);
@@ -52,6 +60,7 @@ QVector<quint32> calcCylinderIndices() {
 
 	for (int j = 0; j < sides * 4; j += 4) {
 		int mod = sides * 4;
+		// 2 triangles forment un quad sur le coté du cylindre
 		indices.append((j + 0) % mod);
 		indices.append((j + 5) % mod);
 		indices.append((j + 1) % mod);
@@ -61,6 +70,7 @@ QVector<quint32> calcCylinderIndices() {
 		indices.append((j + 5) % mod);
 
 		if(j > 0) {
+			// Puis 2 autres triangles sont ajoutés en haut et en bas
 			indices.append((j + 2) % mod);
 			indices.append(2);
 			indices.append((j + 6) % mod);
@@ -79,6 +89,7 @@ QVector<GLfloat> calcCylinderColors() {
 	colors.reserve(sides * 4);
 
 	for (int j = 0; j < sides * 4; j++) {
+		// La couleur est a 0 pour les 2 premiers vertices, puis a 1 et 2 pour les autres
 		colors.append(qMax(0, (j % 4) - 1));
 	}
 
@@ -91,11 +102,13 @@ QVector<GLfloat> calcCylinderUVs() {
 
 	qreal theta = 0;
 	for (int j = 0; j < sides; j++) {
+		// Les UV du coté suivent le cylindre
 		for(int i = 0; i < 2; i++) {
 			UVs.append(i);
 			UVs.append(static_cast<float>(j) / sides);
 		}
 
+		// Ceux du dessus et du dessous sont calculés comme dans la classe Cercle
 		UVs.append(qCos(theta));
 		UVs.append(qSin(theta));
 

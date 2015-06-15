@@ -5,6 +5,10 @@
 
 #include <geometry.hpp>
 
+/*! \brief Un pyramide
+ *
+ * Une classe gérant la géometrie simple d'une pyramide.
+ */
 class Pyramide : public Geometry<Pyramide> {
     Q_OBJECT
 

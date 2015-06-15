@@ -4,6 +4,7 @@
 #include <limits>
 
 QQuaternion fromEuler(const QVector3D& euler) {
+	// La conversion a partir d'un angle eulerien consiste a appliquer chaque rotation les unes après les autres
 	auto value =
 		QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), euler.x()) *
 		QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), euler.y()) *

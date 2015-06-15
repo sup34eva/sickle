@@ -8,7 +8,6 @@
 #include <QColor>
 
 /*! \brief Une simple sphere
- * \todo Générer les vertices a la compilation.
  *
  * Cette classe affiche la géometrie d'un sphere. Les vertices sont généré dynamiquement pour aléger le code.
  */

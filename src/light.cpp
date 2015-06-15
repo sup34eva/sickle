@@ -4,26 +4,37 @@
 #include <viewport.hpp>
 
 Light::Light(QObject* parent) : Actor(parent) {
+	// Les paramètres par défaut sont assez large pour couvrir toute la zone par défaut, au détriment de la qualité des ombres
 	nearZ(-63);
 	farZ(66);
+	mapSize(QSize(140, 103));
+
+	// La lumière a de base une puissance de 1 et un lumière blanche
 	power(1.0);
 	color(QColor(255, 255, 255));
-	mapSize(QSize(140, 103));
-	orientation(fromEuler(QVector3D(-45, 0, -45)));
-	setObjectName(tr("New Light"));
 
+	// Orientation a 45deg pour une ombre inclinée
+	orientation(fromEuler(QVector3D(-45, 0, -45)));
+
+	// Compteur d'instances pour le nom de l'objet
+	static int instances = 1;
+	setObjectName(tr("Light %1").arg(instances++));
+
+	// La lumière se met a jour lorsque ses propriétés sont modifiées
 	connect(this, &Light::nearZChanged, this, &Light::update);
 	connect(this, &Light::farZChanged, this, &Light::update);
 	connect(this, &Light::mapSizeChanged, this, &Light::update);
 	connect(this, &Light::moved, this, &Light::update);
 	connect(this, &Light::rotated, this, &Light::update);
 
+	// Mise a jour initiale pour calculer les ombres une première fois
 	update();
 	if(parent != nullptr)
 		setParent(parent);
 }
 
 Light::~Light() {
+	// Avant sa suppresion, la lumière se retire de la liste des lumières modifiées du viewport pour eviter les segfault
 	auto view = viewport();
 	if(view != nullptr) view->removeLight(this);
 }
@@ -42,9 +53,11 @@ void Light::updateView() {
 void Light::update() {
 	auto view = viewport();
 
+	// Mise a jour des matrices
 	updateProj();
 	updateView();
 
+	// Mise a jour de la shadowmap
 	if(view != nullptr)
 		view->updateLight(this);
 }
@@ -53,7 +66,10 @@ void Light::setParent(QObject* parent) {
 	Actor::setParent(parent);
 	auto view = viewport();
 	if(view != nullptr) {
+		// La lumière demande aui viewport de l'initialiser
 		view->initLight(*this);
+
+		// Puis calcule une premère fois sa shadowmap
 		view->updateLight(this);
 	}
 }
