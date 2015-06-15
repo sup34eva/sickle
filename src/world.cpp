@@ -1,6 +1,7 @@
 // Copyright 2015 PsychoLama
 
 #include <world.hpp>
+#include <rectangle.hpp>
 #include <sphere.hpp>
 #include <cube.hpp>
 #include <light.hpp>
@@ -17,16 +18,17 @@ void Zone::addBaseProps() {
 	sky->scale(QVector3D(-1, -1, -1));
 	sky->castShadows(false);
 
-	auto ground = addChild<Cube>();
+	auto ground = addChild<Rect>();
 	ground->setObjectName(tr("Ground"));
-	ground->scale(QVector3D(1, 1.0f / 50, 1));
+	ground->orientation(fromEuler(QVector3D(0, 0, -90)));
+	ground->castShadows(false);
 	qobject_cast<Material*>(ground->material())->roughness(100);
-	for(int i = 0; i < 6; i++)
+	for(int i = 0; i < 2; i++)
 		ground->setColor(i, QColor(185, 150, 110));
 
 	auto group = addChild<Group>();
 	group->setObjectName(tr("Scenery"));
-	group->position(QVector3D(0, -2, 0));
+	group->position(QVector3D(0, -1, 0));
 	group->scale(QVector3D(50, 50, 50));
 	sky->setParent(group);
 	ground->setParent(group);

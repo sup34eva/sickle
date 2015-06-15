@@ -184,7 +184,10 @@ void main() {
     float visibility = 0.0;
     for (int i=0; i < 4; i++){
         vec3 tempS = vec3(shadowCoord.xy + poissonDisk[i] / 700.0, shadowCoord.z);
-        visibility += texture(shadowMap, tempS, bias) * 0.2;
+        if(tempS.x >= 0 && tempS.x <= 1 && tempS.y >= 0 && tempS.y <= 1)
+            visibility += texture(shadowMap, tempS, bias) * 0.2;
+        else
+            visibility += 0.2;
     }
 
     Material mat = getMat();

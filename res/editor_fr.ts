@@ -306,7 +306,7 @@
     <message>
         <location filename="../src/rectangle.cpp" line="10"/>
         <source>Rectangle %1</source>
-        <translation></translation>
+        <translation>Rectangle %1</translation>
     </message>
 </context>
 <context>
