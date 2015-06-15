@@ -7,17 +7,11 @@ template<>
 int Trapeze::tBase::s_instances = 0;
 
 Trapeze::Trapeze(QObject *parent) : Geometry(parent) {
-        setObjectName(QString(tr("Trapeze %1")).arg(Trapeze::tBase::s_instances));
-        colors({
-                QColor(255, 0, 0)
-        });
-}
-
-void Trapeze::draw(const DrawInfo &info) {
-        auto func = info.context->functions();
-        func->glDisable(GL_CULL_FACE);
-        tBase::draw(info);
-        func->glEnable(GL_CULL_FACE);
+	setObjectName(QString(tr("Trapeze %1")).arg(Trapeze::tBase::s_instances));
+	colors({
+		QColor(255, 0, 0),
+		QColor(0, 255, 0)
+	});
 }
 
 template<>
@@ -29,28 +23,42 @@ QHash<QString, QOpenGLBuffer*> Trapeze::tBase::s_buffers = {};
 
 template<>
 QVector<quint32> Trapeze::tBase::s_indexBuffer = {
-        0,  1,  2,		// Face 1
-        2,  3,  0,		// Face 2
+	0, 1, 2,		// Face 1
+	2, 3, 0,		//
+	6, 5, 4,		// Face 2
+	4, 7, 6,		//
 };
 
 template<>
 QHash<QString, QVector<GLfloat>> Trapeze::tBase::s_buffersData = {
         {"Position", {
-                        -0.5f, -1.0f, 0.0f,		// Face 1
-                         0.5f, -1.0f, 0.0f,		//
-                         1.0f,  1.0f, 0.0f,		//
-                        -1.0f,  1.0f, 0.0f,		//
+			-1.0f,  -1.0f, 0.0f,		// Face 1
+			 1.0f,  -1.0f, 0.0f,		//
+			 0.75f,  1.0f, 0.0f,		//
+			-0.75f,  1.0f, 0.0f,		//
+			-1.0f,  -1.0f, 0.0f,		// Face 2
+			 1.0f,  -1.0f, 0.0f,		//
+			 0.75f,  1.0f, 0.0f,		//
+			-0.75f,  1.0f, 0.0f,		//
         }},
         {"Color", {
-                        0.0f,		// Face 1
-                        0.0f,		//
-                        0.0f,		//
-                        0.0f,		//
+			0.0f,		// Face 1
+			0.0f,		//
+			0.0f,		//
+			0.0f,		//
+			1.0f,		// Face 2
+			1.0f,		//
+			1.0f,		//
+			1.0f,		//
         }},
         {"UV", {
-                        0.0f,  0.0f,		// Face 1
-                        0.0f,  1.0f,		//
-                        1.0f,  0.0f,		//
-                        1.0f,  1.0f,		//
+			0.0f,  0.0f,		// Face 1
+			0.0f,  1.0f,		//
+			1.0f,  0.0f,		//
+			1.0f,  1.0f,		//
+			0.0f,  0.0f,		// Face 2
+			0.0f,  1.0f,		//
+			1.0f,  0.0f,		//
+			1.0f,  1.0f,		//
         }}
 };

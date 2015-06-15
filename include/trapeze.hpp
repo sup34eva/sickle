@@ -10,8 +10,7 @@ class Trapeze : public Geometry<Trapeze> {
 
 public:
     explicit Trapeze(QObject* parent = nullptr);
-    typedef Geometry<Trapeze> tBase;
-    virtual void draw(const DrawInfo &info);
+	typedef Geometry<Trapeze> tBase;
 };
 
 Q_DECLARE_METATYPE(Trapeze)
