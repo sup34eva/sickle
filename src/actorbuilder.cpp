@@ -10,6 +10,7 @@
 #include <cylinder.hpp>
 #include <line.hpp>
 #include <rectangle.hpp>
+#include <trapeze.hpp>
 #include <light.hpp>
 #include <spotlight.hpp>
 #include <trigger.hpp>
@@ -23,6 +24,7 @@ QList<ActorBuilder::ActorClass> DefaultActorBuilder::getClasses() {
 
 		ActorClass{tr("Line"), GEOMETRY_2D},
 		ActorClass{tr("Rectangle"), GEOMETRY_2D},
+        ActorClass{tr("Trapeze"), GEOMETRY_2D},
 
 		ActorClass{tr("Light"), LIGHT},
 		ActorClass{tr("Spotlight"), LIGHT},
@@ -46,13 +48,15 @@ Actor* DefaultActorBuilder::build(Viewport* viewport, int index) {
 			return viewport->addChild<Line>();
 		case 5:
 			return viewport->addChild<Rect>();
+        case 6:
+            return viewport->addChild<Trapeze>();
 
-		case 6:
+        case 7:
 			return viewport->addChild<Light>();
-		case 7:
+        case 8:
 			return viewport->addChild<Spotlight>();
 
-		case 8:
+        case 9:
 			return viewport->addChild<Trigger>();
 
 		default:
