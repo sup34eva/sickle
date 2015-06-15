@@ -1,9 +1,8 @@
 // Copyright 2015 PsychoLama
 
 #include <world.hpp>
-#include <rectangle.hpp>
 #include <sphere.hpp>
-#include <cube.hpp>
+#include <cercle.hpp>
 #include <light.hpp>
 #include <group.hpp>
 #include <viewport.hpp>
@@ -19,7 +18,7 @@ void Zone::addBaseProps() {
 	sky->scale(QVector3D(-1, -1, -1));
 	sky->castShadows(false);
 
-	auto ground = addChild<Rect>();
+	auto ground = addChild<Cercle>();
 	ground->setObjectName(tr("Ground"));
 	ground->orientation(fromEuler(QVector3D(0, 0, -90)));
 	ground->castShadows(false);

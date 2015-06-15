@@ -23,7 +23,7 @@ ProgramList Cylinder::tBase::s_programList = ProgramList();
 template<>
 QHash<QString, QOpenGLBuffer*> Cylinder::tBase::s_buffers = {};
 
-int sides = 30;
+int sides = 48;
 
 QVector<GLfloat> calcCylinderVertices() {
 	QVector<GLfloat> vertices;

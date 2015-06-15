@@ -1,3 +1,5 @@
+// Copyright 2015 PsychoLama
+
 #include "cercle.hpp"
 #include <QtMath>
 #include <vector>
@@ -9,8 +11,7 @@ Cercle::Cercle(QObject* parent) : Geometry(parent) {
     setObjectName(QString(tr("Cercle %1")).arg(Cercle::tBase::s_instances));
     colors({
         QColor(255, 0, 0),
-        QColor(0, 255, 0),
-        QColor(0, 0, 255)
+		QColor(0, 255, 0)
     });
 }
 
@@ -21,21 +22,19 @@ ProgramList Cercle::tBase::s_programList = ProgramList();
 template<>
 QHash<QString, QOpenGLBuffer*> Cercle::tBase::s_buffers = {};
 
-int side = 30;
+int side = 48;
 
 QVector<GLfloat> calcCercleVertices() {
     QVector<GLfloat> vertices;
-    vertices.reserve(side* 4 * 3);
+	vertices.reserve(side * 2 * 3);
 
     qreal theta = 0;
     for (int j = 0; j < side; j++) {
-
-            vertices.append(qCos(theta));
-            vertices.append(1.0f);
-            vertices.append(qSin(theta));
-
-
-
+		for (int i = 0; i < 2; i++) {
+			vertices.append(qCos(theta));
+			vertices.append(qSin(theta));
+			vertices.append(0.0f);
+		}
 
         theta += (2 * M_PI) / side;
     }
@@ -46,26 +45,28 @@ QVector<GLfloat> calcCercleVertices() {
 QVector<quint32> calcCercleIndices() {
     QVector<quint32> indices;
 
-    for (int j = 0; j < side ; j++) {
-        int mod = side  ;
-        if(j > 0) {
-            indices.append((j) % mod);
-            indices.append(0);
-            indices.append((j + 1) % mod);
+	for (int j = 0; j < side * 2; j += 2) {
+		int mod = side * 2;
+		if(j > 0) {
+			indices.append((j + 2) % mod);
+			indices.append(0);
+			indices.append(j % mod);
 
-
-        }
-    }
+			indices.append((j + 1) % mod);
+			indices.append(1);
+			indices.append((j + 3) % mod);
+		}
+	}
 
     return indices;
 }
 
 QVector<GLfloat> calcCercleColors() {
     QVector<GLfloat> colors;
-    colors.reserve(side  );
+	colors.reserve(side * 2);
 
-    for (int j = 0; j < side  ; j++) {
-        colors.append(0.0f);
+	for (int j = 0; j < side * 2; j++) {
+		colors.append(j % 2);
     }
 
     return colors;
@@ -73,17 +74,14 @@ QVector<GLfloat> calcCercleColors() {
 
 QVector<GLfloat> calcCercleUVs() {
     QVector<GLfloat> UVs;
-    UVs.reserve(side * 2);
+	UVs.reserve(side * 2 * 2);
 
     qreal theta = 0;
-    for (int j = 0; j < side; j++) {
-
-
-
-        UVs.append(qCos(theta));
-        UVs.append(qSin(theta));
-
-
+	for (int j = 0; j < side; j++) {
+		for (int i = 0; i < 2; i++) {
+			UVs.append(qCos(theta));
+			UVs.append(qSin(theta));
+		}
 
         theta += (2 * M_PI) / side;
     }

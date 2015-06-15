@@ -1,8 +1,9 @@
+// Copyright 2015 PsychoLama
+
 #ifndef CERCLE_HPP
 #define CERCLE_HPP
+
 #include <geometry.hpp>
-
-
 
 class Cercle : public Geometry<Cercle> {
     Q_OBJECT
@@ -14,4 +15,4 @@ class Cercle : public Geometry<Cercle> {
 
 Q_DECLARE_METATYPE(Cercle)
 
-#endif   // Cercle_HPP
+#endif  // CERCLE_HPP
