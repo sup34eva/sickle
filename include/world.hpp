@@ -28,7 +28,7 @@ class Zone : public QObject {
 		}
 };
 
-/*! \brief Gestionnaire d'Abmient Occlusion
+/*! \brief Gestionnaire d'Ambient Occlusion
  *
  * Une classe contenant les différentes porpriétés utilisées pour configurer le rendu de l'occlusion ambiante.
  */

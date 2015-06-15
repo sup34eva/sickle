@@ -435,7 +435,7 @@ void Viewport::renderQuad() {
 				prog->setUniformValue("light.power", light->power());
 				prog->setUniformValue("light.color", toVector(light->color()));
 
-				if(type == 1) { // Spotlight
+				if(type == 1) {  // Spotlight
 					auto spot = static_cast<Spotlight*>(light);
 					prog->setUniformValue("light.falloff", spot->farZ());
 					prog->setUniformValue("light.inner", static_cast<GLfloat>(qCos(qDegreesToRadians(spot->innerAngle()))));

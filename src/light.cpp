@@ -4,7 +4,8 @@
 #include <viewport.hpp>
 
 Light::Light(QObject* parent) : Actor(parent) {
-	// Les paramètres par défaut sont assez large pour couvrir toute la zone par défaut, au détriment de la qualité des ombres
+	// Les paramètres par défaut sont assez large pour couvrir toute la zone par défaut,
+	// au détriment de la qualité des ombres
 	nearZ(-63);
 	farZ(66);
 	mapSize(QSize(140, 103));

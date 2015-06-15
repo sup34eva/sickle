@@ -260,7 +260,7 @@ void MainWindow::on_viewport_childAdded(QObject* obj) {
 	// Si l'objet est un groupe
 	auto group = qobject_cast<Group*>(obj);
 	if(group != nullptr) {
-		//Liste les acteurs séléctionnés
+		// Liste les acteurs séléctionnés
 		auto selection = ui->actorList->selectedItems();
 
 		// Pour chaque element de la séléction
@@ -629,7 +629,7 @@ void MainWindow::updateTree() {
 	// Recupère la zone courante
 	auto zone = ui->viewport->world()->currentZone();
 
-	//Ajoute tous les enfant directs a l'arbre
+	// Ajoute tous les enfant directs a l'arbre
 	foreach(auto i, zone->children()) {
 		auto child = dynamic_cast<Actor*>(i);
 		if (child) addToTree(child);
