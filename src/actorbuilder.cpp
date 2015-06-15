@@ -15,6 +15,7 @@
 #include <spotlight.hpp>
 #include <group.hpp>
 #include <trigger.hpp>
+#include <cercle.hpp>
 
 DefaultActorBuilder::DefaultActorBuilder(QObject *parent) : QObject(parent) {
 	qRegisterMetaType<Cube>("Cube");
@@ -25,6 +26,7 @@ DefaultActorBuilder::DefaultActorBuilder(QObject *parent) : QObject(parent) {
 	qRegisterMetaType<Line>("Line");
 	qRegisterMetaType<Rect>("Rect");
 	qRegisterMetaType<Trapeze>("Trapeze");
+    qRegisterMetaType<Cercle>("Cercle");
 
 	qRegisterMetaType<Light>("Light");
 	qRegisterMetaType<Spotlight>("Spotlight");
@@ -44,6 +46,7 @@ QList<ActorBuilder::ActorClass> DefaultActorBuilder::getClasses() {
 		ActorClass{tr("Line"), GEOMETRY_2D},
 		ActorClass{tr("Rectangle"), GEOMETRY_2D},
         ActorClass{tr("Trapeze"), GEOMETRY_2D},
+        ActorClass{tr("Cercle"), GEOMETRY_2D},
 
 		ActorClass{tr("Light"), LIGHT},
 		ActorClass{tr("Spotlight"), LIGHT},
@@ -69,13 +72,15 @@ Actor* DefaultActorBuilder::build(Viewport* viewport, int index) {
 			return viewport->addChild<Rect>();
         case 6:
             return viewport->addChild<Trapeze>();
-
         case 7:
-			return viewport->addChild<Light>();
+            return viewport->addChild<Cercle>();
+
         case 8:
+			return viewport->addChild<Light>();
+        case 9:
 			return viewport->addChild<Spotlight>();
 
-        case 9:
+        case 10:
 			return viewport->addChild<Trigger>();
 
 		default:
