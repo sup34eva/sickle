@@ -8,6 +8,8 @@
 #include <QObject>
 #include <QList>
 
+class Viewport;
+
 class Zone : public QObject {
 	Q_OBJECT
 

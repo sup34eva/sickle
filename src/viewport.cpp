@@ -18,20 +18,6 @@ Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_isInitialized(fal
 
 	setFocusPolicy(Qt::StrongFocus);
 
-	qRegisterMetaType<Cube>("Cube");
-	qRegisterMetaType<Sphere>("Sphere");
-	qRegisterMetaType<Pyramide>("Pyramide");
-	qRegisterMetaType<Cylinder>("Cylinder");
-
-	qRegisterMetaType<Line>("Line");
-	qRegisterMetaType<Rect>("Rect");
-
-	qRegisterMetaType<Light>("Light");
-	qRegisterMetaType<Spotlight>("Spotlight");
-	qRegisterMetaType<Group>("Group");
-	qRegisterMetaType<Material>("Material");
-	qRegisterMetaType<Trigger>("Trigger");
-
 	QSurfaceFormat format;
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	format.setDepthBufferSize(16);
@@ -45,6 +31,7 @@ void Viewport::initLight(Light& light) {
 	makeCurrent();
 	glGenFramebuffers(1, &light.getBuffer());
 	glBindFramebuffer(GL_FRAMEBUFFER, light.getBuffer());
+	catchErrors();
 
 	static const GLfloat colors[] = {0, 0, 0};
 
@@ -57,7 +44,7 @@ void Viewport::initLight(Light& light) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, colors);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-	doneCurrent();
+	catchErrors();
 }
 
 void Viewport::initScene() {
@@ -133,6 +120,8 @@ void Viewport::initializeGL() {
 
 	m_world->addZone();
 
+	catchErrors();
+
 	isInitialized(true);
 
 	qDebug() << "OpenGL version:" << reinterpret_cast<const char*>(glGetString(GL_VERSION));
@@ -146,13 +135,20 @@ void Viewport::catchErrors() {
 }
 
 void Viewport::renderLight(Light* light) {
+	catchErrors();
+
 	glBindFramebuffer(GL_FRAMEBUFFER, light->getBuffer());
+	catchErrors();
+
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, light->getTexture(), 0);
 	catchErrors();
 
 	glDrawBuffer(GL_NONE);
+	catchErrors();
 
 	glViewport(0, 0, 1024, 1024);
+	catchErrors();
+
 	glClear(GL_DEPTH_BUFFER_BIT);
 	catchErrors();
 

@@ -15,4 +15,4 @@ public:
 
 Q_DECLARE_METATYPE(Trapeze)
 
-#endif // TRAPEZE_H
+#endif  // TRAPEZE_H

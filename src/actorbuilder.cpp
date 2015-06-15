@@ -13,7 +13,26 @@
 #include <trapeze.hpp>
 #include <light.hpp>
 #include <spotlight.hpp>
+#include <group.hpp>
 #include <trigger.hpp>
+
+DefaultActorBuilder::DefaultActorBuilder(QObject *parent) : QObject(parent) {
+	qRegisterMetaType<Cube>("Cube");
+	qRegisterMetaType<Sphere>("Sphere");
+	qRegisterMetaType<Pyramide>("Pyramide");
+	qRegisterMetaType<Cylinder>("Cylinder");
+
+	qRegisterMetaType<Line>("Line");
+	qRegisterMetaType<Rect>("Rect");
+	qRegisterMetaType<Trapeze>("Trapeze");
+
+	qRegisterMetaType<Light>("Light");
+	qRegisterMetaType<Spotlight>("Spotlight");
+
+	qRegisterMetaType<Group>("Group");
+	qRegisterMetaType<Material>("Material");
+	qRegisterMetaType<Trigger>("Trigger");
+}
 
 QList<ActorBuilder::ActorClass> DefaultActorBuilder::getClasses() {
 	return {

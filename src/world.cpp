@@ -6,6 +6,7 @@
 #include <cube.hpp>
 #include <light.hpp>
 #include <group.hpp>
+#include <viewport.hpp>
 
 Zone::Zone(QObject *parent) : QObject(parent) {
 	// NOOP
@@ -34,6 +35,7 @@ void Zone::addBaseProps() {
 	ground->setParent(group);
 
 	auto light = addChild<Light>();
+
 	light->setObjectName(tr("Sunlight"));
 	light->orientation(fromEuler(QVector3D(-45, 0, -45)));
 }

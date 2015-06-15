@@ -40,9 +40,11 @@ void Light::updateView() {
 }
 
 void Light::update() {
+	auto view = viewport();
+
 	updateProj();
 	updateView();
-	auto view = viewport();
+
 	if(view != nullptr)
 		view->updateLight(this);
 }

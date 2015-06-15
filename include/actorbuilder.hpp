@@ -44,6 +44,7 @@ class DefaultActorBuilder : public QObject, public ActorBuilder {
 	Q_INTERFACES(ActorBuilder)
 
 	public:
+		explicit DefaultActorBuilder(QObject* parent = nullptr);
 		virtual QList<ActorClass> getClasses();
 		virtual Actor* build(Viewport* viewport, int index);
 };

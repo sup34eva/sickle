@@ -78,6 +78,7 @@ public slots:
 	void updateLights();
 	void updateLight(Light* light);
 	void removeLight(Light* light);
+	void catchErrors();
 
 signals:
 	void childAdded(QObject* child);
@@ -99,7 +100,6 @@ protected:
 	void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
 	int heightForWidth(int w) const { return w; }
 	bool hasHeightForWidth() const { return true; }
-	void catchErrors();
 
 private:
 	QMatrix4x4 m_projection;

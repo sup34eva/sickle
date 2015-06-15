@@ -77,19 +77,9 @@ void DefaultFileLoader::load(Viewport* view, const QString& name) {
 		quint32 size;
 		in >> size;
 		for (quint32 i = 0; i < size; i++) {
-			QString type;
-			in >> type;
-
 			view->makeCurrent();
-
-			auto obj = static_cast<Actor*>(QMetaType::create(QMetaType::type(type.toLatin1().data())));
-			if(obj != nullptr) {
-				obj->setParent(zone);
-				in >> *obj;
-				view->childAdded(obj);
-			} else {
-				qWarning() << "Error re-creating object of type " << type;
-			}
+			auto obj = loadObj(&in, zone);
+			view->childAdded(obj);
 		}
 
 		zones.insert(i, zone);
@@ -145,16 +135,7 @@ QDataStream& operator>>(QDataStream& stream, QObject& obj) {
 		if(!isObj) {
 			stream >> value;
 		} else {
-			QString type;
-			stream >> type;
-			auto child = static_cast<QObject*>(QMetaType::create(QMetaType::type(type.toLatin1().data())));
-			if(child != nullptr) {
-				child->setParent(&obj);
-				stream >> *child;
-				value = QVariant::fromValue(child);
-			} else {
-				qWarning() << "Error re-creating object of type " << type;
-			}
+			value = QVariant::fromValue(loadObj(&stream, &obj));
 		}
 		obj.setProperty(name.toLatin1().data(), value);
 	}
@@ -163,16 +144,24 @@ QDataStream& operator>>(QDataStream& stream, QObject& obj) {
 	stream >> childCount;
 
 	for (quint32 i = 0; i < childCount; ++i) {
-		QString type;
-		stream >> type;
-		auto child = static_cast<Actor*>(QMetaType::create(QMetaType::type(type.toLatin1().data())));
-		if(child != nullptr) {
-			child->setParent(&obj);
-			stream >> *child;
-		} else {
-			qWarning() << "Error re-creating object of type " << type;
-		}
+		loadObj(&stream, &obj);
 	}
 
 	return stream;
+}
+
+QObject* loadObj(QDataStream* stream, QObject* parent) {
+	QString type;
+	(*stream) >> type;
+	auto obj = static_cast<QObject*>(QMetaType::create(QMetaType::type(type.toLatin1().data())));
+	if(obj != nullptr) {
+		if(parent != nullptr) {
+			obj->setParent(parent);
+		}
+		(*stream) >> *obj;
+		return obj;
+	} else {
+		qWarning() << "Error re-creating object of type " << type;
+		return nullptr;
+	}
 }

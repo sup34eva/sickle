@@ -36,5 +36,6 @@ class DefaultFileLoader : public QObject, public FileLoader {
 
 QDataStream& operator<<(QDataStream&, const QObject&);
 QDataStream& operator>>(QDataStream&, QObject&);
+QObject* loadObj(QDataStream* stream, QObject* parent = nullptr);
 
 #endif  // FILELOADER_HPP
